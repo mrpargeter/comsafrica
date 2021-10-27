@@ -54,6 +54,7 @@ detachAllPackages()
 
 library(dplyr)
 library(rptR)
+library(krippendorffsalpha)
 
 ############################## 
 # Set working directory and load datafile
@@ -66,6 +67,8 @@ getwd()
 ## Add datasets
 
 comsafrica_data<-read.csv("comsafrica_complete_adjusted.csv")
+# change column names to lower case
+colnames(comsafrica_data) <- tolower(colnames(comsafrica_data))
 
 ####################################
 # exploring data to identify and rectify potential numbering mistakes
@@ -102,10 +105,6 @@ detach()
 ############################## 
 # Trim/tidy data and subset data for analyses
 ##############################
-
-# change column names to lower case
-
-colnames(comsafrica_data) <- tolower(colnames(comsafrica_data))
 
 ## subset
 
@@ -486,6 +485,30 @@ summary(comsafrica_dorsal_scar_count_boot$mod)
 plot(comsafrica_dorsal_scar_count_boot, type = "boot", cex.main = 0.8,main="")
 plot(comsafrica_dorsal_scar_count_boot, type = "permut", cex.main = 1)
 
+### repeatability coefficients for categorical data ####
+
+comsafrica_data_cat_data<-comsafrica_data %>%
+   select(c(assemblage_code,analyst_id,flake_id,completeness,platform_cortex,directionality,platfmorph,
+            platflipp,bulb,shattbulb,initiation,ventr_plane_form,section,latedgetype,flaketerm,
+            distplanform,kombewa))
+
+comsafrica_data_cat_data_condb<-comsafrica_data_cat_data %>%
+   subset(assemblage_code=="chert_condition_B")
+
+comsafrica_data_cat_data_conda<-comsafrica_data_cat_data %>%
+   subset(assemblage_code=="chert_condition_A") 
+
+## Condition b
+# completeness
+ completeness_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,completeness)
+ library(tidyverse)
+ wide = completeness_data_b %>% 
+    spread(analyst_id, completeness)
+ wide = data.matrix(wide)
+ 
+ set.seed(42)
+ fit.full<-krippendorffs.alpha(wide, level = "nominal", control = list(parallel = FALSE), verbose = TRUE)
 
 #### Testing Condition A vs. Condition B #####
 

@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1635363426185.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "651B29B4",
+    "lastKnownWriteTime" : 8030879312480528756,
+    "last_content_update" : 1635363426185,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "B845C250",
+        "caption" : "comsafrica_data_cat_data_condb",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=comsafrica_data_cat_data_condb&cache_key=B845C250",
+        "displayedObservations" : "542",
+        "environment" : "",
+        "expression" : "comsafrica_data_cat_data_condb",
+        "object" : "comsafrica_data_cat_data_condb",
+        "preview" : "0",
+        "totalObservations" : "542",
+        "variables" : "17"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
