@@ -55,6 +55,7 @@ detachAllPackages()
 library(dplyr)
 library(rptR)
 library(krippendorffsalpha)
+library(tidyverse)
 
 ############################## 
 # Set working directory and load datafile
@@ -501,15 +502,27 @@ comsafrica_data_cat_data_conda<-comsafrica_data_cat_data %>%
 ## Condition b
 # completeness
  completeness_data_b<-comsafrica_data_cat_data_condb %>%
-    select(flake_id,analyst_id,completeness)
- library(tidyverse)
- wide = completeness_data_b %>% 
-    spread(analyst_id, completeness)
- wide = data.matrix(wide)
+    select(flake_id,analyst_id,completeness) %>%
+    mutate(completeness=as.factor(completeness),
+       completeness_new=unclass(completeness)) %>%
+    select(-completeness) %>% 
+    spread(analyst_id, completeness_new) %>%
+    select(-flake_id)
+ 
+ completeness_data_b_matrix<-as.matrix(completeness_data_b)
  
  set.seed(42)
- fit.full<-krippendorffs.alpha(wide, level = "nominal", control = list(parallel = FALSE), verbose = TRUE)
-
+ fit.full<-krippendorffs.alpha(completeness_data_b_matrix, 
+                               level = "nominal", 
+                               control = list(parallel = FALSE,bootit=100), 
+                               verbose = TRUE)
+ summary(fit.full)
+ 
+ plot(fit.full, xlim = c(0, 1), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
 #### Testing Condition A vs. Condition B #####
 
 comsafrica_data_complete_summary<-comsafrica_data_complete %>%
