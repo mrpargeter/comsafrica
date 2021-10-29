@@ -523,6 +523,209 @@ comsafrica_data_cat_data_conda<-comsafrica_data_cat_data %>%
       main = "Nominal Data",
       density = FALSE)
  
+ # platform cortex
+ platform_cortex_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,platform_cortex) %>%
+    mutate(platform_cortex=recode(comsafrica_data_cat_data_condb$platform_cortex, INDET = "Indeterminate"),
+           platform_cortex=as.factor(platform_cortex),
+           platform_cortex_dummy=unclass(platform_cortex)) %>%
+    select(-platform_cortex) %>%
+    spread(analyst_id, platform_cortex_dummy) %>%
+    select(-flake_id)
+ 
+ platform_cortex_data_b<-as.matrix(platform_cortex_data_b)
+ 
+ set.seed(42)
+ fit.full_cortex<-krippendorffs.alpha(platform_cortex_data_b, 
+                               level = "nominal", 
+                               control = list(parallel = FALSE,bootit=100), 
+                               verbose = TRUE)
+ summary(fit.full_cortex)
+ 
+ plot(fit.full_cortex, xlim = c(0, 0.6), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # scar directions
+ directionality_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,directionality) %>%
+    mutate(directionality=as.factor(directionality),
+           directionality_dummy=unclass(directionality)) %>%
+    select(-directionality) %>%
+    spread(analyst_id, directionality_dummy) %>%
+    select(-flake_id)
+ 
+ directionality_data_b<-as.matrix(directionality_data_b)
+ 
+ set.seed(42)
+ fit.full_directions<-krippendorffs.alpha(directionality_data_b, 
+                                      level = "nominal", 
+                                      control = list(parallel = FALSE,bootit=100), 
+                                      verbose = TRUE)
+ 
+ plot(fit.full_directions, xlim = c(0, 0.4), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # platf morph
+ plat_morph_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,platfmorph) %>%
+    mutate(platfmorph=recode(comsafrica_data_cat_data_condb$platfmorph, 'Chapeau de Gendarme' = "ChapeauDeGendarme",
+                             linear = "Linear"),
+           platfmorph=as.factor(platfmorph),
+           platfmorph_dummy=unclass(platfmorph)) %>%
+    select(-platfmorph) %>%
+    spread(analyst_id, platfmorph_dummy) %>%
+    select(-flake_id)
+ 
+ plat_morph_data_b<-as.matrix(plat_morph_data_b)
+ 
+ set.seed(42)
+ fit.full_platmorphs<-krippendorffs.alpha(plat_morph_data_b, 
+                                          level = "nominal", 
+                                          control = list(parallel = FALSE,bootit=100), 
+                                          verbose = TRUE)
+ 
+ plot(fit.full_platmorphs, xlim = c(0, 0.7), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # platf lip
+ plat_lip_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,platflipp) %>%
+    mutate(platflipp=recode(comsafrica_data_cat_data_condb$platflipp, YES = "yes",
+                            'NOT APPLICABLE' = "",
+                            NO = "no"),
+           platflipp=as.factor(platflipp),
+           platflipp_dummy=unclass(platflipp)) %>%
+    select(-platflipp) %>%
+    spread(analyst_id, platflipp_dummy) %>%
+    select(-flake_id)
+ 
+ plat_lip_data_b<-as.matrix(plat_lip_data_b)
+ 
+ set.seed(42)
+ fit.full_platlip<-krippendorffs.alpha(plat_lip_data_b, 
+                                          level = "nominal", 
+                                          control = list(parallel = FALSE,bootit=100), 
+                                          verbose = TRUE)
+ 
+ plot(fit.full_platlip, xlim = c(0, 0.5), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # bulb
+ plat_bulb_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,bulb) %>%
+    mutate(bulb=recode(comsafrica_data_cat_data_condb$bulb, YES = "yes",
+                            NO = "no"),
+           bulb=as.factor(bulb),
+           bulb_dummy=unclass(bulb)) %>%
+    select(-bulb) %>%
+    spread(analyst_id, bulb_dummy) %>%
+    select(-flake_id)
+ 
+ plat_bulb_data_b<-as.matrix(plat_bulb_data_b)
+ 
+ set.seed(42)
+ fit.full_bulb<-krippendorffs.alpha(plat_bulb_data_b, 
+                                       level = "nominal", 
+                                       control = list(parallel = FALSE,bootit=100), 
+                                       verbose = TRUE)
+ 
+ plot(fit.full_bulb, xlim = c(0, 0.6), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # Shattbulb
+ plat_shattbulb_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,shattbulb) %>%
+    mutate(shattbulb=recode(comsafrica_data_cat_data_condb$shattbulb, Indet = "Indeterminate",
+                            Indeterminateerminate = "Indeterminate",
+                            NO = "No",
+                            YES = "Yes"),
+           shattbulb=as.factor(shattbulb),
+           shattbulb_dummy=unclass(shattbulb)) %>%
+    select(-shattbulb) %>%
+    spread(analyst_id, shattbulb_dummy) %>%
+    select(-flake_id)
+ 
+ plat_shattbulb_data_b<-as.matrix(plat_shattbulb_data_b)
+ 
+ set.seed(42)
+ fit.full_shattbulb<-krippendorffs.alpha(plat_shattbulb_data_b, 
+                                    level = "nominal", 
+                                    control = list(parallel = FALSE,bootit=100), 
+                                    verbose = TRUE)
+ 
+ plot(fit.full_shattbulb, xlim = c(0, 0.6), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ # initiation
+ plat_initiation_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,initiation) %>%
+    mutate(initiation=recode(comsafrica_data_cat_data_condb$initiation, BENDING = "Bending",
+                             HERTZIAN = "Hertzian"),
+           initiation=as.factor(initiation),
+           initiation_dummy=unclass(initiation)) %>%
+    select(-initiation) %>%
+    spread(analyst_id, initiation_dummy) %>%
+    select(-flake_id) %>%
+    na.omit()
+ 
+ plat_initiation_data_b<-as.matrix(plat_initiation_data_b)
+ 
+ set.seed(42)
+ fit.full_initiation<-krippendorffs.alpha(plat_initiation_data_b, 
+                                         level = "nominal", 
+                                         control = list(parallel = FALSE,bootit=100), 
+                                         verbose = TRUE)
+ 
+ plot(fit.full_initiation, xlim = c(0, 0.8), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ library("irr") 
+ # Compute kapa-allows us to see which categories are performing better
+ kappam.fleiss(plat_initiation_data_b, detail = T)
+ 
+ # ventr_plane_form FIX THIS
+ ventr_plane_form_data_b<-comsafrica_data_cat_data_condb %>%
+    select(flake_id,analyst_id,ventr_plane_form) %>%
+    mutate(ventr_plane_form=as.factor((ventr_plane_form)),
+           ventr_plane_form=recode(ventr_plane_form, very_concave = "very concave"),
+           ventr_plane_form_dummy=unclass(ventr_plane_form)) %>%
+    select(-ventr_plane_form) %>%
+    spread(analyst_id, ventr_plane_form_dummy) %>%
+    select(-flake_id) %>%
+    na.omit()
+ 
+ ventr_plane_form_data_b<-as.matrix(ventr_plane_form_data_b)
+ 
+ set.seed(42)
+ fit.full_ventr_plane_form<-krippendorffs.alpha(ventr_plane_form_data_b, 
+                                          level = "nominal", 
+                                          control = list(parallel = FALSE,bootit=100), 
+                                          verbose = TRUE)
+ 
+ plot(fit.full_ventr_plane_form, xlim = c(0, 0.8), 
+      xlab = "Bootstrap Estimates", 
+      main = "Nominal Data",
+      density = FALSE)
+ 
+ library("irr") 
+ # Compute kapa-allows us to see which categories are performing better
+ kappam.fleiss(plat_initiation_data_b, detail = T)
+ 
+ 
 #### Testing Condition A vs. Condition B #####
 
 comsafrica_data_complete_summary<-comsafrica_data_complete %>%
