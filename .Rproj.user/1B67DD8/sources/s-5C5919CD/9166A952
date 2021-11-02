@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1635816968819.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "9166A952",
+    "lastKnownWriteTime" : 4841215066499973120,
+    "last_content_update" : 1635816968819,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "6A59FD3D",
+        "caption" : "plat_lip_data_b_krip",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=plat_lip_data_b_krip&cache_key=6A59FD3D",
+        "displayedObservations" : "42",
+        "environment" : "",
+        "expression" : "plat_lip_data_b_krip",
+        "object" : "plat_lip_data_b_krip",
+        "preview" : "0",
+        "totalObservations" : "42",
+        "variables" : "10"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

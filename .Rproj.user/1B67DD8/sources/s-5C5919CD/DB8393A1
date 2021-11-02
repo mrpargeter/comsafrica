@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1635816496544.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DB8393A1",
+    "lastKnownWriteTime" : 1635526604,
+    "last_content_update" : 1635816496544,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "4912C6FA",
+        "caption" : "plat_morph_data_b",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=plat_morph_data_b&cache_key=4912C6FA",
+        "displayedObservations" : "485",
+        "environment" : "",
+        "expression" : "plat_morph_data_b",
+        "object" : "plat_morph_data_b",
+        "preview" : "0",
+        "totalObservations" : "485",
+        "variables" : "3"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 6,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
