@@ -309,7 +309,8 @@ plot(comsafrica_edgeplatf, type = "boot", cex.main = 0.8,main="EPA")
 
 # cortex-NOT SURE WHAT TO DO WITH CORTEX-STRANGE DISTRIBUTION?
 hist(log(comsafrica_data_complete_conda$dorsal_cortex))
-comsafrica_cortex_boot<-rpt(maximumdimension ~ (1 | flake_id), 
+set.seed(50)
+comsafrica_cortex_boot<-rpt(dorsal_cortex ~ (1 | flake_id), 
                             grname = "flake_id", 
                             data = comsafrica_data_complete_conda, 
                             datatype = "Gaussian", 
@@ -320,134 +321,169 @@ plot(comsafrica_cortex_boot, type = "boot", cex.main = 0.8,main="maximum dimensi
 plot(comsafrica_cortex_boot, type = "permut", cex.main = 1)
 
 # maxdim
+set.seed(50)
 comsafrica_maxdim_boot<-rpt(maximumdimension ~ (1 | flake_id), 
                             grname = "flake_id", 
                             data = comsafrica_data_complete_conda, 
                             datatype = "Gaussian", 
                             nboot = 1000, npermut = 100)
+summary(comsafrica_maxdim_boot)
 plot(comsafrica_maxdim_boot, type = "boot", cex.main = 0.8,main="maximum dimension")
 
 #mass
-comsafrica_mass<-rpt(mass ~ (1 | flake_id), 
+hist(log(comsafrica_data_complete_conda$mass))
+set.seed(50)
+comsafrica_mass<-rpt(log(mass) ~ (1 | flake_id), 
                      grname = "flake_id", 
-                     data = comsafrica_data_complete_conda, 
+                     data = filter(comsafrica_data_complete_conda, mass>0), 
                      datatype = "Gaussian", 
                      nboot = 1000, npermut = 100)
+summary(comsafrica_mass)
 plot(comsafrica_mass, type = "boot", cex.main = 0.8,main="mass")
 
 #flake width
+set.seed(50)
 comsafrica_maxwidth<-rpt(maximumwidth ~ (1 | flake_id), 
                          grname = "flake_id", 
                          data = comsafrica_data_complete_conda, 
                          datatype = "Gaussian", 
                          nboot = 1000, npermut = 100)
+summary(comsafrica_maxwidth)
 plot(comsafrica_maxwidth, type = "boot", cex.main = 0.8,main="max width")
 
 #flake max thickness
+set.seed(50)
 comsafrica_maxthick<-rpt(maximumthickness ~ (1 | flake_id), 
                          grname = "flake_id", 
                          data = comsafrica_data_complete_conda, 
                          datatype = "Gaussian", 
                          nboot = 1000, npermut = 100)
+summary(comsafrica_maxthick)
 plot(comsafrica_maxthick, type = "boot", cex.main = 0.8,main="max thickness")
 
 #flake tech length
+set.seed(50)
 comsafrica_techlength<-rpt(techlength ~ (1 | flake_id), 
                            grname = "flake_id", 
                            data = comsafrica_data_complete_conda, 
                            datatype = "Gaussian", 
                            nboot = 1000, npermut = 100)
+summary(comsafrica_techlength)
 plot(comsafrica_techlength, type = "boot", cex.main = 0.8,main="tech length")
 
 #flake tech max width
+set.seed(50)
 comsafrica_techmaxwidth<-rpt(techmaxwidth ~ (1 | flake_id), 
                              grname = "flake_id", 
                              data = comsafrica_data_complete_conda, 
                              datatype = "Gaussian", 
                              nboot = 1000, npermut = 100)
+summary(comsafrica_techmaxwidth)
 plot(comsafrica_techmaxwidth, type = "boot", cex.main = 0.8,main="tech max width")
 
 #flake tech max thickness
+set.seed(50)
 comsafrica_techmaxthick<-rpt(techmaxthickness ~ (1 | flake_id), 
                              grname = "flake_id", 
                              data = comsafrica_data_complete_conda, 
                              datatype = "Gaussian", 
                              nboot = 1000, npermut = 0)
+summary(comsafrica_techmaxthick)
 plot(comsafrica_techmaxthick, type = "boot", cex.main = 0.8,main="tech max thickness")
 
 #flake tech width prox
+set.seed(50)
 comsafrica_techwidthprox<-rpt(techwidthprox ~ (1 | flake_id), 
                               grname = "flake_id", 
                               data = comsafrica_data_complete_conda, 
                               datatype = "Gaussian", 
                               nboot = 1000, npermut = 0)
+summary(comsafrica_techwidthprox)
 plot(comsafrica_techwidthprox, type = "boot", cex.main = 0.8,main="tech width proximal")
 
 #flake tech width mes
+set.seed(50)
 comsafrica_techwidthmes<-rpt(techwidthmes ~ (1 | flake_id), 
                              grname = "flake_id", 
                              data = comsafrica_data_complete_conda, 
                              datatype = "Gaussian", 
                              nboot = 1000, npermut = 0)
+summary(comsafrica_techwidthmes)
 plot(comsafrica_techwidthmes, type = "boot", cex.main = 0.8,main="tech width medial")
 
 #flake tech width dist
+set.seed(50)
 comsafrica_techwidthdist<-rpt(techwidthdist ~ (1 | flake_id), 
                               grname = "flake_id", 
                               data = comsafrica_data_complete_conda, 
                               datatype = "Gaussian", 
                               nboot = 1000, npermut = 0)
+summary(comsafrica_techwidthdist)
 plot(comsafrica_techwidthdist, type = "boot", cex.main = 0.8,main="tech width dist")
 
 #flake tech thick prox
+set.seed(50)
 comsafrica_techtechthickprox<-rpt(techthickprox ~ (1 | flake_id), 
                                   grname = "flake_id", 
                                   data = comsafrica_data_complete_conda, 
                                   datatype = "Gaussian", 
                                   nboot = 1000, npermut = 0)
+summary(comsafrica_techtechthickprox)
 plot(comsafrica_techtechthickprox, type = "boot", cex.main = 0.8,main="tech thick prox")
 
 #flake tech thick med
+set.seed(50)
 comsafrica_techtechthickmes<-rpt(techthickmes ~ (1 | flake_id), 
                                  grname = "flake_id", 
                                  data = comsafrica_data_complete_conda, 
                                  datatype = "Gaussian", 
                                  nboot = 1000, npermut = 0)
+summary(comsafrica_techtechthickmes)
 plot(comsafrica_techtechthickmes, type = "boot", cex.main = 0.8,main="tech thick medial")
 
 #flake tech thick dist
+set.seed(50)
 comsafrica_techthickdist<-rpt(techthickdist ~ (1 | flake_id), 
                               grname = "flake_id", 
                               data = comsafrica_data_complete_conda, 
                               datatype = "Gaussian", 
                               nboot = 1000, npermut = 0)
+summary(comsafrica_techthickdist)
 plot(comsafrica_techthickdist, type = "boot", cex.main = 0.8,main="tech thick dist")
 
 #flake platform width
+set.seed(50)
 comsafrica_platfwidth<-rpt(platfwidth ~ (1 | flake_id), 
                            grname = "flake_id", 
                            data = comsafrica_data_complete_conda, 
                            datatype = "Gaussian", 
                            nboot = 1000, npermut = 0)
+summary(comsafrica_platfwidth)
 plot(comsafrica_platfwidth, type = "boot", cex.main = 0.8,main="platform width")
 
 #flake platform thickness
+set.seed(50)
 comsafrica_platfthickmax<-rpt(platfthickmax ~ (1 | flake_id), 
                               grname = "flake_id", 
                               data = comsafrica_data_complete_conda, 
                               datatype = "Gaussian", 
                               nboot = 1000, npermut = 0)
+summary(comsafrica_platfthickmax)
 plot(comsafrica_platfthickmax, type = "boot", cex.main = 0.8,main="platform thickness")
 
 #flake EPA
-comsafrica_edgeplatf<-rpt(edgeplatf ~ (1 | flake_id), 
+hist(log10(comsafrica_data_complete_conda$edgeplatf))
+set.seed(50)
+comsafrica_edgeplatf<-rpt(log(edgeplatf) ~ (1 | flake_id), 
                               grname = "flake_id", 
-                              data = comsafrica_data_complete_conda, 
+                              data = filter(comsafrica_data_complete_conda,edgeplatf>0), 
                               datatype = "Gaussian", 
                               nboot = 1000, npermut = 0)
+summary(comsafrica_edgeplatf)
 plot(comsafrica_edgeplatf, type = "boot", cex.main = 0.8,main="EPA")
 
 ### repeatability coefficients for Count data ####
+
 comsafrica_data_count_data<-comsafrica_data %>%
    select(c(assemblage_code,analyst_id,flake_id,proximal_scars,left_scars,distal_scars,right_scars,
             dorsal_scar_count))
@@ -458,7 +494,72 @@ comsafrica_data_count_data_condb<-comsafrica_data_count_data %>%
 comsafrica_data_count_data_conda<-comsafrica_data_count_data %>%
    subset(assemblage_code=="chert_condition_A") 
 
-## Condition b
+## Condition a####
+
+# proximal_scars
+hist(comsafrica_data_count_data_conda$proximal_scars)
+set.seed(50)
+comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ (1 | flake_id), 
+                                    grname = "flake_id", 
+                                    data = comsafrica_data_count_data_conda, 
+                                    datatype = "Poisson", 
+                                    nboot = 100, npermut = 100)
+summary(comsafrica_proximal_scars_boot)
+summary(comsafrica_proximal_scars_boot$mod)
+plot(comsafrica_proximal_scars_boot, type = "boot", cex.main = 0.8,main="")
+plot(comsafrica_proximal_scars_boot, type = "permut", cex.main = 1)
+
+# left_scars
+hist(comsafrica_data_count_data_conda$left_scars)
+set.seed(50)
+comsafrica_left_scars_boot<-rpt(left_scars ~ (1 | flake_id), 
+                                grname = "flake_id", 
+                                data = comsafrica_data_count_data_conda, 
+                                datatype = "Poisson", 
+                                nboot = 100, npermut = 100)
+summary(comsafrica_left_scars_boot)
+summary(comsafrica_left_scars_boot$mod)
+plot(comsafrica_left_scars_boot, type = "boot", cex.main = 0.8,main="")
+plot(comsafrica_left_scars_boot, type = "permut", cex.main = 1)
+
+# distal_scars
+hist(comsafrica_data_count_data_conda$distal_scars)
+comsafrica_distal_scars_boot<-rpt(distal_scars ~ (1 | flake_id), 
+                                  grname = "flake_id", 
+                                  data = comsafrica_data_count_data_conda, 
+                                  datatype = "Poisson", 
+                                  nboot = 100, npermut = 100)
+summary(comsafrica_distal_scars_boot)
+summary(comsafrica_distal_scars_boot$mod)
+plot(comsafrica_distal_scars_boot, type = "boot", cex.main = 0.8,main="")
+plot(comsafrica_distal_scars_boot, type = "permut", cex.main = 1)
+
+# right_scars
+hist(comsafrica_data_count_data_conda$right_scars)
+comsafrica_right_scars_boot<-rpt(right_scars ~ (1 | flake_id), 
+                                 grname = "flake_id", 
+                                 data = comsafrica_data_count_data_conda, 
+                                 datatype = "Poisson", 
+                                 nboot = 100, npermut = 100)
+summary(comsafrica_right_scars_boot)
+summary(comsafrica_right_scars_boot$mod)
+plot(comsafrica_right_scars_boot, type = "boot", cex.main = 0.8,main="")
+plot(comsafrica_right_scars_boot, type = "permut", cex.main = 1)
+
+# dorsal scar count
+hist(comsafrica_data_count_data_conda$dorsal_scar_count)
+comsafrica_dorsal_scar_count_boot<-rpt(dorsal_scar_count ~ (1 | flake_id), 
+                                       grname = "flake_id", 
+                                       data = comsafrica_data_count_data_conda, 
+                                       datatype = "Poisson", 
+                                       nboot = 100, npermut = 100)
+summary(comsafrica_dorsal_scar_count_boot)
+summary(comsafrica_dorsal_scar_count_boot$mod)
+plot(comsafrica_dorsal_scar_count_boot, type = "boot", cex.main = 0.8,main="")
+plot(comsafrica_dorsal_scar_count_boot, type = "permut", cex.main = 1)
+
+## Condition b####
+
 # proximal_scars
 hist(comsafrica_data_count_data_condb$proximal_scars)
 comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ (1 | flake_id), 
