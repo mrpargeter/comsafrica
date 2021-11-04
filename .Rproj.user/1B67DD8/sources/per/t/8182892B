@@ -2,18 +2,18 @@
     "collab_server" : "",
     "contents" : "",
     "created" : 1635279225299.000,
-    "dirty" : true,
+    "dirty" : false,
     "encoding" : "UTF-8",
-    "folds" : "34|16|35|36|\n36|16|59|0|\n38|33|48|0|\n78|34|107|0|\n110|30|127|0|\n128|62|128|66|\n129|15|306|0|\n307|15|483|0|\n563|14|624|0|\n625|52|637|0|\n638|16|1261|1|\n1262|41|1270|0|\n1271|24|1322|0|\n",
-    "hash" : "0",
+    "folds" : "34|16|35|36|\n36|16|59|0|\n38|33|48|0|\n78|34|107|0|\n110|30|127|0|\n128|62|128|66|\n129|15|306|0|\n307|15|483|0|\n484|46|495|0|\n496|14|562|0|\n563|14|624|0|\n625|52|637|0|\n638|15|1265|0|\n1266|15|1889|1|\n1890|41|1898|0|\n1899|24|1950|0|\n",
+    "hash" : "4062226129",
     "id" : "8182892B",
-    "lastKnownWriteTime" : 1635948689,
-    "last_content_update" : 1635948902837,
+    "lastKnownWriteTime" : 1636057538,
+    "last_content_update" : 1636058553187,
     "path" : "/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis/CoMSA_stats/comsafrica/comsafrica_stats.R",
     "project_path" : "comsafrica_stats.R",
     "properties" : {
-        "cursorPosition" : "559,0",
-        "scrollLine" : "551"
+        "cursorPosition" : "1882,1",
+        "scrollLine" : "1853"
     },
     "read_only" : false,
     "read_only_alternatives" : [
