@@ -628,7 +628,7 @@ plot(comsafrica_dorsal_scar_count_boot, type = "permut", cex.main = 1)
 comsafrica_data_cat_data<-comsafrica_data %>%
    select(c(assemblage_code,analyst_id,flake_id,completeness,platform_cortex,directionality,platfmorph,
             platflipp,bulb,shattbulb,initiation,ventr_plane_form,section,latedgetype,flaketerm,
-            distplanform,kombewa))
+            distplanform,kombewa,red_syst,flk_form))
 
 comsafrica_data_cat_data_condb<-comsafrica_data_cat_data %>%
    subset(assemblage_code=="chert_condition_B")
@@ -637,6 +637,123 @@ comsafrica_data_cat_data_conda<-comsafrica_data_cat_data %>%
    subset(assemblage_code=="chert_condition_A") 
 
 ## Condition a ####
+
+## Reduction system
+
+red_syst_data_a<-comsafrica_data_cat_data_conda %>%
+   select(flake_id,analyst_id,red_syst) %>% 
+   mutate(red_syst=as.factor(red_syst),
+          red_syst=recode(red_syst,
+                          Discoidal = "Discoid",
+                          idnet = "Indet",
+                          inde = "Indet",
+                          Indeterminate = "Indet",
+                          other = "Indet",
+                          Ind = "Indet",
+                          indet = "Indet",
+                          indeterminate = "Indet",
+                          laminar = "Laminar",
+                          'Lev or Disc' = "Indet",
+                          'Levallois indet' = "Levallois",
+                          'Levallois non-Nubian' = "Levallois",
+                          'LEVALLOIS/LEVALLOIS-RELATED' = "Levallois",
+                          'Other (informal)' = "Indet",
+                          'potential levallois' = "Levallois",
+                          levallois = "Levallois",
+                          LEVALLOIS = "Levallois",
+                          'Levallois non Nubian' = "Levallois",
+                          'Levallois?' = "Levallois",
+                          'potential Lev' = "Levallois",
+                          'potential Levallois' = "Levallois",
+                          CENTRIPETAL = "Discoid",
+                          discoid = "Discoid",
+                          DISCOID = "Discoid",
+                          FLAKE = "Flake")) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+# delete flake #'s with < 4 observations
+red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$flake_id, 
+                                                red_syst_data_a$flake_id, 
+                                                    FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+red_syst_data_a_krip<- red_syst_data_a %>%
+   mutate(red_sys_dummy=unclass(red_syst)) %>% 
+   select(-red_syst) %>%
+   spread(analyst_id, red_sys_dummy) %>%
+   select(-flake_id) %>% 
+   as.matrix() 
+
+set.seed(42)
+fit.full_red_syst<-krippendorffs.alpha(red_syst_data_a_krip, 
+                                       level = "nominal", 
+                                       control = list(parallel = FALSE,bootit=100), 
+                                       verbose = TRUE)
+summary(fit.full_red_syst)
+
+plot(fit.full_red_syst, xlim = c(0, 0.9), 
+     xlab = "Bootstrap Estimates", 
+     main = "Nominal Data",
+     density = FALSE)
+
+# Compute kapa-allows us to see which categories are performing better
+# requires actual categorical variables not reclasssed values
+red_sys_data_a_fleiss<- red_syst_data_a %>%
+   mutate(red_syst=as.factor(red_syst)) %>%
+   spread(analyst_id, red_syst) %>%
+   select(-flake_id) 
+
+kappam.fleiss(red_sys_data_a_fleiss, detail = T)
+
+## flake form
+
+flake_form_data_a<-comsafrica_data_cat_data_conda %>%
+   select(flake_id,analyst_id,flk_form) %>% 
+   mutate(flk_form=recode(comsafrica_data_cat_data_conda$flk_form, 
+                          BLADE = "Blade",
+                          CONVFLAKE = "Convflake", 
+                          ELONG = "Blade",
+                          Elong = "Blade",
+                          flake = "Flake",
+                          FLAKE = "Flake")) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+# delete flake #'s with < 4 observations
+flake_form_data_a<-flake_form_data_a[as.numeric(ave(flake_form_data_a$flake_id, 
+                                                    flake_form_data_a$flake_id, 
+                                                        FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+flake_form_data_a_krip<- flake_form_data_a %>%
+   mutate(flk_form=as.factor(flk_form),
+          flk_form_dummy=unclass(flk_form)) %>% 
+   select(-flk_form) %>%
+   spread(analyst_id, flk_form_dummy) %>%
+   select(-flake_id) %>% 
+   as.matrix() 
+
+set.seed(42)
+fit.full_flk_form<-krippendorffs.alpha(flake_form_data_a_krip, 
+                                           level = "nominal", 
+                                           control = list(parallel = FALSE,bootit=100), 
+                                           verbose = TRUE)
+summary(fit.full_flk_form)
+
+plot(fit.full_flk_form, xlim = c(0, 0.9), 
+     xlab = "Bootstrap Estimates", 
+     main = "Nominal Data",
+     density = FALSE)
+
+# Compute kapa-allows us to see which categories are performing better
+# requires actual categorical variables not reclasssed values
+flake_form_data_a_fleiss<- flake_form_data_a %>%
+   mutate(flk_form=as.factor(flk_form)) %>%
+   spread(analyst_id, flk_form) %>%
+   select(-flake_id) 
+
+kappam.fleiss(flake_form_data_a_fleiss, detail = T)
 
 ## completeness
 
@@ -1265,6 +1382,141 @@ distplanform_fleiss<- distplanform_data_a %>%
 kappam.fleiss(distplanform_fleiss, detail = T)
 
 ## Condition b ####
+
+## Reduction system
+
+red_syst_data_b<-comsafrica_data_cat_data_condb %>%
+   select(flake_id,analyst_id,red_syst) %>% 
+   mutate(red_syst=as.factor(red_syst),
+          red_syst=recode(red_syst,
+                          Discoidal = "Discoid",
+                          idnet = "Indet",
+                          inde = "Indet",
+                          Indeterminate = "Indet",
+                          other = "Indet",
+                          Ind = "Indet",
+                          indet = "Indet",
+                          indeterminate = "Indet",
+                          INDET = "Indet",
+                          'indeterminate (broken)' = "Indet",
+                          'Indeterminate (broken)' = "Indet",
+                          laminar = "Laminar",
+                          'Lev or Disc' = "Indet",
+                          'Levallois indet' = "Levallois",
+                          'Levallois non-Nubian' = "Levallois",
+                          'levallois non nubian' = "Levallois",
+                          'LEVALLOIS OR DISCOID' = "Indet",
+                          na = "Indet",
+                          none = "Indet",
+                          'Platform (laminar?)' = "Platform",
+                          'Platform / Laminar' = "Platform",
+                          'possible Levallois non-Nubian' = "Levallois",
+                          'LEVALLOIS/LEVALLOIS-RELATED' = "Levallois",
+                          'Levallois (pref)' = "Levallois",
+                          'Other (informal)' = "Indet",
+                          'potential levallois' = "Levallois",
+                          levallois = "Levallois",
+                          LEVALLOIS = "Levallois",
+                          'Levallois non Nubian' = "Levallois",
+                          'Levallois?' = "Levallois",
+                          'potential Lev' = "Levallois",
+                          'potential Levallois' = "Levallois",
+                          CENTRIPETAL = "Discoid",
+                          discoid = "Discoid",
+                          DISCOID = "Discoid",
+                          'Discoid?' = "Discoid",
+                          FLAKE = "Flake",
+                          multidirectional = "Platform",
+                          'NON-LEVALLOIS; ORTHOGONAL VOLUME EXPLOITATION' = "Platform")) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+levels(red_syst_data_b$red_syst)
+
+# delete flake #'s with < 4 observations
+red_syst_data_b<-red_syst_data_b[as.numeric(ave(red_syst_data_b$flake_id, 
+                                                red_syst_data_b$flake_id, 
+                                                FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+red_syst_data_b_krip<- red_syst_data_b %>%
+   mutate(red_sys_dummy=unclass(red_syst)) %>% 
+   select(-red_syst) %>%
+   spread(analyst_id, red_sys_dummy) %>%
+   select(-flake_id) %>% 
+   as.matrix() 
+
+set.seed(42)
+fit.full_red_syst<-krippendorffs.alpha(red_syst_data_b_krip, 
+                                       level = "nominal", 
+                                       control = list(parallel = FALSE,bootit=100), 
+                                       verbose = TRUE)
+summary(fit.full_red_syst)
+
+plot(fit.full_red_syst, xlim = c(0, 0.9), 
+     xlab = "Bootstrap Estimates", 
+     main = "Nominal Data",
+     density = FALSE)
+
+# Compute kapa-allows us to see which categories are performing better
+# requires actual categorical variables not reclasssed values
+red_sys_data_b_fleiss<- red_syst_data_b %>%
+   mutate(red_syst=as.factor(red_syst)) %>%
+   spread(analyst_id, red_syst) %>%
+   select(-flake_id) 
+
+kappam.fleiss(red_sys_data_b_fleiss, detail = T)
+
+## flake form
+
+flake_form_data_b<-comsafrica_data_cat_data_condb %>%
+   select(flake_id,analyst_id,flk_form) %>% 
+   mutate(flk_form=recode(comsafrica_data_cat_data_condb$flk_form, 
+                          BLADE = "Blade",
+                          CONVFLAKE = "Convflake", 
+                          ELONG = "Blade",
+                          Elong = "Blade",
+                          flake = "Flake",
+                          FLAKE = "Flake",
+                          indet = "Indet",
+                          INDET = "Indet")) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+# delete flake #'s with < 4 observations
+flake_form_data_b<-flake_form_data_b[as.numeric(ave(flake_form_data_b$flake_id, 
+                                                    flake_form_data_b$flake_id, 
+                                                    FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+flake_form_data_b_krip<- flake_form_data_b %>%
+   mutate(flk_form=as.factor(flk_form),
+          flk_form_dummy=unclass(flk_form)) %>% 
+   select(-flk_form) %>%
+   spread(analyst_id, flk_form_dummy) %>%
+   select(-flake_id) %>% 
+   as.matrix() 
+
+set.seed(42)
+fit.full_flk_form<-krippendorffs.alpha(flake_form_data_b_krip, 
+                                       level = "nominal", 
+                                       control = list(parallel = FALSE,bootit=100), 
+                                       verbose = TRUE)
+summary(fit.full_flk_form)
+
+plot(fit.full_flk_form, xlim = c(0, 0.9), 
+     xlab = "Bootstrap Estimates", 
+     main = "Nominal Data",
+     density = FALSE)
+
+# Compute kapa
+
+flake_form_data_b_fleiss<- flake_form_data_b %>%
+   mutate(flk_form=as.factor(flk_form)) %>%
+   spread(analyst_id, flk_form) %>%
+   select(-flake_id) 
+
+kappam.fleiss(flake_form_data_b_fleiss, detail = T)
 
 ## completeness
 
