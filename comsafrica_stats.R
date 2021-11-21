@@ -2200,3 +2200,187 @@ bland.altman.plot(A, B, main="This is a Bland Altman Plot", xlab="Means", ylab="
 pl <- bland.altman.plot(A, B, graph.sys = "ggplot2")
 print(pl)
 
+
+
+###### SUMMARY TABLES FOR CATEGORICAL VARIABLES
+data1 <- comsafrica_data
+
+#create a unique flake ID for each flake
+summary(data1$assemblage_code)
+
+data1$assemblage_code <- as.character(data1$assemblage_code)
+data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
+data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
+data1$assemblage_code <- as.factor(data1$assemblage_code)
+
+
+
+data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
+data1$cond_flake_id <- as.factor(data1$cond_flake_id)
+
+summary(data1$cond_flake_id)
+
+#completeness
+summary(data1$completeness)
+data1$completeness <- as.character(data1$completeness)
+data1$completeness[data1$completeness %in% c("fragment", "shatter", "lateral")] <- "indeterminate"
+data1$completeness[data1$completeness == ""] <- NA #could possibly be all grouped with indeterminate
+data1$completeness <- as.factor(data1$completeness)
+
+tableCOMPLETENESS <-  table(data1$cond_flake_id, data1$completeness)
+tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS)))
+write.csv(tabCOMP, file="Tables/tablecompleteness.csv")
+
+#damage
+summary(data1$damage)
+data1$damage <- as.character(data1$damage)
+data1$damage[data1$damage ==""] <- "yes" #in that case, NAs correspond to yes
+data1$damage <- as.factor(data1$damage)
+
+table2 <- table(data1$cond_flake_id, data1$damage)
+tabDAM=cbind(addmargins(round(prop.table(addmargins(table2,1),1),2)*100,2), c(margin.table(table2,1),sum(table2)))
+write.csv(tabDAM, file="Tables/tabledamage.csv")
+
+#platform_cortex
+summary(data1$platform_cortex)
+
+data1$platform_cortex <- as.character(data1$platform_cortex)
+data1$platform_cortex[data1$platform_cortex == ""] <- NA
+data1$platform_cortex[data1$platform_cortex == "INDET"] <- "indeterminate"
+data1$platform_cortex[data1$platform_cortex == "Indeterminate"] <- "indeterminate"
+data1$platform_cortex[data1$platform_cortex =="absent"] <- "Absent"
+data1$platform_cortex[data1$platform_cortex =="complete"] <- "Complete"
+data1$platform_cortex <- as.factor(data1$platform_cortex)
+ 
+
+table3 <- table(data1$cond_flake_id, data1$platform_cortex)
+tabCORTEXPLATF=cbind(addmargins(round(prop.table(addmargins(table3,1),1),2)*100,2), c(margin.table(table3,1),sum(table3)))
+write.csv(tabCORTEXPLATF, file="Tables/tablecortexplatf.csv")
+
+#directionality
+summary(data1$directionality)
+
+data1$directionality <- as.character(data1$directionality)
+data1$directionality[data1$directionality == ""] <- NA
+data1$directionality[data1$directionality == "centripetal"] <- "Centripetal"
+data1$directionality[data1$directionality == "other"] <- "Other"
+data1$directionality <- as.factor(data1$directionality)
+
+table4 <- table(data1$cond_flake_id, data1$directionality)
+tabDIRECTIONALITY=cbind(addmargins(round(prop.table(addmargins(table4,1),1),2)*100,2), c(margin.table(table4,1),sum(table4)))
+write.csv(tabDIRECTIONALITY, file="Tables/tabledirectionality.csv")
+
+#platf morph
+summary(data1$platfmorph) #did not group together other with indet as separated in our original attribute list?
+
+data1$platfmorph <- as.character(data1$platfmorph)
+data1$platfmorph[data1$platfmorph == ""] <- NA
+data1$platfmorph[data1$platfmorph == "Chapeau de Gendarme"] <- "ChapeauDeGendarme"
+data1$platfmorph[data1$platfmorph == "Diherdral"] <- "Dihedral"
+data1$platfmorph[data1$platfmorph == "facetted"] <- "Facetted"
+data1$platfmorph[data1$platfmorph == "linear"] <- "Linear"
+data1$platfmorph <- as.factor(data1$platfmorph)
+
+table5 <- table(data1$cond_flake_id, data1$platfmorph)
+tabPLATFMORPH=cbind(addmargins(round(prop.table(addmargins(table5,1),1),2)*100,2), c(margin.table(table5,1),sum(table5)))
+write.csv(tabPLATFMORPH, file="Tables/tableplatfmorph.csv")
+
+#platf lip
+summary(data1$platflipp)
+
+data1$platflipp <- as.character(data1$platflipp)
+data1$platflipp[data1$platflipp == ""] <- NA
+data1$platflipp[data1$platflipp %in% c("no", "NO")] <- "No"
+data1$platflipp[data1$platflipp %in% c("yes", "YES")] <- "Yes"
+data1$platflipp[data1$platflipp == "NOT APPLICABLE"] <- "Indeterminate"
+data1$platflipp <- as.factor(data1$platflipp)
+
+table6 <- table(data1$cond_flake_id, data1$platflipp)
+tabPLATFLIPP=cbind(addmargins(round(prop.table(addmargins(table6,1),1),2)*100,2), c(margin.table(table6,1),sum(table6)))
+write.csv(tabPLATFLIPP, file="Tables/tableplatflipp.csv")
+
+#bulb
+summary(data1$bulb)
+
+data1$bulb <- as.character(data1$bulb)
+data1$bulb[data1$bulb == ""] <- NA
+data1$bulb[data1$bulb == "Indet"] <- "Indeterminate"
+data1$bulb[data1$bulb == "NO"] <- "No"
+data1$bulb[data1$bulb == "YES"] <- "Yes"
+data1$bulb <- as.factor(data1$bulb)
+
+table7 <- table(data1$cond_flake_id, data1$bulb)
+tabBULB=cbind(addmargins(round(prop.table(addmargins(table7,1),1),2)*100,2), c(margin.table(table7,1),sum(table7)))
+write.csv(tabBULB, file="Tables/tablebulb.csv")
+
+
+#shattbulb
+
+summary(data1$shattbulb) #one line from the dataset was corrected in the csv.
+
+data1$shattbulb <- as.character(data1$shattbulb)
+data1$shattbulb[data1$shattbulb == ""] <- NA
+data1$shattbulb[data1$shattbulb %in% c("Indet","Indeterminateerminate" )] <- "Indeterminate"
+data1$shattbulb[data1$shattbulb %in% c("no","NO" )] <- "No"
+data1$shattbulb[data1$shattbulb =="YES"] <- "Yes"
+data1$shattbulb <- as.factor(data1$shattbulb)
+
+table8 <- table(data1$cond_flake_id, data1$shattbulb)
+tabSHATTBULB=cbind(addmargins(round(prop.table(addmargins(table8,1),1),2)*100,2), c(margin.table(table8,1),sum(table8)))
+write.csv(tabSHATTBULB, file="Tables/tableshattbulb.csv")
+
+#initiation
+summary(data1$initiation)
+
+data1$initiation <- as.character(data1$initiation)
+data1$initiation[data1$initiation == ""] <- NA #indet (N=1) should be as NA too?
+data1$initiation[data1$initiation == "BENDING"] <- "Bending"
+data1$initiation[data1$initiation %in% c("hertzian", "HERTZIAN")] <- "Hertzian"
+data1$initiation[data1$initiation == "WEDGING"] <- "Wedging"
+data1$initiation <- as.factor(data1$initiation)
+
+table9 <- table(data1$cond_flake_id, data1$initiation)
+tabINITIATION=cbind(addmargins(round(prop.table(addmargins(table9,1),1),2)*100,2), c(margin.table(table9,1),sum(table9)))
+write.csv(tabINITIATION, file="Tables/tableinitiation.csv")
+
+#ventral plane form
+
+summary(data1$ventr_plane_form)
+
+data1$ventr_plane_form <- as.character(data1$ventr_plane_form)
+data1$ventr_plane_form[data1$ventr_plane_form == ""] <- NA
+data1$ventr_plane_form[data1$ventr_plane_form == "BULBAR"] <- "Bulbar"
+data1$ventr_plane_form[data1$ventr_plane_form == "CONCAVE"] <- "Concave"
+data1$ventr_plane_form[data1$ventr_plane_form == "FLAT"] <- "Flat"
+data1$ventr_plane_form[data1$ventr_plane_form == "TWISTED"] <- "Twisted"
+data1$ventr_plane_form[data1$ventr_plane_form %in% c("VERY CONCAVE", "VERY_CONCAVE")] <- "Very_concave"
+data1$ventr_plane_form <- as.factor(data1$ventr_plane_form)
+
+table10 <- table(data1$cond_flake_id, data1$ventr_plane_form)
+tabVENTRPLANEFORM=cbind(addmargins(round(prop.table(addmargins(table10,1),1),2)*100,2), c(margin.table(table10,1),sum(table10)))
+write.csv(tabVENTRPLANEFORM, file="Tables/tableventralplaneform.csv")
+
+
+#section
+
+summary(data1$section)
+
+data1$section <- as.character(data1$section)
+data1$section[data1$section == ""] <- NA
+data1$section[data1$section == "DOMED"] <- "Domed"
+data1$section[data1$section == "INDET"] <- "Indeterminate"
+data1$section[data1$section %in% c("LENTIC", "LENTICULAR")] <- "Lenticular"
+data1$section[data1$section %in%c("RIGHTTRI", "RIGHTTRIANGLE")] <- "Righttriangle"
+data1$section[data1$section %in% c( "TRAP", "TRAPEZOIDAL")] <- "Trapezoidal"
+data1$section[data1$section %in% c("TRI", "TRIANGULAR")] <- "Triangular"
+data1$section <- as.factor(data1$section)
+
+
+table11 <- table(data1$cond_flake_id, data1$section)
+tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), c(margin.table(table11,1),sum(table11)))
+write.csv(tabSECTION, file="Tables/tablesection.csv")
+
+
+
+
+
