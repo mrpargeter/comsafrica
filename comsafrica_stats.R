@@ -2380,6 +2380,130 @@ table11 <- table(data1$cond_flake_id, data1$section)
 tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), c(margin.table(table11,1),sum(table11)))
 write.csv(tabSECTION, file="Tables/tablesection.csv")
 
+#lateral edge type
+
+summary(data1$latedgetype)
+
+data1$latedgetype <- as.character(data1$latedgetype)
+data1$latedgetype[data1$latedgetype == ""] <- NA
+data1$latedgetype[data1$latedgetype == "AMORPH"] <- "Amorphous"
+data1$latedgetype[data1$latedgetype %in% c("CONV", "CONVERGENT")] <- "Convergent"
+data1$latedgetype[data1$latedgetype == "DIAMOND"] <- "Diamond"
+data1$latedgetype[data1$latedgetype %in% c("DIV", "DIVERGENT")] <- "Divergent"
+data1$latedgetype[data1$latedgetype == "na"] <- "Indeterminate" #why not NA?
+data1$latedgetype[data1$latedgetype == "INDET"] <- "Indeterminate"
+data1$latedgetype[data1$latedgetype %in% c("OVAL", "OVOID")] <- "Ovoid"
+data1$latedgetype[data1$latedgetype == "PARALLEL"] <- "Parallel"
+data1$latedgetype <- as.factor(data1$latedgetype)
+
+table12 <- table(data1$cond_flake_id, data1$latedgetype)
+tabLATEDGE=cbind(addmargins(round(prop.table(addmargins(table12,1),1),2)*100,2), c(margin.table(table12,1),sum(table12)))
+write.csv(tabLATEDGE, file="Tables/tablelatedge.csv")
+
+
+#Flake termination
+
+summary(data1$flaketerm)
+data1$flaketerm <- as.character(data1$flaketerm)
+data1$flaketerm[data1$flaketerm == ""] <- NA
+data1$flaketerm[data1$flaketerm == "AXIAL"] <- "Axial"
+data1$flaketerm[data1$flaketerm == "FEATHER"] <- "Feather"
+data1$flaketerm[data1$flaketerm == "HINGE"] <- "Hinge"
+data1$flaketerm[data1$flaketerm == "INDET"] <- "Indeterminate"
+data1$flaketerm[data1$flaketerm == "OVERSHOT"] <- "Overshot"
+data1$flaketerm <- as.factor(data1$flaketerm)
+
+table13 <- table(data1$cond_flake_id, data1$flaketerm)
+tabFLAKETERM=cbind(addmargins(round(prop.table(addmargins(table13,1),1),2)*100,2), c(margin.table(table13,1),sum(table13)))
+write.csv(tabFLAKETERM, file="Tables/tableflaketerm.csv")
+
+
+#Kombewa
+
+summary(data1$kombewa) #0.84 value corresponds to a line that was offset compared to the columns
+
+data1$kombewa <- as.character(data1$kombewa)
+data1$kombewa[data1$kombewa == ""] <- NA
+data1$kombewa[data1$kombewa == "YES"] <- "Yes"
+data1$kombewa <- as.character(data1$kombewa)
+data1$kombewa[data1$kombewa %in% c("no", "NO")] <- "No"
+data1$kombewa <- as.factor(data1$kombewa)
+
+table14 <- table(data1$cond_flake_id, data1$kombewa)
+tabKOMB=cbind(addmargins(round(prop.table(addmargins(table14,1),1),2)*100,2), c(margin.table(table14,1),sum(table14)))
+write.csv(tabKOMB, file="Tables/tablekombewa.csv")
+
+#Distal PLan form
+
+summary(data1$distplanform)
+
+data1$distplanform <- as.character(data1$distplanform)
+data1$distplanform[data1$distplanform == ""] <- NA
+data1$distplanform[data1$distplanform == "FLAT"] <- "Flat"
+data1$distplanform[data1$distplanform == "INDETERMINATE"] <- "INDET"
+data1$distplanform[data1$distplanform %in%c( "IRR", "Irreg")] <- "Irregular"
+data1$distplanform[data1$distplanform == "POINTED"] <- "Pointed"
+data1$distplanform[data1$distplanform %in% c("rounded", "ROUNDED")] <- "Rounded"
+data1$distplanform <- as.factor(data1$distplanform)
+
+table15 <- table(data1$cond_flake_id, data1$distplanform)
+tabDISTPLANFORM=cbind(addmargins(round(prop.table(addmargins(table15,1),1),2)*100,2), c(margin.table(table15,1),sum(table15)))
+write.csv(tabDISTPLANFORM, file="Tables/tabledistplanform.csv")
+
+#Reduction System
+
+summary(data1$red_syst)
+
+data1$red_syst <- as.character(data1$red_syst)
+data1$red_syst[data1$red_syst == ""] <- NA
+data1$red_syst[data1$red_syst %in% c ("idnet", "inde", "Indeterminate",
+                                      "other", "Ind", "indet", "indeterminate",
+                                      "INDET", "indeterminate (broken)",
+                                      "Indeterminate (broken)",
+                                      "LEVALLOIS OR DISCOID", "na", "none",
+                                      "Lev or Disc", "Other (informal)")] <- "Indet"
+
+data1$red_syst[data1$red_syst %in% c("Levallois indet", "Levallois non-Nubian",
+                                     "levallois non nubian", "possible Levallois non-Nubian",
+                                     "LEVALLOIS-RELATED", "LEVALLOIS/LEVALLOIS-RELATED", "Levallois (pref)",
+                                     "potential levallois", "LEVALLOIS", 
+                                     "levallois", "Levallois non Nubian",
+                                     "Levallois?", "potential Lev",
+                                     "potential Levallois", "Nubian")] <- "Levallois"
+
+data1$red_syst[data1$red_syst %in% c("Discoidal", "CENTRIPETAL", 
+                                     "discoid", "DISCOID",
+                                     "Discoid?")] <- "Discoid"
+
+data1$red_syst[data1$red_syst == "BIPOLAR"] <- "Bipolar"
+data1$red_syst[data1$red_syst == "ON ANVIL"] <- "Bipolar"
+data1$red_syst[data1$red_syst == "bipolar"] <- "Bipolar"
+
+data1$red_syst[data1$red_syst %in% c("laminar", "Platform (laminar?)", 
+                                     "Platform / Laminar", "multidirectional",
+                                     "NON-LEVALLOIS; ORTHOGONAL VOLUME EXPLOITATION")] <-  "Platform"
+
+data1$red_syst <- as.factor(data1$red_syst)
+
+table16 <- table(data1$cond_flake_id, data1$red_syst)
+tabREDSYST=cbind(addmargins(round(prop.table(addmargins(table16,1),1),2)*100,2), c(margin.table(table16,1),sum(table16)))
+write.csv(tabREDSYST, file="Tables/tableredsyst.csv")
+
+
+#flake form
+
+summary(data1$flk_form)
+data1$flk_form <- as.character(data1$flk_form)
+data1$flk_form[data1$flk_form == ""] <- NA
+data1$flk_form[data1$flk_form %in% c("Elong", "ELONG")] <- "BLADE"
+data1$flk_form[data1$flk_form %in% c("flake", "Flake")] <- "FLAKE"
+data1$flk_form[data1$flk_form == "Convflake"] <- "CONVFLAKE"
+data1$flk_form <- as.factor(data1$flk_form)
+
+table17 <- table(data1$cond_flake_id, data1$flk_form)
+tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
+write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
+
 
 
 
