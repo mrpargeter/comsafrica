@@ -4,16 +4,16 @@
     "created" : 1635279225299.000,
     "dirty" : false,
     "encoding" : "UTF-8",
-    "folds" : "",
-    "hash" : "0",
+    "folds" : "328|46|339|0|\n340|14|406|0|\n407|52|419|0|\n420|15|1164|0|\n1165|24|1217|0|\n1218|48|1522|0|\n",
+    "hash" : "1198163380",
     "id" : "8182892B",
-    "lastKnownWriteTime" : 1638479622,
-    "last_content_update" : 1638479673926,
+    "lastKnownWriteTime" : 1639083843,
+    "last_content_update" : 1639083893133,
     "path" : "/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis/CoMSA_stats/comsafrica/comsafrica_stats.R",
     "project_path" : "comsafrica_stats.R",
     "properties" : {
-        "cursorPosition" : "1462,15",
-        "scrollLine" : "943"
+        "cursorPosition" : "328,0",
+        "scrollLine" : "316"
     },
     "read_only" : false,
     "read_only_alternatives" : [
