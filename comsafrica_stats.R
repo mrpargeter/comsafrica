@@ -1496,7 +1496,180 @@ table17 <- table(data1$cond_flake_id, data1$flk_form)
 tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
 write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
 
+write.csv(data1, file="comsafrica_complete_adjusted_catcleaned.csv")
 
+############################################### ######################
+#######SUMMARY TABLES FOR COUNT AND CONTINUOUS DATA#######
+##############################################################
+
+#dorsal scar counts
+summary(data1$dorsal_scar_count)
+data1$dorsal_scar_count <- as.factor(data1$dorsal_scar_count)
+
+table18 <- table(data1$cond_flake_id, data1$dorsal_scar_count)
+tabDORSSCARCOUNT=cbind(addmargins(round(prop.table(addmargins(table18,1),1),2)*100,2), c(margin.table(table18,1),sum(table18)))
+write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
+
+#proximal scar counts
+summary(data1$proximal_scars)
+data1$proximal_scars <- as.factor(data1$proximal_scars)
+
+table19 <- table(data1$cond_flake_id, data1$proximal_scars)
+tabPROXSCARS=cbind(addmargins(round(prop.table(addmargins(table19,1),1),2)*100,2), 
+                   c(margin.table(table19,1),sum(table19)))
+write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
+
+#left scar counts
+summary(data1$left_scars)
+data1$left_scars <- as.factor(data1$left_scars)
+
+table20 <- table(data1$cond_flake_id, data1$left_scars)
+tabLEFTSCARS=cbind(addmargins(round(prop.table(addmargins(table20,1),1),2)*100,2), 
+                   c(margin.table(table20,1),sum(table20)))
+write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
+
+#distal scar counts
+summary(data1$distal_scars)
+data1$distal_scars <- as.factor(data1$distal_scars)
+
+table21 <- table(data1$cond_flake_id, data1$distal_scars)
+tabDISTSCARS=cbind(addmargins(round(prop.table(addmargins(table21,1),1),2)*100,2), 
+                   c(margin.table(table21,1),sum(table21)))
+write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
+
+#right scar counts
+summary(data1$right_scars)
+data1$right_scars <- as.factor(data1$right_scars)
+
+table22 <- table(data1$cond_flake_id, data1$right_scars)
+tabRIGHTSCARS=cbind(addmargins(round(prop.table(addmargins(table22,1),1),2)*100,2), 
+                   c(margin.table(table22,1),sum(table22)))
+write.csv(tabRIGHTSCARS, file="Tables/tablerightscars.csv")
+
+##numerical variables
+#cleaning data
+summary(data1)
+
+summary(data1$dorsal_cortex)
+
+summary(data1$maximumdimension)
+data1$maximumdimension[data1$maximumdimension==0] <- NA
+
+summary(data1$mass)
+data1$mass[data1$mass==0] <- NA
+
+summary(data1$maximumwidth)
+data1$maximumwidth[data1$maximumwidth==0] <- NA
+
+summary(data1$maximumthickness)
+data1$maximumthickness[data1$maximumthickness==0] <- NA
+
+summary(data1$techlength)
+data1$techlength[data1$techlength==0] <- NA
+
+summary(data1$techmaxwidth)
+data1$techmaxwidth[data1$techmaxwidth==0] <- NA
+
+summary(data1$techmaxthickness)
+data1$techmaxthickness[data1$techmaxthickness==0] <- NA
+
+summary(data1$techwidthprox)
+data1$techwidthprox[data1$techwidthprox==0] <- NA
+
+summary(data1$techwidthmes)
+data1$techwidthmes[data1$techwidthmes==0] <- NA
+
+summary(data1$techwidthdist)
+data1$techwidthdist[data1$techwidthdist==0] <- NA
+
+summary(data1$techthickprox)
+data1$techthickprox[data1$techthickprox==0] <- NA
+
+summary(data1$techthickmes)
+data1$techthickmes[data1$techthickmes==0] <- NA
+
+summary(data1$techthickdist)
+data1$techthickdist[data1$techthickdist==0] <- NA
+
+summary(data1$platfwidth)
+data1$platfwidth[data1$platfwidth==0] <- NA
+
+summary(data1$platfthickmax)
+data1$platfthickmax[data1$platfthickmax==0] <- NA
+
+summary(data1$platfthickimpact)
+data1$platfthickimpact[data1$platfthickimpact==0] <- NA
+
+
+summary(data1$platfthickmid)
+data1$platfthickmid <- as.numeric(data1$platfthickmid)
+data1$platfthickmid[data1$platfthickmid==0] <- NA
+
+summary(data1$edgeplatf)
+data1$edgeplatf[data1$edgeplatf==0] <- NA
+
+summary(data1$angle_height)
+data1$angle_height <- as.numeric(data1$angle_height)
+
+
+summary(data1$edgeplatf_deg) #should be recalculated
+
+write.csv(data1, file="comsafrica_complete_adjusted_cleaned.csv")
+
+library(gtsummary)
+
+tbl1 <-  data1 %>%
+      tbl_summary(
+            include = c(mass, maximumdimension, maximumwidth, 
+                        maximumthickness,
+                  ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      )
+      
+tbl1
+
+as_gt(tbl1)
+
+
+tbl2 <-  data1 %>%
+      tbl_summary(
+            include = c(techlength, techmaxwidth, techmaxthickness,
+                        techwidthprox, techwidthmes, techwidthdist,
+                        techthickprox, techthickmes, techthickdist
+            ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      )
+
+
+
+as_gt(tbl2)
+tbl2
+
+tbl3 <- 
+ data1 %>%
+      tbl_summary(
+            include = c(platfwidth, platfthickimpact, platfthickmax,
+                        platfthickmid, edgeplatf, angle_height
+            ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      ) 
+
+
+
+as_gt(tbl3)
+tbl3
 
 
 
