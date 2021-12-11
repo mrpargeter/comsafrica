@@ -328,102 +328,76 @@ print(comsafrica_edgeplatf)
 
 ### repeatability coefficients for Count data ####
 
-comsafrica_data_count_data<-comsafrica_data %>%
-   select(c(assemblage_code,analyst_id,flake_id,proximal_scars,left_scars,distal_scars,right_scars,
+comsafrica_data_count_data<-new_comsafrica_data %>%
+   select(c(assemblage_code,analyst_id,analysis_order,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
             dorsal_scar_count))
 
-comsafrica_data_count_data_condb<-comsafrica_data_count_data %>%
-   subset(assemblage_code=="chert_condition_B")
-
-comsafrica_data_count_data_conda<-comsafrica_data_count_data %>%
-   subset(assemblage_code=="chert_condition_A") 
-
-## Condition a####
-
 # proximal_scars
-hist(comsafrica_data_count_data_conda$proximal_scars)
+hist(comsafrica_data_count_data$proximal_scars)
 set.seed(50)
-comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ (1 | flake_id), 
-                                    grname = c("flake_id","Fixed"), 
-                                    data = comsafrica_data_count_data_conda, 
+comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ new_flake_id*analysis_order + (1 | new_flake_id), 
+                                    grname = c("new_flake_id","Fixed"), 
+                                    data = comsafrica_data_count_data, 
                                     datatype = "Poisson", 
                                     nboot = 100, npermut = 100)
 summary(comsafrica_proximal_scars_boot)
-summary(comsafrica_proximal_scars_boot$mod)
-plot(comsafrica_proximal_scars_boot, type = "boot", cex.main = 0.8,main="")
-plot(comsafrica_proximal_scars_boot, type = "permut", cex.main = 1)
+print(comsafrica_proximal_scars_boot)
 
 # left_scars
-hist(comsafrica_data_count_data_conda$left_scars)
+hist(comsafrica_data_count_data$left_scars)
 set.seed(50)
-comsafrica_left_scars_boot<-rpt(left_scars ~ (1 | flake_id), 
-                                grname = c("flake_id","Fixed"), 
-                                data = comsafrica_data_count_data_conda, 
+comsafrica_left_scars_boot<-rpt(left_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
+                                grname = c("new_flake_id","Fixed"), 
+                                data = comsafrica_data_count_data, 
                                 datatype = "Poisson", 
                                 nboot = 100, npermut = 100)
 summary(comsafrica_left_scars_boot)
-summary(comsafrica_left_scars_boot$mod)
-plot(comsafrica_left_scars_boot, type = "boot", cex.main = 0.8,main="")
-plot(comsafrica_left_scars_boot, type = "permut", cex.main = 1)
+print(comsafrica_left_scars_boot)
 
 # distal_scars
-hist(comsafrica_data_count_data_conda$distal_scars)
+hist(comsafrica_data_count_data$distal_scars)
 set.seed(50)
-comsafrica_distal_scars_boot<-rpt(distal_scars ~ (1 | flake_id), 
-                                  grname = c("flake_id","Fixed"), 
-                                  data = comsafrica_data_count_data_conda, 
+comsafrica_distal_scars_boot<-rpt(distal_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
+                                  grname = c("new_flake_id","Fixed"), 
+                                  data = comsafrica_data_count_data, 
                                   datatype = "Poisson", 
                                   nboot = 100, npermut = 100)
 summary(comsafrica_distal_scars_boot)
-summary(comsafrica_distal_scars_boot$mod)
-plot(comsafrica_distal_scars_boot, type = "boot", cex.main = 0.8,main="")
-plot(comsafrica_distal_scars_boot, type = "permut", cex.main = 1)
+print(comsafrica_distal_scars_boot)
 
 # right_scars
-hist(comsafrica_data_count_data_conda$right_scars)
+hist(comsafrica_data_count_data$right_scars)
 set.seed(50)
-comsafrica_right_scars_boot<-rpt(right_scars ~ (1 | flake_id), 
-                                 grname = c("flake_id","Fixed"), 
-                                 data = comsafrica_data_count_data_conda, 
+comsafrica_right_scars_boot<-rpt(right_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
+                                 grname = c("new_flake_id","Fixed"), 
+                                 data = comsafrica_data_count_data, 
                                  datatype = "Poisson", 
                                  nboot = 100, npermut = 100)
 summary(comsafrica_right_scars_boot)
-summary(comsafrica_right_scars_boot$mod)
-plot(comsafrica_right_scars_boot, type = "boot", cex.main = 0.8,main="")
-plot(comsafrica_right_scars_boot, type = "permut", cex.main = 1)
+print(comsafrica_right_scars_boot)
 
 # dorsal scar count
-hist(comsafrica_data_count_data_conda$dorsal_scar_count)
+hist(comsafrica_data_count_data$dorsal_scar_count)
 set.seed(50)
-comsafrica_dorsal_scar_count_boot<-rpt(dorsal_scar_count ~ (1 | flake_id), 
-                                       grname = c("flake_id","Fixed"), 
-                                       data = comsafrica_data_count_data_conda, 
+comsafrica_dorsal_scar_count_boot<-rpt(dorsal_scar_count ~ new_flake_id*analysis_order + (1 | new_flake_id),
+                                       grname = c("new_flake_id","Fixed"), 
+                                       data = comsafrica_data_count_data, 
                                        datatype = "Poisson", 
                                        nboot = 100, npermut = 100)
 summary(comsafrica_dorsal_scar_count_boot)
-summary(comsafrica_dorsal_scar_count_boot$mod)
-plot(comsafrica_dorsal_scar_count_boot, type = "boot", cex.main = 0.8,main="")
-plot(comsafrica_dorsal_scar_count_boot, type = "permut", cex.main = 1)
+print(comsafrica_dorsal_scar_count_boot)
 
 ### repeatability coefficients for categorical data ####
 
-comsafrica_data_cat_data<-comsafrica_data %>%
-   select(c(assemblage_code,analyst_id,flake_id,completeness,platform_cortex,directionality,platfmorph,
+comsafrica_data_cat_data<-new_comsafrica_data %>%
+   select(c(assemblage_code,analyst_id,new_flake_id,completeness,platform_cortex,directionality,platfmorph,
             platflipp,bulb,shattbulb,initiation,ventr_plane_form,section,latedgetype,flaketerm,
             distplanform,kombewa,red_syst,flk_form))
 
-comsafrica_data_cat_data_condb<-comsafrica_data_cat_data %>%
-   subset(assemblage_code=="chert_condition_B")
-
-comsafrica_data_cat_data_conda<-comsafrica_data_cat_data %>%
-   subset(assemblage_code=="chert_condition_A") 
-
-## Condition a ####
-
 ## Reduction system
 
-red_syst_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,red_syst) %>% 
+red_syst_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,red_syst) %>% 
    mutate(red_syst=as.factor(red_syst),
           red_syst=recode(red_syst,
                           Discoidal = "Discoid",
@@ -433,12 +407,27 @@ red_syst_data_a<-comsafrica_data_cat_data_conda %>%
                           other = "Indet",
                           Ind = "Indet",
                           indet = "Indet",
+                          Indet = "Indet",
+                          INDET = "Indet",
+                          'indeterminate (broken)' = "Indet",
+                          'Indeterminate (broken)' = "Indet",
                           indeterminate = "Indet",
                           laminar = "Laminar",
+                          'Levallois (pref)' = "Levallois",
                           'Lev or Disc' = "Indet",
                           'Levallois indet' = "Levallois",
                           'Levallois non-Nubian' = "Levallois",
+                          'levallois non nubian' = "Levallois",
+                          'LEVALLOIS OR DISCOID' = "Levallois",
                           'LEVALLOIS/LEVALLOIS-RELATED' = "Levallois",
+                           na = "Indet",
+                          'NON-LEVALLOIS; ORTHOGONAL VOLUME EXPLOITATION' = "Indet",
+                          none = "Indet",
+                          Nubian = "Levallois",
+                          'ON ANVIL' = "Bipolar",
+                          'Platform (laminar?)' = "Platform",
+                          'Platform / Laminar' = "Platform",
+                          'possible Levallois non-Nubian' = "Levallois",
                           'Other (informal)' = "Indet",
                           'potential levallois' = "Levallois",
                           levallois = "Levallois",
@@ -450,13 +439,18 @@ red_syst_data_a<-comsafrica_data_cat_data_conda %>%
                           CENTRIPETAL = "Discoid",
                           discoid = "Discoid",
                           DISCOID = "Discoid",
-                          FLAKE = "Flake")) %>%
+                          'Discoid?' = "Discoid",
+                          'Core Edge Flake' = "Indet",
+                          FLAKE = "Flake",
+                          bipolar = "Bipolar")) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
+levels(red_syst_data_a$red_syst)
+
 # delete flake #'s with < 4 observations
-red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$flake_id, 
-                                                red_syst_data_a$flake_id, 
+red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$new_flake_id, 
+                                                red_syst_data_a$new_flake_id, 
                                                     FUN=length)) >= 6, ]
 
 # reclass cat variables into numeric values for the krip stat
@@ -464,7 +458,7 @@ red_syst_data_a_krip<- red_syst_data_a %>%
    mutate(red_sys_dummy=unclass(red_syst)) %>% 
    select(-red_syst) %>%
    spread(analyst_id, red_sys_dummy) %>%
-   select(-flake_id) %>% 
+   select(-new_flake_id) %>% 
    as.matrix() 
 
 set.seed(42)
@@ -474,25 +468,23 @@ fit.full_red_syst<-krippendorffs.alpha(red_syst_data_a_krip,
                                        verbose = TRUE)
 summary(fit.full_red_syst)
 
-plot(fit.full_red_syst, xlim = c(0, 0.9), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 # requires actual categorical variables not reclasssed values
 red_sys_data_a_fleiss<- red_syst_data_a %>%
    mutate(red_syst=as.factor(red_syst)) %>%
    spread(analyst_id, red_syst) %>%
-   select(-flake_id) 
+   select(-new_flake_id) 
+
+red_sys_data_a_fleiss<-red_sys_data_a_fleiss %>%
+   mutate_if(is.factor, funs(factor(replace(as.character(.), is.na(.), "Other"))))
 
 kappam.fleiss(red_sys_data_a_fleiss, detail = T)
 
 ## flake form
 
-flake_form_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,flk_form) %>% 
-   mutate(flk_form=recode(comsafrica_data_cat_data_conda$flk_form, 
+flake_form_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,flk_form) %>% 
+   mutate(flk_form=recode(comsafrica_data_cat_data$flk_form, 
                           BLADE = "Blade",
                           CONVFLAKE = "Convflake", 
                           ELONG = "Blade",
@@ -503,8 +495,8 @@ flake_form_data_a<-comsafrica_data_cat_data_conda %>%
    na.omit
 
 # delete flake #'s with < 4 observations
-flake_form_data_a<-flake_form_data_a[as.numeric(ave(flake_form_data_a$flake_id, 
-                                                    flake_form_data_a$flake_id, 
+flake_form_data_a<-flake_form_data_a[as.numeric(ave(flake_form_data_a$new_flake_id, 
+                                                    flake_form_data_a$new_flake_id, 
                                                         FUN=length)) >= 6, ]
 
 # reclass cat variables into numeric values for the krip stat
@@ -513,7 +505,7 @@ flake_form_data_a_krip<- flake_form_data_a %>%
           flk_form_dummy=unclass(flk_form)) %>% 
    select(-flk_form) %>%
    spread(analyst_id, flk_form_dummy) %>%
-   select(-flake_id) %>% 
+   select(-new_flake_id) %>% 
    as.matrix() 
 
 set.seed(42)
@@ -533,20 +525,26 @@ plot(fit.full_flk_form, xlim = c(0, 0.9),
 flake_form_data_a_fleiss<- flake_form_data_a %>%
    mutate(flk_form=as.factor(flk_form)) %>%
    spread(analyst_id, flk_form) %>%
-   select(-flake_id) 
+   select(-new_flake_id) 
+
+flake_form_data_a<-flake_form_data_a %>%
+   mutate_if(is.factor, funs(factor(replace(as.character(.), is.na(.), "Other"))))
 
 kappam.fleiss(flake_form_data_a_fleiss, detail = T)
 
 ## completeness
 
-completeness_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,completeness) %>% 
+completeness_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,completeness) %>% 
+   mutate(completeness=recode(comsafrica_data_cat_data$completeness, 
+                          fragment = "indeterminate",
+                          other = "indeterminate")) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
 # delete flake #'s with < 4 observations
-completeness_data_a<-completeness_data_a[as.numeric(ave(completeness_data_a$flake_id, 
-                                                        completeness_data_a$flake_id, 
+completeness_data_a<-completeness_data_a[as.numeric(ave(completeness_data_a$new_flake_id, 
+                                                        completeness_data_a$new_flake_id, 
                                                         FUN=length)) >= 6, ]
 
 # reclass cat variables into numeric values for the krip stat
@@ -555,7 +553,7 @@ completeness_data_a_krip<- completeness_data_a %>%
           completeness_dummy=unclass(completeness)) %>% 
    select(-completeness) %>%
    spread(analyst_id, completeness_dummy) %>%
-   select(-flake_id) %>% 
+   select(-new_flake_id) %>% 
    as.matrix() 
 
 set.seed(42)
@@ -575,22 +573,22 @@ plot(fit.full_completeness, xlim = c(0, 0.9),
 completeness_data_a_fleiss<- completeness_data_a %>%
    mutate(completeness=as.factor(completeness)) %>%
    spread(analyst_id, completeness) %>%
-   select(-flake_id) 
+   select(-new_flake_id) 
 
 kappam.fleiss(completeness_data_a_fleiss, detail = T)
 
 ## platform cortex
-platform_cortex_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,platform_cortex) %>%
-   mutate(platform_cortex=recode(comsafrica_data_cat_data_conda$platform_cortex, INDET = "Indeterminate",
+platform_cortex_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,platform_cortex) %>%
+   mutate(platform_cortex=recode(comsafrica_data_cat_data$platform_cortex, INDET = "Indeterminate",
                                  complete = "Complete", absent = "Absent"),
           platform_cortex=as.factor(platform_cortex),
           platform_cortex_dummy=unclass(platform_cortex)) %>% 
    na_if("") %>% #delete coding episodes with no data
    na.omit 
 
-platform_cortex_data_a<-platform_cortex_data_a[as.numeric(ave(platform_cortex_data_a$flake_id, 
-                                                              platform_cortex_data_a$flake_id, 
+platform_cortex_data_a<-platform_cortex_data_a[as.numeric(ave(platform_cortex_data_a$new_flake_id, 
+                                                              platform_cortex_data_a$new_flake_id, 
                                                               FUN=length)) >= 6, ]
 
 platform_cortex_data_a_krip<- platform_cortex_data_a %>%
@@ -598,7 +596,7 @@ platform_cortex_data_a_krip<- platform_cortex_data_a %>%
           platform_cortex_dummy=unclass(platform_cortex)) %>% 
    select(-platform_cortex) %>%
    spread(analyst_id, platform_cortex_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -608,39 +606,35 @@ fit.full_cortex<-krippendorffs.alpha(platform_cortex_data_a_krip,
                                      verbose = TRUE)
 summary(fit.full_cortex)
 
-plot(fit.full_cortex, xlim = c(0, 1), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 platform_cortex_data_a_fleiss<-platform_cortex_data_a %>%
-   select(flake_id,analyst_id,platform_cortex) %>%
+   select(new_flake_id,analyst_id,platform_cortex) %>%
    spread(analyst_id,platform_cortex) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(platform_cortex_data_a_fleiss, detail = T)
 
 ## scar directions
 
-directionality_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,directionality) %>% 
+directionality_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,directionality) %>% 
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(directionality=as.factor(directionality),
           directionality=recode(directionality, 
                                 centripetal = "Centripetal",
-                                Other = "Indeterminate"))
+                                Other = "Indeterminate",
+                                other = "Indeterminate"))
 
-directionality_data_a<-directionality_data_a[as.numeric(ave(directionality_data_a$flake_id, 
-                                                            directionality_data_a$flake_id, 
+directionality_data_a<-directionality_data_a[as.numeric(ave(directionality_data_a$new_flake_id, 
+                                                            directionality_data_a$new_flake_id, 
                                                             FUN=length)) >= 6, ]
 
 directionality_data_a_krip<- directionality_data_a %>%
    mutate(directionality_dummy=unclass(directionality)) %>% 
    select(-directionality) %>%
    spread(analyst_id, directionality_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -650,22 +644,17 @@ fit.full_directions<-krippendorffs.alpha(directionality_data_a_krip,
                                          verbose = TRUE)
 summary(fit.full_directions)
 
-plot(fit.full_directions, xlim = c(0, 0.4), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 directionality_data_a_fleiss<- directionality_data_a %>%
    spread(analyst_id, directionality) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(directionality_data_a_fleiss, detail = T)
 
 ## platf morph
 
-plat_morph_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,platfmorph) %>% 
+plat_morph_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,platfmorph) %>% 
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(platfmorph=recode(platfmorph, 
@@ -676,15 +665,15 @@ plat_morph_data_a<-comsafrica_data_cat_data_conda %>%
                             facetted = "Facetted"),
           platfmorph=as.factor(platfmorph))
 
-plat_morph_data_a<-plat_morph_data_a[as.numeric(ave(plat_morph_data_a$flake_id, 
-                                                    plat_morph_data_a$flake_id, 
+plat_morph_data_a<-plat_morph_data_a[as.numeric(ave(plat_morph_data_a$new_flake_id, 
+                                                    plat_morph_data_a$new_flake_id, 
                                                     FUN=length)) >= 6, ]
 
 plat_morph_data_a_krip<- plat_morph_data_a %>%
    mutate(plat_morph_dummy=unclass(platfmorph)) %>% 
    select(-platfmorph) %>%
    spread(analyst_id, plat_morph_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -694,22 +683,17 @@ fit.full_platmorphs<-krippendorffs.alpha(plat_morph_data_a_krip,
                                          verbose = TRUE)
 summary(fit.full_platmorphs)
 
-plot(fit.full_platmorphs, xlim = c(0, 0.7), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 plat_morph_data_a_fleiss<- plat_morph_data_a %>%
    spread(analyst_id, platfmorph) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(plat_morph_data_a_fleiss, detail = T)
 
 ## platf lip
 
-plat_lip_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,platflipp) %>% 
+plat_lip_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,platflipp) %>% 
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(platflipp=as.factor(platflipp),
@@ -717,15 +701,15 @@ plat_lip_data_a<-comsafrica_data_cat_data_conda %>%
                                   NO = "no", No="no", 'NOT APPLICABLE' = "Indeterminate"),
           platflipp=as.factor(platflipp))
 
-plat_lip_data_a<-plat_lip_data_a[as.numeric(ave(plat_lip_data_a$flake_id, 
-                                                plat_lip_data_a$flake_id, 
+plat_lip_data_a<-plat_lip_data_a[as.numeric(ave(plat_lip_data_a$new_flake_id, 
+                                                plat_lip_data_a$new_flake_id, 
                                                 FUN=length)) >=6, ]
 
 plat_lip_data_a_krip<- plat_lip_data_a %>%
    mutate(plat_lip_dummy=unclass(platflipp)) %>% 
    select(-platflipp) %>%
    spread(analyst_id, plat_lip_dummy) %>%
-   select(-flake_id) %>% 
+   select(-new_flake_id) %>% 
    as.matrix()
 
 set.seed(42)
@@ -736,22 +720,17 @@ fit.full_platlip<-krippendorffs.alpha(plat_lip_data_a_krip,
 
 summary(fit.full_platlip)
 
-plot(fit.full_platlip, xlim = c(0, 0.5), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 plat_lip_data_a_fleiss<- plat_lip_data_a %>%
    spread(analyst_id, platflipp) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(plat_lip_data_a_fleiss, detail = T)
 
 ## bulb
 
-plat_bulb_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,bulb) %>%
+plat_bulb_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,bulb) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(bulb=recode(bulb, YES = "yes", Yes="yes",
@@ -759,15 +738,15 @@ plat_bulb_data_a<-comsafrica_data_cat_data_conda %>%
           bulb=as.factor(bulb)) 
 
 
-plat_bulb_data_a<-plat_bulb_data_a[as.numeric(ave(plat_bulb_data_a$flake_id, 
-                                                  plat_bulb_data_a$flake_id, 
+plat_bulb_data_a<-plat_bulb_data_a[as.numeric(ave(plat_bulb_data_a$new_flake_id, 
+                                                  plat_bulb_data_a$new_flake_id, 
                                                   FUN=length)) >=6, ]
 
 plat_bulb_data_a_krip<- plat_bulb_data_a %>%
    mutate(plat_bulb_dummy=unclass(bulb)) %>% 
    select(-bulb) %>%
    spread(analyst_id, plat_bulb_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -786,14 +765,14 @@ plot(fit.full_bulb, xlim = c(0, 1),
 # Compute kapa-allows us to see which categories are performing better
 bulb_data_a_fleiss<- plat_bulb_data_a %>%
    spread(analyst_id, bulb) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(bulb_data_a_fleiss, detail = T)
 
 ## Shattbulb
 
-plat_shattbulb_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,shattbulb) %>%
+plat_shattbulb_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,shattbulb) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(shattbulb=recode(shattbulb, 
@@ -804,15 +783,15 @@ plat_shattbulb_data_a<-comsafrica_data_cat_data_conda %>%
                            YES = "Yes"),
           shattbulb=as.factor(shattbulb))
 
-plat_shattbulb_data_a<-plat_shattbulb_data_a[as.numeric(ave(plat_shattbulb_data_a$flake_id, 
-                                                            plat_shattbulb_data_a$flake_id, 
+plat_shattbulb_data_a<-plat_shattbulb_data_a[as.numeric(ave(plat_shattbulb_data_a$new_flake_id, 
+                                                            plat_shattbulb_data_a$new_flake_id, 
                                                             FUN=length)) >=6, ]
 
 plat_shattbulb_data_a_krip<- plat_shattbulb_data_a %>%
    mutate(plat_shattbulb_dummy=unclass(shattbulb)) %>% 
    select(-shattbulb) %>%
    spread(analyst_id, plat_shattbulb_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -823,39 +802,35 @@ fit.full_shattbulb<-krippendorffs.alpha(plat_shattbulb_data_a_krip,
 
 summary(fit.full_shattbulb)
 
-plot(fit.full_shattbulb, xlim = c(0, 0.6), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 shattbulb_data_a_fleiss<- plat_shattbulb_data_a %>%
    spread(analyst_id, shattbulb) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(shattbulb_data_a_fleiss, detail = T)
 
 ## initiation
 
-plat_initiation_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,initiation) %>%
+plat_initiation_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,initiation) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit %>%
    mutate(initiation=recode(initiation, 
                             BENDING = "Bending",
                             HERTZIAN = "Hertzian",
+                            hertzian = "Hertzian",
                             WEDGING = "Wedging"),
           initiation=as.factor(initiation))
 
-plat_initiation_data_a<-plat_initiation_data_a[as.numeric(ave(plat_initiation_data_a$flake_id, 
-                                                              plat_initiation_data_a$flake_id, 
+plat_initiation_data_a<-plat_initiation_data_a[as.numeric(ave(plat_initiation_data_a$new_flake_id, 
+                                                              plat_initiation_data_a$new_flake_id, 
                                                               FUN=length)) >=6, ]
 
 plat_initiation_data_a_krip<- plat_initiation_data_a %>%
    mutate(initiation_dummy=unclass(initiation)) %>% 
    select(-initiation) %>%
    spread(analyst_id, initiation_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -872,16 +847,21 @@ plot(fit.full_initiation, xlim = c(0, 1),
      density = FALSE)
 
 # Compute kapa-allows us to see which categories are performing better
-initiation_data_a_fleiss<- plat_initiation_data_a %>%
+levels(plat_initiation_data_a$initiation)
+
+initiation_data_a_fleiss<- plat_initiation_data_a  %>%
    spread(analyst_id, initiation) %>%
-   select(-flake_id)
+   select(-new_flake_id)
+
+initiation_data_a_fleiss<-initiation_data_a_fleiss %>%
+   mutate_if(is.factor, funs(factor(replace(as.character(.), is.na(.), "Other"))))
 
 kappam.fleiss(initiation_data_a_fleiss, detail = T)
 
 ## ventr_plane_form
 
-ventr_plane_form_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,ventr_plane_form) %>%
+ventr_plane_form_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,ventr_plane_form) %>%
    mutate(ventr_plane_form=as.factor((ventr_plane_form)),
           ventr_plane_form=recode(ventr_plane_form, 
                                   very_concave = "Very concave",
@@ -895,15 +875,15 @@ ventr_plane_form_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-ventr_plane_form_data_a<-ventr_plane_form_data_a[as.numeric(ave(ventr_plane_form_data_a$flake_id, 
-                                                                ventr_plane_form_data_a$flake_id, 
+ventr_plane_form_data_a<-ventr_plane_form_data_a[as.numeric(ave(ventr_plane_form_data_a$new_flake_id, 
+                                                                ventr_plane_form_data_a$new_flake_id, 
                                                                 FUN=length)) >=6, ]
 
 ventr_plane_form_data_a_krip<- ventr_plane_form_data_a %>%
    mutate(ventr_plane_form_dummy=unclass(ventr_plane_form)) %>% 
    select(-ventr_plane_form) %>%
    spread(analyst_id, ventr_plane_form_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -922,14 +902,14 @@ plot(fit.full_ventr_plane_form, xlim = c(0, 0.3),
 # Compute kapa-allows us to see which categories are performing better
 ventr_plane_form_fleiss<- ventr_plane_form_data_a %>%
    spread(analyst_id, ventr_plane_form) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(ventr_plane_form_fleiss, detail = T)
 
 ## Section
 
-section_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,section) %>%
+section_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,section) %>%
    mutate(section=as.factor((section)),
           section=recode(section, 
                          DOMED = "Domed",
@@ -945,15 +925,15 @@ section_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-section_data_a<-section_data_a[as.numeric(ave(section_data_a$flake_id, 
-                                              section_data_a$flake_id, 
+section_data_a<-section_data_a[as.numeric(ave(section_data_a$new_flake_id, 
+                                              section_data_a$new_flake_id, 
                                               FUN=length)) >=6, ]
 
 section_data_a_krip<- section_data_a %>%
    mutate(section_dummy=unclass(section)) %>% 
    select(-section) %>%
    spread(analyst_id, section_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -972,14 +952,14 @@ plot(fit.full_section, xlim = c(0.2, 0.5),
 # Compute kapa-allows us to see which categories are performing better
 section_fleiss<- section_data_a %>%
    spread(analyst_id, section) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(section_fleiss, detail = T)
 
 ## Lateral edge type
 
-latedge_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,latedgetype) %>%
+latedge_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,latedgetype) %>%
    mutate(latedgetype=as.factor(latedgetype),
           latedgetype=recode(latedgetype, 
                              AMORPH = "Amorphous",
@@ -996,15 +976,15 @@ latedge_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-latedge_data_a<-latedge_data_a[as.numeric(ave(latedge_data_a$flake_id, 
-                                              latedge_data_a$flake_id, 
+latedge_data_a<-latedge_data_a[as.numeric(ave(latedge_data_a$new_flake_id, 
+                                              latedge_data_a$new_flake_id, 
                                               FUN=length)) >=6, ]
 
 latedge_data_a_krip<- latedge_data_a %>%
    mutate(latedge_dummy=unclass(latedgetype)) %>% 
    select(-latedgetype) %>%
    spread(analyst_id, latedge_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -1023,14 +1003,14 @@ plot(fit.full_latedge, xlim = c(0.2, 0.5),
 # Compute kapa-allows us to see which categories are performing better
 latedge_fleiss<- latedge_data_a %>%
    spread(analyst_id, latedgetype) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(latedge_fleiss, detail = T)
 
 ## Flake termination
 
-flaketerm_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,flaketerm) %>%
+flaketerm_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,flaketerm) %>%
    mutate(flaketerm=as.factor(flaketerm),
           flaketerm=recode(flaketerm, 
                            FEATHER = "Feather",
@@ -1041,15 +1021,15 @@ flaketerm_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-flaketerm_data_a<-flaketerm_data_a[as.numeric(ave(flaketerm_data_a$flake_id, 
-                                                  flaketerm_data_a$flake_id, 
+flaketerm_data_a<-flaketerm_data_a[as.numeric(ave(flaketerm_data_a$new_flake_id, 
+                                                  flaketerm_data_a$new_flake_id, 
                                                   FUN=length)) >=6, ]
 
 flaketerm_data_a_krip<- flaketerm_data_a %>%
    mutate(flaketerm_dummy=unclass(flaketerm)) %>% 
    select(-flaketerm) %>%
    spread(analyst_id, flaketerm_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -1068,14 +1048,14 @@ plot(fit.full_flaketerm, xlim = c(0, 0.6),
 # Compute kapa-allows us to see which categories are performing better
 flaketerm_fleiss<- flaketerm_data_a %>%
    spread(analyst_id, flaketerm) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(flaketerm_fleiss, detail = T)
 
 ## Kombewa
 
-kombewa_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,kombewa) %>%
+kombewa_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,kombewa) %>%
    mutate(kombewa=as.factor(kombewa),
           kombewa=recode(kombewa, 
                          NO = "No",
@@ -1084,15 +1064,15 @@ kombewa_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-kombewa_data_a<-kombewa_data_a[as.numeric(ave(kombewa_data_a$flake_id, 
-                                              kombewa_data_a$flake_id, 
+kombewa_data_a<-kombewa_data_a[as.numeric(ave(kombewa_data_a$new_flake_id, 
+                                              kombewa_data_a$new_flake_id, 
                                               FUN=length)) > 4, ]
 
 kombewa_data_a_krip<- kombewa_data_a %>%
    mutate(kombewa_dummy=unclass(kombewa)) %>% 
    select(-kombewa) %>%
    spread(analyst_id, kombewa_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -1111,14 +1091,14 @@ plot(fit.full_kombewa, xlim = c(0, 1),
 # Compute kapa-allows us to see which categories are performing better
 kombewa_fleiss<- kombewa_data_a %>%
    spread(analyst_id, kombewa) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(kombewa_fleiss, detail = T)
 
 ## Distal plan form
 
-distplanform_data_a<-comsafrica_data_cat_data_conda %>%
-   select(flake_id,analyst_id,distplanform) %>%
+distplanform_data_a<-comsafrica_data_cat_data %>%
+   select(new_flake_id,analyst_id,distplanform) %>%
    mutate(distplanform=as.factor(distplanform),
           distplanform=recode(distplanform, 
                               FLAT = "Flat",
@@ -1132,15 +1112,15 @@ distplanform_data_a<-comsafrica_data_cat_data_conda %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-distplanform_data_a<-distplanform_data_a[as.numeric(ave(distplanform_data_a$flake_id, 
-                                                        distplanform_data_a$flake_id, 
+distplanform_data_a<-distplanform_data_a[as.numeric(ave(distplanform_data_a$new_flake_id, 
+                                                        distplanform_data_a$new_flake_id, 
                                                         FUN=length)) > 4, ]
 
 distplanform_data_a_krip<- distplanform_data_a %>%
    mutate(distplanform_dummy=unclass(distplanform)) %>% 
    select(-distplanform) %>%
    spread(analyst_id, distplanform_dummy) %>%
-   select(-flake_id) %>%
+   select(-new_flake_id) %>%
    as.matrix()
 
 set.seed(42)
@@ -1159,7 +1139,7 @@ plot(fit.full_distplanform, xlim = c(0.1, 0.5),
 # Compute kapa-allows us to see which categories are performing better
 distplanform_fleiss<- distplanform_data_a %>%
    spread(analyst_id, distplanform) %>%
-   select(-flake_id)
+   select(-new_flake_id)
 
 kappam.fleiss(distplanform_fleiss, detail = T)
 

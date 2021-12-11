@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1639242986750.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "FD8DB55C",
+    "lastKnownWriteTime" : 3419074865033881004,
+    "last_content_update" : 1639242986750,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "516464E9",
+        "caption" : "diagnoses",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=diagnoses&cache_key=516464E9",
+        "displayedObservations" : 30,
+        "environment" : "",
+        "expression" : "diagnoses",
+        "object" : "diagnoses",
+        "preview" : 0,
+        "totalObservations" : 30,
+        "variables" : 6
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
