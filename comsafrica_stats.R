@@ -1623,12 +1623,13 @@ tbl1 <-  data1 %>%
             include = c(mass, maximumdimension, maximumwidth, 
                         maximumthickness,
                   ),
-            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
             by = cond_flake_id,
             digits = all_continuous() ~ 1,
             missing = "always",
             missing_text = "NAs"
-      )
+      )%>%
+      italicize_levels()
       
 tbl1
 
@@ -1641,7 +1642,7 @@ tbl2 <-  data1 %>%
                         techwidthprox, techwidthmes, techwidthdist,
                         techthickprox, techthickmes, techthickdist
             ),
-            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
             by = cond_flake_id,
             digits = all_continuous() ~ 1,
             missing = "always",
@@ -1659,7 +1660,7 @@ tbl3 <-
             include = c(platfwidth, platfthickimpact, platfthickmax,
                         platfthickmid, edgeplatf, angle_height
             ),
-            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
             by = cond_flake_id,
             digits = all_continuous() ~ 1,
             missing = "always",
@@ -1670,6 +1671,5 @@ tbl3 <-
 
 as_gt(tbl3)
 tbl3
-
 
 
