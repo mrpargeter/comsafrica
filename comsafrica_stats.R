@@ -1814,4 +1814,253 @@ tbl3 <-
 as_gt(tbl3)
 tbl3
 
+###Alternative summary table for quantitative variables using dplyr
 
+###tables per quantitative variables
+mass <- data1 %>%
+      group_by(cond_flake_id) %>% #change cond_flake_id by flake id created by Justin
+      summarize(variable = "mass",
+                  mean = mean(mass, na.rm = TRUE),
+                sd = sd(mass, na.rm = TRUE),
+                min = min(mass, na.rm=T),
+                max = max(mass, na.rm=T),
+                median = median(mass, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(mass)))
+
+maxdim <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "Max Dim",
+                mean = mean(maximumdimension, na.rm = TRUE),
+                sd = sd(maximumdimension, na.rm = TRUE),
+                min = min(maximumdimension, na.rm=T),
+                max = max(maximumdimension, na.rm=T),
+                median = median(maximumdimension, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumdimension)))
+
+maxwidth <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "Max Width",
+                mean = mean(maximumwidth, na.rm = TRUE),
+                sd = sd(maximumwidth, na.rm = TRUE),
+                min = min(maximumwidth, na.rm=T),
+                max = max(maximumwidth, na.rm=T),
+                median = median(maximumwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumwidth)))
+
+maxT <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "Max Thick",
+                mean = mean(maximumthickness, na.rm = TRUE),
+                sd = sd(maximumthickness, na.rm = TRUE),
+                min = min(maximumthickness, na.rm=T),
+                max = max(maximumthickness, na.rm=T),
+                median = median(maximumthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumthickness)))
+
+
+techL <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "Tech Length",
+                mean = mean(techlength, na.rm = TRUE),
+                sd = sd(techlength, na.rm = TRUE),
+                min = min(techlength, na.rm=T),
+                max = max(techlength, na.rm=T),
+                median = median(techlength, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techlength)))
+
+techmaxwidth <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techmaxwidth",
+                mean = mean(techmaxwidth, na.rm = TRUE),
+                sd = sd(techmaxwidth, na.rm = TRUE),
+                min = min(techmaxwidth, na.rm=T),
+                max = max(techmaxwidth, na.rm=T),
+                median = median(techmaxwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxwidth)))
+
+techmaxthickness <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techmaxthickness",
+                mean = mean(techmaxthickness, na.rm = TRUE),
+                sd = sd(techmaxthickness, na.rm = TRUE),
+                min = min(techmaxthickness, na.rm=T),
+                max = max(techmaxthickness, na.rm=T),
+                median = median(techmaxthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxthickness)))
+
+techwidthprox <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techwidthprox",
+                mean = mean(techwidthprox, na.rm = TRUE),
+                sd = sd(techwidthprox, na.rm = TRUE),
+                min = min(techwidthprox, na.rm=T),
+                max = max(techwidthprox, na.rm=T),
+                median = median(techwidthprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthprox)))
+
+techwidthmes <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techwidthmes",
+                mean = mean(techwidthmes, na.rm = TRUE),
+                sd = sd(techwidthmes, na.rm = TRUE),
+                min = min(techwidthmes, na.rm=T),
+                max = max(techwidthmes, na.rm=T),
+                median = median(techwidthmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthmes)))
+
+techwidthdist <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techwidthdist",
+                mean = mean(techwidthdist, na.rm = TRUE),
+                sd = sd(techwidthdist, na.rm = TRUE),
+                min = min(techwidthdist, na.rm=T),
+                max = max(techwidthdist, na.rm=T),
+                median = median(techwidthdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthdist)))
+
+techthickprox <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techthickprox",
+                mean = mean(techthickprox, na.rm = TRUE),
+                sd = sd(techthickprox, na.rm = TRUE),
+                min = min(techthickprox, na.rm=T),
+                max = max(techthickprox, na.rm=T),
+                median = median(techthickprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickprox)))
+
+techthickmes <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techthickmes",
+                mean = mean(techthickmes, na.rm = TRUE),
+                sd = sd(techthickmes, na.rm = TRUE),
+                min = min(techthickmes, na.rm=T),
+                max = max(techthickmes, na.rm=T),
+                median = median(techthickmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickmes)))
+
+techthickdist <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "techthickdist",
+                mean = mean(techthickdist, na.rm = TRUE),
+                sd = sd(techthickdist, na.rm = TRUE),
+                min = min(techthickdist, na.rm=T),
+                max = max(techthickdist, na.rm=T),
+                median = median(techthickdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickdist)))
+
+platfwidth <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "platfwidth",
+                mean = mean(platfwidth, na.rm = TRUE),
+                sd = sd(platfwidth, na.rm = TRUE),
+                min = min(platfwidth, na.rm=T),
+                max = max(platfwidth, na.rm=T),
+                median = median(platfwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfwidth)))
+
+platfthickimpact <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "platfthickimpact",
+                mean = mean(platfthickimpact, na.rm = TRUE),
+                sd = sd(platfthickimpact, na.rm = TRUE),
+                min = min(platfthickimpact, na.rm=T),
+                max = max(platfthickimpact, na.rm=T),
+                median = median(platfthickimpact, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickimpact)))
+
+platfthickmax <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "platfthickmax",
+                mean = mean(platfthickmax, na.rm = TRUE),
+                sd = sd(platfthickmax, na.rm = TRUE),
+                min = min(platfthickmax, na.rm=T),
+                max = max(platfthickmax, na.rm=T),
+                median = median(platfthickmax, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmax)))
+
+platfthickmid <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "platfthickmid",
+                mean = mean(platfthickmid, na.rm = TRUE),
+                sd = sd(platfthickmid, na.rm = TRUE),
+                min = min(platfthickmid, na.rm=T),
+                max = max(platfthickmid, na.rm=T),
+                median = median(platfthickmid, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmid)))
+
+edgeplatf <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "edgeplatf",
+                mean = mean(edgeplatf, na.rm = TRUE),
+                sd = sd(edgeplatf, na.rm = TRUE),
+                min = min(edgeplatf, na.rm=T),
+                max = max(edgeplatf, na.rm=T),
+                median = median(edgeplatf, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(edgeplatf)))
+
+angle_height <- data1 %>%
+      group_by(cond_flake_id) %>%
+      summarize(variable = "angle_height",
+                mean = mean(angle_height, na.rm = TRUE),
+                sd = sd(angle_height, na.rm = TRUE),
+                min = min(angle_height, na.rm=T),
+                max = max(angle_height, na.rm=T),
+                median = median(angle_height, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(angle_height)))
+
+sumquant <- rbind(mass, maxdim, maxwidth, maxT, techL, techmaxwidth,
+                  techmaxthickness, techwidthprox, techwidthmes,
+                  techwidthdist, techthickprox, techthickmes,
+                  techthickdist, platfwidth, platfthickimpact,
+                  platfthickmax, platfthickmid, edgeplatf, angle_height)
+
+write.csv(sumquant, file="Tables/sumquant.csv")
+
+
+####Summary table using coefficient of variation
+
+CV <- function(x){
+      (sd(x)/mean(x))*100
+}
+
+dataCV <- data1 %>%
+      group_by(cond_flake_id) %>% #change cond_flake_id by flake id created by Justin
+      mutate(cvmass = CV(mass),
+             cvmaxdim = CV(maximumdimension),
+             cvmaxW = CV(maximumwidth),
+             cvmaxT = CV(maximumthickness),
+             cvtechL = CV(techlength),
+             cvtechmaxW = CV(techmaxwidth),
+             cvtechmaxT = CV(techmaxthickness),
+             cvtechwidthprox = CV(techwidthprox),
+             cvtechwidthmes = CV(techwidthmes),
+             cvtechwidthdist = CV(techwidthdist),
+             cvtechthickprox = CV(techthickprox),
+             cvtechthickdist = CV(techthickdist),
+             cvplatfwidth = CV(platfwidth),
+             cvplatfthickimpact = CV(platfthickimpact),
+             cvplatfthickmax = CV(platfthickmax),
+             cvplatfthickmid = CV(platfthickmid),
+             cvedgeplatf = CV(edgeplatf),
+             cvangle_height = CV(angle_height)) 
+
+#next step is to compute the mean,sd,range and median of the CVs for the whole assemblage?
