@@ -142,7 +142,7 @@ comsafrica_data_complete<-new_comsafrica_data %>%
                techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
                platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf))
 
-##### Inter rater visualizations and data analyses
+##### Inter rater data analyses
 
 ### repeatability coefficients for continuous (Gaussian) data ####
 
@@ -169,7 +169,7 @@ comsafrica_maxdim_boot<-rpt(maximumdimension ~ new_flake_id*analysis_order + (1 
                   nboot = 1000, npermut = 100)
 
 summary(comsafrica_maxdim_boot)
-print(comsafrica_cortex_boot)
+print(comsafrica_maxdim_boot)
 
 #mass
 hist(log(comsafrica_data_complete$mass))
@@ -224,7 +224,7 @@ comsafrica_techmaxwidth<-rpt(techmaxwidth ~ new_flake_id*analysis_order + (1 | n
                            nboot = 1000, npermut = 100)
 
 summary(comsafrica_techmaxwidth)
-print(comsafrica_techlength)
+print(comsafrica_techmaxwidth)
 
 #flake tech max thickness
 set.seed(50)
@@ -515,11 +515,6 @@ fit.full_flk_form<-krippendorffs.alpha(flake_form_data_a_krip,
                                            verbose = TRUE)
 summary(fit.full_flk_form)
 
-plot(fit.full_flk_form, xlim = c(0, 0.9), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 # requires actual categorical variables not reclasssed values
 flake_form_data_a_fleiss<- flake_form_data_a %>%
@@ -578,6 +573,7 @@ completeness_data_a_fleiss<- completeness_data_a %>%
 kappam.fleiss(completeness_data_a_fleiss, detail = T)
 
 ## platform cortex
+
 platform_cortex_data_a<-comsafrica_data_cat_data %>%
    select(new_flake_id,analyst_id,platform_cortex) %>%
    mutate(platform_cortex=recode(comsafrica_data_cat_data$platform_cortex, INDET = "Indeterminate",
@@ -757,11 +753,6 @@ fit.full_bulb<-krippendorffs.alpha(plat_bulb_data_a_krip,
 
 summary(fit.full_bulb)
 
-plot(fit.full_bulb, xlim = c(0, 1), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 bulb_data_a_fleiss<- plat_bulb_data_a %>%
    spread(analyst_id, bulb) %>%
@@ -769,7 +760,7 @@ bulb_data_a_fleiss<- plat_bulb_data_a %>%
 
 kappam.fleiss(bulb_data_a_fleiss, detail = T)
 
-## Shattbulb
+## Shattbulb 
 
 plat_shattbulb_data_a<-comsafrica_data_cat_data %>%
    select(new_flake_id,analyst_id,shattbulb) %>%
@@ -819,7 +810,8 @@ plat_initiation_data_a<-comsafrica_data_cat_data %>%
                             BENDING = "Bending",
                             HERTZIAN = "Hertzian",
                             hertzian = "Hertzian",
-                            WEDGING = "Wedging"),
+                            WEDGING = "Wedging",
+                            INDET = "Other"),
           initiation=as.factor(initiation))
 
 plat_initiation_data_a<-plat_initiation_data_a[as.numeric(ave(plat_initiation_data_a$new_flake_id, 
@@ -840,11 +832,6 @@ fit.full_initiation<-krippendorffs.alpha(plat_initiation_data_a_krip,
                                          verbose = TRUE)
 
 summary(fit.full_initiation)
-
-plot(fit.full_initiation, xlim = c(0, 1), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
 
 # Compute kapa-allows us to see which categories are performing better
 levels(plat_initiation_data_a$initiation)
@@ -894,11 +881,6 @@ fit.full_ventr_plane_form<-krippendorffs.alpha(ventr_plane_form_data_a_krip,
 
 summary(fit.full_ventr_plane_form)
 
-plot(fit.full_ventr_plane_form, xlim = c(0, 0.3), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 ventr_plane_form_fleiss<- ventr_plane_form_data_a %>%
    spread(analyst_id, ventr_plane_form) %>%
@@ -943,11 +925,6 @@ fit.full_section<-krippendorffs.alpha(section_data_a_krip,
                                       verbose = TRUE)
 
 summary(fit.full_section)
-
-plot(fit.full_section, xlim = c(0.2, 0.5), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
 
 # Compute kapa-allows us to see which categories are performing better
 section_fleiss<- section_data_a %>%
@@ -995,11 +972,6 @@ fit.full_latedge<-krippendorffs.alpha(latedge_data_a_krip,
 
 summary(fit.full_latedge)
 
-plot(fit.full_latedge, xlim = c(0.2, 0.5), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 latedge_fleiss<- latedge_data_a %>%
    spread(analyst_id, latedgetype) %>%
@@ -1017,7 +989,8 @@ flaketerm_data_a<-comsafrica_data_cat_data %>%
                            HINGE = "Hinge",
                            INDET = "Indeterminate",
                            OVERSHOT = "Overshot",
-                           AXIAL= "Axial")) %>%
+                           AXIAL= "Axial",
+                           CRUSHED = "Crushed")) %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
@@ -1039,11 +1012,6 @@ fit.full_flaketerm<-krippendorffs.alpha(flaketerm_data_a_krip,
                                         verbose = TRUE)
 
 summary(fit.full_flaketerm)
-
-plot(fit.full_flaketerm, xlim = c(0, 0.6), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
 
 # Compute kapa-allows us to see which categories are performing better
 flaketerm_fleiss<- flaketerm_data_a %>%
@@ -1082,11 +1050,6 @@ fit.full_kombewa<-krippendorffs.alpha(kombewa_data_a_krip,
                                       verbose = TRUE)
 
 summary(fit.full_kombewa)
-
-plot(fit.full_kombewa, xlim = c(0, 1), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
 
 # Compute kapa-allows us to see which categories are performing better
 kombewa_fleiss<- kombewa_data_a %>%
@@ -1131,11 +1094,6 @@ fit.full_distplanform<-krippendorffs.alpha(distplanform_data_a_krip,
 
 summary(fit.full_distplanform)
 
-plot(fit.full_distplanform, xlim = c(0.1, 0.5), 
-     xlab = "Bootstrap Estimates", 
-     main = "Nominal Data",
-     density = FALSE)
-
 # Compute kapa-allows us to see which categories are performing better
 distplanform_fleiss<- distplanform_data_a %>%
    spread(analyst_id, distplanform) %>%
@@ -1143,59 +1101,242 @@ distplanform_fleiss<- distplanform_data_a %>%
 
 kappam.fleiss(distplanform_fleiss, detail = T)
 
-#### Bland altman plots ####
+### IRR visualizations ####
 
-library(dplyr)
-library(ggplot2)
+irr_summary<-read.csv("irr_summary_data.csv")
+irr_summary_cat<-read.csv("irr_summary_data_categorical.csv")
+irr_summary_subcat<-read.csv("irr_summary_data_subcategorical.csv", stringsAsFactors = T)
 
-pine_df <- Loblolly
+## Continuous data, analyst ID
 
-sample_df <- data.frame(sample_n(pine_df, size = nrow(pine_df) * 0.5) %>%
-                              select(height) %>% 
-                              arrange(desc(height)), 
-                        sample_n(pine_df, size = nrow(pine_df) * 0.5) %>%
-                              select(height) %>%
-                              arrange(desc(height)))
-names(sample_df) <- c("Sample_1", "Sample_2")
+ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_analyst"), 
+       aes(y=irr_value, x=reorder(variable,irr_value))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   geom_errorbar(aes(ymin=lower, ymax=upper),
+                 width=.2,                    # Width of the error bars
+                 position=position_dodge(.9))+
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   labs(x = "",
+        y = "IRR value")
 
-sample_df$Avg <- (sample_df$Sample_1 + sample_df$Sample_2) / 2
-sample_df$Dif <- sample_df$Sample_1 - sample_df$Sample_2
+## Continuous data, order
 
-ggplot(sample_df, aes(x = Avg, y = Dif)) +
-      geom_point(alpha = 0.5) +
-      geom_hline(yintercept = mean(sample_df$Dif), colour = "blue", size = 0.5) +
-      geom_hline(yintercept = mean(sample_df$Dif) - (1.96 * sd(sample_df$Dif)), colour = "red", size = 0.5) +
-      geom_hline(yintercept = mean(sample_df$Dif) + (1.96 * sd(sample_df$Dif)), colour = "red", size = 0.5) +
-      ylab("Diff. Between Measures") +
-      xlab("Average Measure")
+ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_order"), 
+       aes(y=irr_value, x=reorder(variable,irr_value))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   geom_errorbar(aes(ymin=lower, ymax=upper),
+                 width=.2,                    # Width of the error bars
+                 position=position_dodge(.9))+
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   labs(x = "",
+        y = "IRR value")
 
-library(tidyr)
+## Count data, analyst ID
 
-wide_comsafrica<- comsafrica_data_complete_condb %>% select(analyst_id,maximumdimension) %>% spread(analyst_id, maximumdimension) %>%
-      na.omit() %>%
-      mutate(Avg=(`0202a`+`034b1`+`9d812`+db727+r42o8)/5)
+ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_analyst"), 
+       aes(y=irr_value, x=reorder(variable,irr_value))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   geom_errorbar(aes(ymin=lower, ymax=upper),
+                 width=.2,                    # Width of the error bars
+                 position=position_dodge(.9))+
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")
 
-# OR
-library(BlandAltmanLeh)
-A <- c(-0.358, 0.788, 1.23, -0.338, -0.789, -0.255, 0.645, 0.506, 
-       0.774, -0.511, -0.517, -0.391, 0.681, -2.037, 2.019, -0.447, 
-       0.122, -0.412, 1.273, -2.165)
-B <- c(0.121, 1.322, 1.929, -0.339, -0.515, -0.029, 1.322, 0.951, 
-       0.799, -0.306, -0.158, 0.144, 1.132, -0.675, 2.534, -0.398, 0.537, 
-       0.173, 1.508, -1.955)
-C <- c(0.121, 1.322, 1.929, -0.339, -0.515, -0.029, 1.322, 0.951, 
-       0.799, -0.306, -0.158, 0.144, 1.132, -0.675, 2.534, -0.398, 0.537, 
-       0.173, 1.508, -1.955)
+## Count data, order
 
-bland.altman.plot(A, B, main="This is a Bland Altman Plot", xlab="Means", ylab="Differences")
+ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_order"), 
+       aes(y=irr_value, x=reorder(variable,irr_value))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   geom_errorbar(aes(ymin=lower, ymax=upper),
+                 width=.2,                    # Width of the error bars
+                 position=position_dodge(.9))+
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")
 
-#OR ggplot
+## Categorical data
 
-pl <- bland.altman.plot(A, B, graph.sys = "ggplot2")
-print(pl)
+ggplot(irr_summary_cat,aes(y=irr_value, x=reorder(variable,irr_value))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   geom_errorbar(aes(ymin=lower, ymax=upper),
+                 width=.2,                    # Width of the error bars
+                 position=position_dodge(.9))+
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")
 
+## sub categorical data
 
+ggplot(data=filter(irr_summary_subcat,variable == "reduction_system"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
 
+ggplot(data=filter(irr_summary_subcat,variable == "flake_form"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "Completeness"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "platform_cortex"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "scar_directionality"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "platform_morphology"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "platform_lipping"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "Bulb"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "shattered_bulb"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "Initiation"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "ventral_plan_form"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "Section"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "lateral_edge"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "flake_termination"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "Kombewa"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+ggplot(data=filter(irr_summary_subcat,variable == "distal_plan_form"),
+       aes(y=alpha, x=reorder(sub_variable,alpha))) + 
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10))+
+   labs(x = "",
+        y = "IRR value")+
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
+   facet_wrap(~variable)
+
+############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
 data1 <- comsafrica_data
 
@@ -1496,7 +1637,181 @@ table17 <- table(data1$cond_flake_id, data1$flk_form)
 tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
 write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
 
+write.csv(data1, file="comsafrica_complete_adjusted_catcleaned.csv")
 
+
+############################################### ######################
+#######SUMMARY TABLES FOR COUNT AND CONTINUOUS DATA#######
+##############################################################
+
+#dorsal scar counts
+summary(data1$dorsal_scar_count)
+data1$dorsal_scar_count <- as.factor(data1$dorsal_scar_count)
+
+table18 <- table(data1$cond_flake_id, data1$dorsal_scar_count)
+tabDORSSCARCOUNT=cbind(addmargins(round(prop.table(addmargins(table18,1),1),2)*100,2), c(margin.table(table18,1),sum(table18)))
+write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
+
+#proximal scar counts
+summary(data1$proximal_scars)
+data1$proximal_scars <- as.factor(data1$proximal_scars)
+
+table19 <- table(data1$cond_flake_id, data1$proximal_scars)
+tabPROXSCARS=cbind(addmargins(round(prop.table(addmargins(table19,1),1),2)*100,2), 
+                   c(margin.table(table19,1),sum(table19)))
+write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
+
+#left scar counts
+summary(data1$left_scars)
+data1$left_scars <- as.factor(data1$left_scars)
+
+table20 <- table(data1$cond_flake_id, data1$left_scars)
+tabLEFTSCARS=cbind(addmargins(round(prop.table(addmargins(table20,1),1),2)*100,2), 
+                   c(margin.table(table20,1),sum(table20)))
+write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
+
+#distal scar counts
+summary(data1$distal_scars)
+data1$distal_scars <- as.factor(data1$distal_scars)
+
+table21 <- table(data1$cond_flake_id, data1$distal_scars)
+tabDISTSCARS=cbind(addmargins(round(prop.table(addmargins(table21,1),1),2)*100,2), 
+                   c(margin.table(table21,1),sum(table21)))
+write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
+
+#right scar counts
+summary(data1$right_scars)
+data1$right_scars <- as.factor(data1$right_scars)
+
+table22 <- table(data1$cond_flake_id, data1$right_scars)
+tabRIGHTSCARS=cbind(addmargins(round(prop.table(addmargins(table22,1),1),2)*100,2), 
+                   c(margin.table(table22,1),sum(table22)))
+write.csv(tabRIGHTSCARS, file="Tables/tablerightscars.csv")
+
+##numerical variables
+#cleaning data
+summary(data1)
+
+summary(data1$dorsal_cortex)
+
+summary(data1$maximumdimension)
+data1$maximumdimension[data1$maximumdimension==0] <- NA
+
+summary(data1$mass)
+data1$mass[data1$mass==0] <- NA
+
+summary(data1$maximumwidth)
+data1$maximumwidth[data1$maximumwidth==0] <- NA
+
+summary(data1$maximumthickness)
+data1$maximumthickness[data1$maximumthickness==0] <- NA
+
+summary(data1$techlength)
+data1$techlength[data1$techlength==0] <- NA
+
+summary(data1$techmaxwidth)
+data1$techmaxwidth[data1$techmaxwidth==0] <- NA
+
+summary(data1$techmaxthickness)
+data1$techmaxthickness[data1$techmaxthickness==0] <- NA
+
+summary(data1$techwidthprox)
+data1$techwidthprox[data1$techwidthprox==0] <- NA
+
+summary(data1$techwidthmes)
+data1$techwidthmes[data1$techwidthmes==0] <- NA
+
+summary(data1$techwidthdist)
+data1$techwidthdist[data1$techwidthdist==0] <- NA
+
+summary(data1$techthickprox)
+data1$techthickprox[data1$techthickprox==0] <- NA
+
+summary(data1$techthickmes)
+data1$techthickmes[data1$techthickmes==0] <- NA
+
+summary(data1$techthickdist)
+data1$techthickdist[data1$techthickdist==0] <- NA
+
+summary(data1$platfwidth)
+data1$platfwidth[data1$platfwidth==0] <- NA
+
+summary(data1$platfthickmax)
+data1$platfthickmax[data1$platfthickmax==0] <- NA
+
+summary(data1$platfthickimpact)
+data1$platfthickimpact[data1$platfthickimpact==0] <- NA
+
+
+summary(data1$platfthickmid)
+data1$platfthickmid <- as.numeric(data1$platfthickmid)
+data1$platfthickmid[data1$platfthickmid==0] <- NA
+
+summary(data1$edgeplatf)
+data1$edgeplatf[data1$edgeplatf==0] <- NA
+
+summary(data1$angle_height)
+data1$angle_height <- as.numeric(data1$angle_height)
+
+
+summary(data1$edgeplatf_deg) #should be recalculated
+
+write.csv(data1, file="comsafrica_complete_adjusted_cleaned.csv")
+
+library(gtsummary)
+
+tbl1 <-  data1 %>%
+      tbl_summary(
+            include = c(mass, maximumdimension, maximumwidth, 
+                        maximumthickness,
+                  ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      )
+      
+tbl1
+
+as_gt(tbl1)
+
+
+tbl2 <-  data1 %>%
+      tbl_summary(
+            include = c(techlength, techmaxwidth, techmaxthickness,
+                        techwidthprox, techwidthmes, techwidthdist,
+                        techthickprox, techthickmes, techthickdist
+            ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      )
+
+
+
+as_gt(tbl2)
+tbl2
+
+tbl3 <- 
+ data1 %>%
+      tbl_summary(
+            include = c(platfwidth, platfthickimpact, platfthickmax,
+                        platfthickmid, edgeplatf, angle_height
+            ),
+            statistic = all_continuous() ~ "{mean} [{min} - {max}]",
+            by = cond_flake_id,
+            digits = all_continuous() ~ 1,
+            missing = "always",
+            missing_text = "NAs"
+      ) 
+
+
+
+as_gt(tbl3)
+tbl3
 
 
 

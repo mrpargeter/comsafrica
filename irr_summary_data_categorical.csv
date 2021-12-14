@@ -1,0 +1,17 @@
+variable,irr_value,lower,upper
+Reduction system,0.31,0.23,0.41
+Flake form,0.41,0.28,0.55
+Completeness,0.5,0.34,0.62
+Platform cortex,0.56,0.44,0.69
+Scar directionality,0.17,0.13,0.24
+Platform morphology,0.44,0.36,0.53
+Platform lipping,0.11,-0.02,0.24
+Bulb,0.48,0.35,0.62
+Shattered bulb,0.28,0.18,0.39
+Initiation,0.08,-0.35,0.41
+Ventral plan form,0.14,0.1,0.19
+Flake cross section shape,0.32,0.27,0.38
+Lateral edge shape,0.35,0.3,0.4
+Flake termination,0.28,0.16,0.41
+Kombewa,0.16,-0.21,0.52
+Distal plan form,0.36,0.31,0.43
