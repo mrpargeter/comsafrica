@@ -306,6 +306,26 @@ comsafrica_platfwidth<-rpt(platfwidth ~ new_flake_id*analysis_order + (1 | new_f
 summary(comsafrica_platfwidth)
 print(comsafrica_platfwidth)
 
+#flake platform thickness impact
+set.seed(50)
+comsafrica_platfthicimpact<-rpt(platfthickimpact ~ new_flake_id*analysis_order + (1 | new_flake_id), 
+                           grname = c("new_flake_id","Fixed"), 
+                           data = comsafrica_data_complete, 
+                           datatype = "Gaussian", 
+                           nboot = 1000, npermut = 100)
+summary(comsafrica_platfthicimpact)
+print(comsafrica_platfthicimpact)
+
+#flake platform thickness mid point
+set.seed(50)
+comsafrica_platfthickmid<-rpt(platfthickmid ~ new_flake_id*analysis_order + (1 | new_flake_id), 
+                                grname = c("new_flake_id","Fixed"), 
+                                data = comsafrica_data_complete, 
+                                datatype = "Gaussian", 
+                                nboot = 1000, npermut = 100)
+summary(comsafrica_platfthickmid)
+print(comsafrica_platfthickmid)
+
 #flake platform thickness
 set.seed(50)
 comsafrica_platfthickmax<-rpt(platfthickmax ~ new_flake_id*analysis_order + (1 | new_flake_id), 
@@ -446,7 +466,8 @@ red_syst_data_a<-comsafrica_data_cat_data %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-levels(red_syst_data_a$red_syst)
+#option for transforming Indet into NA
+#levels(red_syst_data_a$red_syst)[levels(red_syst_data_a$red_syst)=='Indet'] <- NA
 
 # delete flake #'s with < 4 observations
 red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$new_flake_id, 
@@ -1814,4 +1835,36 @@ tbl3 <-
 as_gt(tbl3)
 tbl3
 
+#### Summary data with CV ####
+library(EnvStats)
 
+round_df <- function(x, digits) {
+   # round all numeric variables
+   # x: data frame 
+   # digits: number of digits to round
+   numeric_columns <- sapply(x, mode) == 'numeric'
+   x[numeric_columns] <-  round(x[numeric_columns], digits)
+   x
+}
+
+test<- comsafrica_data_complete %>%
+   select(c(new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf)) %>%
+   mutate(across(c(4:21), na_if, 0)) %>%
+   pivot_longer(!new_flake_id &!assemblage_code,
+      names_to = "variable",
+      values_to = "value") %>%
+   group_by(new_flake_id,variable) %>%
+   mutate(cv=cv(value, na.rm=T),
+          mean=mean(value, na.rm=T),
+          sd=sd(value, na.rm=T),
+          min=min(value, na.rm=T),
+          max=max(value, na.rm=T),
+          median=median(value, na.rm=T),
+          range=max-min) %>%
+   distinct(new_flake_id,assemblage_code,variable,cv,mean,sd,min,max,median,range) %>%
+   round_df(2)
+
+ggplot(data=filter(test,variable=="maximumdimension"), aes(x=sd)) +
+   geom_histogram()

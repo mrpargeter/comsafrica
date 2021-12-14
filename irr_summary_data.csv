@@ -1,7 +1,7 @@
-data_class,variable,measure,irr_value,upper,lower
+data_class,variable,measure,irr_value,lower,upper
 Continuous,Cortex,irr_analyst,0.93,0.91,0.94
 Continuous,Maximum dimension,irr_analyst,0.98,0.97,0.98
-Continuous,Mass,irr_analyst,0.999,0.999,1.000
+Continuous,Mass,irr_analyst,0.999,0.999,1
 Continuous,Width,irr_analyst,0.96,0.95,0.97
 Continuous,Maximum thickness,irr_analyst,0.89,0.86,0.92
 Continuous,Technological length,irr_analyst,0.79,0.74,0.84
@@ -14,32 +14,36 @@ Continuous,Technological thickness proximal,irr_analyst,0.78,0.73,0.83
 Continuous,Technological thickness mesial,irr_analyst,0.88,0.84,0.91
 Continuous,Technological thickness distal,irr_analyst,0.83,0.79,0.87
 Continuous,Platform width,irr_analyst,0.81,0.76,0.85
-Continuous,Platform thickness,irr_analyst,0.80,0.75,0.85
-Continuous,EPA,irr_analyst,0.01,0.00,0.04
+Continuous,Platform thickness impact,irr_analyst,0.82,0.77,0.86
+Continuous,Platform thickness mid,irr_analyst,0.77,0.7,0.82
+Continuous,Platform thickness,irr_analyst,0.8,0.75,0.85
+Continuous,EPA,irr_analyst,0.01,0,0.04
 Count,Proximal scar counts,irr_analyst,0.57,0.47,0.65
 Count,Left scar counts,irr_analyst,0.47,0.29,0.56
 Count,Distal scar counts,irr_analyst,0.47,0.35,0.57
-Count,Right scar counts,irr_analyst,0.50,0.36,0.61
+Count,Right scar counts,irr_analyst,0.5,0.36,0.61
 Count,Dorsal scar counts,irr_analyst,0.65,0.55,0.72
-Continuous,Cortex,irr_order,0.10,0.09,0.27
-Continuous,Maximum dimension,irr_order,0.05,0.002,0.20
-Continuous,Mass,irr_order,0.05,0.002,0.20
-Continuous,Width,irr_order,0.05,0.003,0.20
+Continuous,Cortex,irr_order,0.1,0.09,0.27
+Continuous,Maximum dimension,irr_order,0.05,0.002,0.2
+Continuous,Mass,irr_order,0.05,0.002,0.2
+Continuous,Width,irr_order,0.05,0.003,0.2
 Continuous,Maximum thickness,irr_order,0.07,0.05,0.22
 Continuous,Technological length,irr_order,0.01,0.002,0.08
 Continuous,Technological maximum width,irr_order,0.04,0.004,0.14
 Continuous,Technological maximum thickness,irr_order,0.04,0.005,0.17
-Continuous,Technological width proximal,irr_order,0.02,0.002,0.10
+Continuous,Technological width proximal,irr_order,0.02,0.002,0.1
 Continuous,Technological width mesial,irr_order,0.03,0.002,0.13
 Continuous,Technological width distal,irr_order,0.03,0.002,0.13
 Continuous,Technological thickness proximal,irr_order,0.04,0.009,0.15
 Continuous,Technological thickness mesial,irr_order,0.05,0.008,0.17
-Continuous,Technological thickness distal,irr_order,0.05,0.010,0.17
-Continuous,Platform width,irr_order,0.002,0.000,0.05
+Continuous,Technological thickness distal,irr_order,0.05,0.01,0.17
+Continuous,Platform width,irr_order,0.002,0,0.05
 Continuous,Platform thickness,irr_order,0.005,0.001,0.06
+Continuous,Platform thickness impact,irr_order,0.01,0,0.07
+Continuous,Platform thickness mid,irr_order,0.01,0,0.05
 Continuous,EPA,irr_order,0.01,0.003,0.03
 Count,Proximal scar counts,irr_order,0.03,0.003,0.11
-Count,Left scar counts,irr_order,0.04,0.01,0.10
+Count,Left scar counts,irr_order,0.04,0.01,0.1
 Count,Distal scar counts,irr_order,0.01,0.004,0.06
-Count,Right scar counts,irr_order,0.03,0.008,0.10
+Count,Right scar counts,irr_order,0.03,0.008,0.1
 Count,Dorsal scar counts,irr_order,0.06,0.01,0.13
