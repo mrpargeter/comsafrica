@@ -57,7 +57,6 @@ library(rptR)
 library(krippendorffsalpha)
 library(tidyverse)
 library(irr) 
-library(EnvStats)
 
 ############################## 
 # Set working directory and load datafile
@@ -141,7 +140,7 @@ comsafrica_data_complete<-new_comsafrica_data %>%
       select(c(assemblage_code,analyst_id,analysis_order,flake_id,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
                dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
                techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
-               platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height))
+               platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf))
 
 ##### Inter rater data analyses
 
@@ -268,9 +267,6 @@ summary(comsafrica_techwidthdist)
 print(comsafrica_techwidthdist)
 
 #flake tech thick prox
-tech_thick_prox_data<-comsafrica_data_complete %>%
-   filter(!new_flake_id %in% c(27,68,10))
-
 set.seed(50)
 comsafrica_techtechthickprox<-rpt(techthickprox ~ new_flake_id*analysis_order + (1 | new_flake_id), 
                               grname = c("new_flake_id","Fixed"), 
@@ -310,26 +306,6 @@ comsafrica_platfwidth<-rpt(platfwidth ~ new_flake_id*analysis_order + (1 | new_f
 summary(comsafrica_platfwidth)
 print(comsafrica_platfwidth)
 
-#flake platform thickness impact
-set.seed(50)
-comsafrica_platfthicimpact<-rpt(platfthickimpact ~ new_flake_id*analysis_order + (1 | new_flake_id), 
-                           grname = c("new_flake_id","Fixed"), 
-                           data = comsafrica_data_complete, 
-                           datatype = "Gaussian", 
-                           nboot = 1000, npermut = 100)
-summary(comsafrica_platfthicimpact)
-print(comsafrica_platfthicimpact)
-
-#flake platform thickness mid point
-set.seed(50)
-comsafrica_platfthickmid<-rpt(platfthickmid ~ new_flake_id*analysis_order + (1 | new_flake_id), 
-                                grname = c("new_flake_id","Fixed"), 
-                                data = comsafrica_data_complete, 
-                                datatype = "Gaussian", 
-                                nboot = 1000, npermut = 100)
-summary(comsafrica_platfthickmid)
-print(comsafrica_platfthickmid)
-
 #flake platform thickness
 set.seed(50)
 comsafrica_platfthickmax<-rpt(platfthickmax ~ new_flake_id*analysis_order + (1 | new_flake_id), 
@@ -341,9 +317,6 @@ summary(comsafrica_platfthickmax)
 print(comsafrica_platfthickmax)
 
 #flake EPA
-EPA_data<-comsafrica_data_complete %>%
-   filter(!new_flake_id %in% c(53,64,82,56,54,55,60))
-
 set.seed(50)
 comsafrica_edgeplatf<-rpt(edgeplatf ~ new_flake_id*analysis_order + (1 | new_flake_id), 
                               grname = c("new_flake_id","Fixed"), 
@@ -352,16 +325,6 @@ comsafrica_edgeplatf<-rpt(edgeplatf ~ new_flake_id*analysis_order + (1 | new_fla
                               nboot = 1000, npermut = 100)
 summary(comsafrica_edgeplatf)
 print(comsafrica_edgeplatf)
-
-#angle height
-set.seed(50)
-comsafrica_angle_height<-rpt(angle_height ~ new_flake_id*analysis_order + (1 | new_flake_id), 
-                          grname = c("new_flake_id","Fixed"), 
-                          data = comsafrica_data_complete, 
-                          datatype = "Gaussian", 
-                          nboot = 1000, npermut = 100)
-summary(comsafrica_angle_height)
-print(comsafrica_angle_height)
 
 ### repeatability coefficients for Count data ####
 
@@ -483,8 +446,7 @@ red_syst_data_a<-comsafrica_data_cat_data %>%
    na_if("") %>% #delete coding episodes with no data
    na.omit
 
-#option for transforming Indet into NA
-#levels(red_syst_data_a$red_syst)[levels(red_syst_data_a$red_syst)=='Indet'] <- NA
+levels(red_syst_data_a$red_syst)
 
 # delete flake #'s with < 4 observations
 red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$new_flake_id, 
@@ -1376,20 +1338,20 @@ ggplot(data=filter(irr_summary_subcat,variable == "distal_plan_form"),
 
 ############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
-data1 <- comsafrica_data
+data1 <- new_comsafrica_data
 
 #create a unique flake ID for each flake
-summary(data1$assemblage_code)
-
-data1$assemblage_code <- as.character(data1$assemblage_code)
-data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
-data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
-data1$assemblage_code <- as.factor(data1$assemblage_code)
-
-data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
-data1$cond_flake_id <- as.factor(data1$cond_flake_id)
-
-summary(data1$cond_flake_id)
+# summary(data1$assemblage_code)
+# 
+# data1$assemblage_code <- as.character(data1$assemblage_code)
+# data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
+# data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
+# data1$assemblage_code <- as.factor(data1$assemblage_code)
+# 
+# data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
+# data1$cond_flake_id <- as.factor(data1$cond_flake_id)
+# 
+# summary(data1$cond_flake_id)
 
 #completeness
 summary(data1$completeness)
@@ -1398,7 +1360,7 @@ data1$completeness[data1$completeness %in% c("fragment", "shatter", "lateral")] 
 data1$completeness[data1$completeness == ""] <- NA #could possibly be all grouped with indeterminate
 data1$completeness <- as.factor(data1$completeness)
 
-tableCOMPLETENESS <-  table(data1$cond_flake_id, data1$completeness)
+tableCOMPLETENESS <-  table(data1$new_flake_id, data1$completeness)
 tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS)))
 write.csv(tabCOMP, file="Tables/tablecompleteness.csv")
 
@@ -1408,7 +1370,7 @@ data1$damage <- as.character(data1$damage)
 data1$damage[data1$damage ==""] <- "yes" #in that case, NAs correspond to yes
 data1$damage <- as.factor(data1$damage)
 
-table2 <- table(data1$cond_flake_id, data1$damage)
+table2 <- table(data1$new_flake_id, data1$damage)
 tabDAM=cbind(addmargins(round(prop.table(addmargins(table2,1),1),2)*100,2), c(margin.table(table2,1),sum(table2)))
 write.csv(tabDAM, file="Tables/tabledamage.csv")
 
@@ -1424,7 +1386,7 @@ data1$platform_cortex[data1$platform_cortex =="complete"] <- "Complete"
 data1$platform_cortex <- as.factor(data1$platform_cortex)
  
 
-table3 <- table(data1$cond_flake_id, data1$platform_cortex)
+table3 <- table(data1$new_flake_id, data1$platform_cortex)
 tabCORTEXPLATF=cbind(addmargins(round(prop.table(addmargins(table3,1),1),2)*100,2), c(margin.table(table3,1),sum(table3)))
 write.csv(tabCORTEXPLATF, file="Tables/tablecortexplatf.csv")
 
@@ -1437,7 +1399,7 @@ data1$directionality[data1$directionality == "centripetal"] <- "Centripetal"
 data1$directionality[data1$directionality == "other"] <- "Other"
 data1$directionality <- as.factor(data1$directionality)
 
-table4 <- table(data1$cond_flake_id, data1$directionality)
+table4 <- table(data1$new_flake_id, data1$directionality)
 tabDIRECTIONALITY=cbind(addmargins(round(prop.table(addmargins(table4,1),1),2)*100,2), c(margin.table(table4,1),sum(table4)))
 write.csv(tabDIRECTIONALITY, file="Tables/tabledirectionality.csv")
 
@@ -1452,7 +1414,7 @@ data1$platfmorph[data1$platfmorph == "facetted"] <- "Facetted"
 data1$platfmorph[data1$platfmorph == "linear"] <- "Linear"
 data1$platfmorph <- as.factor(data1$platfmorph)
 
-table5 <- table(data1$cond_flake_id, data1$platfmorph)
+table5 <- table(data1$new_flake_id, data1$platfmorph)
 tabPLATFMORPH=cbind(addmargins(round(prop.table(addmargins(table5,1),1),2)*100,2), c(margin.table(table5,1),sum(table5)))
 write.csv(tabPLATFMORPH, file="Tables/tableplatfmorph.csv")
 
@@ -1466,7 +1428,7 @@ data1$platflipp[data1$platflipp %in% c("yes", "YES")] <- "Yes"
 data1$platflipp[data1$platflipp == "NOT APPLICABLE"] <- "Indeterminate"
 data1$platflipp <- as.factor(data1$platflipp)
 
-table6 <- table(data1$cond_flake_id, data1$platflipp)
+table6 <- table(data1$new_flake_id, data1$platflipp)
 tabPLATFLIPP=cbind(addmargins(round(prop.table(addmargins(table6,1),1),2)*100,2), c(margin.table(table6,1),sum(table6)))
 write.csv(tabPLATFLIPP, file="Tables/tableplatflipp.csv")
 
@@ -1480,7 +1442,7 @@ data1$bulb[data1$bulb == "NO"] <- "No"
 data1$bulb[data1$bulb == "YES"] <- "Yes"
 data1$bulb <- as.factor(data1$bulb)
 
-table7 <- table(data1$cond_flake_id, data1$bulb)
+table7 <- table(data1$new_flake_id, data1$bulb)
 tabBULB=cbind(addmargins(round(prop.table(addmargins(table7,1),1),2)*100,2), c(margin.table(table7,1),sum(table7)))
 write.csv(tabBULB, file="Tables/tablebulb.csv")
 
@@ -1496,7 +1458,7 @@ data1$shattbulb[data1$shattbulb %in% c("no","NO" )] <- "No"
 data1$shattbulb[data1$shattbulb =="YES"] <- "Yes"
 data1$shattbulb <- as.factor(data1$shattbulb)
 
-table8 <- table(data1$cond_flake_id, data1$shattbulb)
+table8 <- table(data1$new_flake_id, data1$shattbulb)
 tabSHATTBULB=cbind(addmargins(round(prop.table(addmargins(table8,1),1),2)*100,2), c(margin.table(table8,1),sum(table8)))
 write.csv(tabSHATTBULB, file="Tables/tableshattbulb.csv")
 
@@ -1510,7 +1472,7 @@ data1$initiation[data1$initiation %in% c("hertzian", "HERTZIAN")] <- "Hertzian"
 data1$initiation[data1$initiation == "WEDGING"] <- "Wedging"
 data1$initiation <- as.factor(data1$initiation)
 
-table9 <- table(data1$cond_flake_id, data1$initiation)
+table9 <- table(data1$new_flake_id, data1$initiation)
 tabINITIATION=cbind(addmargins(round(prop.table(addmargins(table9,1),1),2)*100,2), c(margin.table(table9,1),sum(table9)))
 write.csv(tabINITIATION, file="Tables/tableinitiation.csv")
 
@@ -1527,7 +1489,7 @@ data1$ventr_plane_form[data1$ventr_plane_form == "TWISTED"] <- "Twisted"
 data1$ventr_plane_form[data1$ventr_plane_form %in% c("VERY CONCAVE", "VERY_CONCAVE")] <- "Very_concave"
 data1$ventr_plane_form <- as.factor(data1$ventr_plane_form)
 
-table10 <- table(data1$cond_flake_id, data1$ventr_plane_form)
+table10 <- table(data1$new_flake_id, data1$ventr_plane_form)
 tabVENTRPLANEFORM=cbind(addmargins(round(prop.table(addmargins(table10,1),1),2)*100,2), c(margin.table(table10,1),sum(table10)))
 write.csv(tabVENTRPLANEFORM, file="Tables/tableventralplaneform.csv")
 
@@ -1547,7 +1509,7 @@ data1$section[data1$section %in% c("TRI", "TRIANGULAR")] <- "Triangular"
 data1$section <- as.factor(data1$section)
 
 
-table11 <- table(data1$cond_flake_id, data1$section)
+table11 <- table(data1$new_flake_id, data1$section)
 tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), c(margin.table(table11,1),sum(table11)))
 write.csv(tabSECTION, file="Tables/tablesection.csv")
 
@@ -1567,7 +1529,7 @@ data1$latedgetype[data1$latedgetype %in% c("OVAL", "OVOID")] <- "Ovoid"
 data1$latedgetype[data1$latedgetype == "PARALLEL"] <- "Parallel"
 data1$latedgetype <- as.factor(data1$latedgetype)
 
-table12 <- table(data1$cond_flake_id, data1$latedgetype)
+table12 <- table(data1$new_flake_id, data1$latedgetype)
 tabLATEDGE=cbind(addmargins(round(prop.table(addmargins(table12,1),1),2)*100,2), c(margin.table(table12,1),sum(table12)))
 write.csv(tabLATEDGE, file="Tables/tablelatedge.csv")
 
@@ -1584,7 +1546,7 @@ data1$flaketerm[data1$flaketerm == "INDET"] <- "Indeterminate"
 data1$flaketerm[data1$flaketerm == "OVERSHOT"] <- "Overshot"
 data1$flaketerm <- as.factor(data1$flaketerm)
 
-table13 <- table(data1$cond_flake_id, data1$flaketerm)
+table13 <- table(data1$new_flake_id, data1$flaketerm)
 tabFLAKETERM=cbind(addmargins(round(prop.table(addmargins(table13,1),1),2)*100,2), c(margin.table(table13,1),sum(table13)))
 write.csv(tabFLAKETERM, file="Tables/tableflaketerm.csv")
 
@@ -1600,7 +1562,7 @@ data1$kombewa <- as.character(data1$kombewa)
 data1$kombewa[data1$kombewa %in% c("no", "NO")] <- "No"
 data1$kombewa <- as.factor(data1$kombewa)
 
-table14 <- table(data1$cond_flake_id, data1$kombewa)
+table14 <- table(data1$new_flake_id, data1$kombewa)
 tabKOMB=cbind(addmargins(round(prop.table(addmargins(table14,1),1),2)*100,2), c(margin.table(table14,1),sum(table14)))
 write.csv(tabKOMB, file="Tables/tablekombewa.csv")
 
@@ -1617,7 +1579,7 @@ data1$distplanform[data1$distplanform == "POINTED"] <- "Pointed"
 data1$distplanform[data1$distplanform %in% c("rounded", "ROUNDED")] <- "Rounded"
 data1$distplanform <- as.factor(data1$distplanform)
 
-table15 <- table(data1$cond_flake_id, data1$distplanform)
+table15 <- table(data1$new_flake_id, data1$distplanform)
 tabDISTPLANFORM=cbind(addmargins(round(prop.table(addmargins(table15,1),1),2)*100,2), c(margin.table(table15,1),sum(table15)))
 write.csv(tabDISTPLANFORM, file="Tables/tabledistplanform.csv")
 
@@ -1656,7 +1618,7 @@ data1$red_syst[data1$red_syst %in% c("laminar", "Platform (laminar?)",
 
 data1$red_syst <- as.factor(data1$red_syst)
 
-table16 <- table(data1$cond_flake_id, data1$red_syst)
+table16 <- table(data1$new_flake_id, data1$red_syst)
 tabREDSYST=cbind(addmargins(round(prop.table(addmargins(table16,1),1),2)*100,2), c(margin.table(table16,1),sum(table16)))
 write.csv(tabREDSYST, file="Tables/tableredsyst.csv")
 
@@ -1671,7 +1633,7 @@ data1$flk_form[data1$flk_form %in% c("flake", "Flake")] <- "FLAKE"
 data1$flk_form[data1$flk_form == "Convflake"] <- "CONVFLAKE"
 data1$flk_form <- as.factor(data1$flk_form)
 
-table17 <- table(data1$cond_flake_id, data1$flk_form)
+table17 <- table(data1$new_flake_id, data1$flk_form)
 tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
 write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
 
@@ -1686,7 +1648,7 @@ write.csv(data1, file="comsafrica_complete_adjusted_catcleaned.csv")
 summary(data1$dorsal_scar_count)
 data1$dorsal_scar_count <- as.factor(data1$dorsal_scar_count)
 
-table18 <- table(data1$cond_flake_id, data1$dorsal_scar_count)
+table18 <- table(data1$new_flake_id, data1$dorsal_scar_count)
 tabDORSSCARCOUNT=cbind(addmargins(round(prop.table(addmargins(table18,1),1),2)*100,2), c(margin.table(table18,1),sum(table18)))
 write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
 
@@ -1694,7 +1656,7 @@ write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
 summary(data1$proximal_scars)
 data1$proximal_scars <- as.factor(data1$proximal_scars)
 
-table19 <- table(data1$cond_flake_id, data1$proximal_scars)
+table19 <- table(data1$new_flake_id, data1$proximal_scars)
 tabPROXSCARS=cbind(addmargins(round(prop.table(addmargins(table19,1),1),2)*100,2), 
                    c(margin.table(table19,1),sum(table19)))
 write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
@@ -1703,7 +1665,7 @@ write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
 summary(data1$left_scars)
 data1$left_scars <- as.factor(data1$left_scars)
 
-table20 <- table(data1$cond_flake_id, data1$left_scars)
+table20 <- table(data1$new_flake_id, data1$left_scars)
 tabLEFTSCARS=cbind(addmargins(round(prop.table(addmargins(table20,1),1),2)*100,2), 
                    c(margin.table(table20,1),sum(table20)))
 write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
@@ -1712,7 +1674,7 @@ write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
 summary(data1$distal_scars)
 data1$distal_scars <- as.factor(data1$distal_scars)
 
-table21 <- table(data1$cond_flake_id, data1$distal_scars)
+table21 <- table(data1$new_flake_id, data1$distal_scars)
 tabDISTSCARS=cbind(addmargins(round(prop.table(addmargins(table21,1),1),2)*100,2), 
                    c(margin.table(table21,1),sum(table21)))
 write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
@@ -1721,7 +1683,7 @@ write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
 summary(data1$right_scars)
 data1$right_scars <- as.factor(data1$right_scars)
 
-table22 <- table(data1$cond_flake_id, data1$right_scars)
+table22 <- table(data1$new_flake_id, data1$right_scars)
 tabRIGHTSCARS=cbind(addmargins(round(prop.table(addmargins(table22,1),1),2)*100,2), 
                    c(margin.table(table22,1),sum(table22)))
 write.csv(tabRIGHTSCARS, file="Tables/tablerightscars.csv")
@@ -1796,206 +1758,238 @@ summary(data1$edgeplatf_deg) #should be recalculated
 
 write.csv(data1, file="comsafrica_complete_adjusted_cleaned.csv")
 
-library(gtsummary)
 
-tbl1 <-  data1 %>%
-      tbl_summary(
-            include = c(mass, maximumdimension, maximumwidth, 
-                        maximumthickness,
-                  ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      )%>%
-      italicize_levels()
-      
-tbl1
+###Alternative summary table for quantitative variables using dplyr
 
-as_gt(tbl1)
+###tables per quantitative variables
 
+mass <- data1 %>%
+      group_by(new_flake_id) %>% 
+      summarize(variable = "mass",
+                  mean = mean(mass, na.rm = TRUE),
+                sd = sd(mass, na.rm = TRUE),
+                min = min(mass, na.rm=T),
+                max = max(mass, na.rm=T),
+                median = median(mass, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(mass)))
 
-tbl2 <-  data1 %>%
-      tbl_summary(
-            include = c(techlength, techmaxwidth, techmaxthickness,
-                        techwidthprox, techwidthmes, techwidthdist,
-                        techthickprox, techthickmes, techthickdist
-            ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      )
+cortex <- data1 %>%
+      group_by(new_flake_id) %>% 
+      summarize(variable = "cortex",
+                mean = mean(dorsal_cortex, na.rm = TRUE),
+                sd = sd(dorsal_cortex, na.rm = TRUE),
+                min = min(dorsal_cortex, na.rm=T),
+                max = max(dorsal_cortex, na.rm=T),
+                median = median(dorsal_cortex, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(dorsal_cortex)))
 
 
 
-as_gt(tbl2)
-tbl2
+maxdim <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Dim",
+                mean = mean(maximumdimension, na.rm = TRUE),
+                sd = sd(maximumdimension, na.rm = TRUE),
+                min = min(maximumdimension, na.rm=T),
+                max = max(maximumdimension, na.rm=T),
+                median = median(maximumdimension, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumdimension)))
 
-tbl3 <- 
- data1 %>%
-      tbl_summary(
-            include = c(platfwidth, platfthickimpact, platfthickmax,
-                        platfthickmid, edgeplatf, angle_height
-            ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      ) 
+maxwidth <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Width",
+                mean = mean(maximumwidth, na.rm = TRUE),
+                sd = sd(maximumwidth, na.rm = TRUE),
+                min = min(maximumwidth, na.rm=T),
+                max = max(maximumwidth, na.rm=T),
+                median = median(maximumwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumwidth)))
+
+maxT <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Thick",
+                mean = mean(maximumthickness, na.rm = TRUE),
+                sd = sd(maximumthickness, na.rm = TRUE),
+                min = min(maximumthickness, na.rm=T),
+                max = max(maximumthickness, na.rm=T),
+                median = median(maximumthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumthickness)))
 
 
+techL <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Tech Length",
+                mean = mean(techlength, na.rm = TRUE),
+                sd = sd(techlength, na.rm = TRUE),
+                min = min(techlength, na.rm=T),
+                max = max(techlength, na.rm=T),
+                median = median(techlength, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techlength)))
 
-as_gt(tbl3)
-tbl3
+techmaxwidth <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techmaxwidth",
+                mean = mean(techmaxwidth, na.rm = TRUE),
+                sd = sd(techmaxwidth, na.rm = TRUE),
+                min = min(techmaxwidth, na.rm=T),
+                max = max(techmaxwidth, na.rm=T),
+                median = median(techmaxwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxwidth)))
 
-#### Summary data with CV ####
+techmaxthickness <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techmaxthickness",
+                mean = mean(techmaxthickness, na.rm = TRUE),
+                sd = sd(techmaxthickness, na.rm = TRUE),
+                min = min(techmaxthickness, na.rm=T),
+                max = max(techmaxthickness, na.rm=T),
+                median = median(techmaxthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxthickness)))
 
-round_df <- function(x, digits) {
-   # round all numeric variables
-   # x: data frame 
-   # digits: number of digits to round
-   numeric_columns <- sapply(x, mode) == 'numeric'
-   x[numeric_columns] <-  round(x[numeric_columns], digits)
-   x
-}
+techwidthprox <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthprox",
+                mean = mean(techwidthprox, na.rm = TRUE),
+                sd = sd(techwidthprox, na.rm = TRUE),
+                min = min(techwidthprox, na.rm=T),
+                max = max(techwidthprox, na.rm=T),
+                median = median(techwidthprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthprox)))
 
-test<- comsafrica_data_complete %>%
-   select(c(new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
-            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
-            platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf)) %>%
-   filter(!new_flake_id %in% c(1,89,97)) %>%
-   mutate(across(c(4:21), na_if, 0)) %>%
-   pivot_longer(!new_flake_id &!assemblage_code,
-      names_to = "variable",
-      values_to = "value") %>%
-   group_by(new_flake_id,variable) %>%
-   mutate(cv=cv(value, na.rm=T),
-          mean=mean(value, na.rm=T),
-          sd=sd(value, na.rm=T),
-          min=min(value, na.rm=T),
-          max=max(value, na.rm=T),
-          median=median(value, na.rm=T),
-          range=max-min) %>%
-   distinct(new_flake_id,assemblage_code,variable,cv,mean,sd,min,max,median,range) %>%
-   round_df(2)
+techwidthmes <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthmes",
+                mean = mean(techwidthmes, na.rm = TRUE),
+                sd = sd(techwidthmes, na.rm = TRUE),
+                min = min(techwidthmes, na.rm=T),
+                max = max(techwidthmes, na.rm=T),
+                median = median(techwidthmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthmes)))
 
-## Range histograms
+techwidthdist <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthdist",
+                mean = mean(techwidthdist, na.rm = TRUE),
+                sd = sd(techwidthdist, na.rm = TRUE),
+                min = min(techwidthdist, na.rm=T),
+                max = max(techwidthdist, na.rm=T),
+                median = median(techwidthdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthdist)))
 
-# dorsal_cortex COME BACK TO THIS AFTER CHECKING DATA FOR WEIRD RANGE
-# VALUES
-ggplot(data=filter(test,variable=="dorsal_cortex"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Cortex",
-        x ="Range of measurements", y = "Density")
+techthickprox <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickprox",
+                mean = mean(techthickprox, na.rm = TRUE),
+                sd = sd(techthickprox, na.rm = TRUE),
+                min = min(techthickprox, na.rm=T),
+                max = max(techthickprox, na.rm=T),
+                median = median(techthickprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickprox)))
 
-# Max dimension
-ggplot(data=filter(test,variable=="maximumdimension"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Maximum dimension",
-         x ="Range of measurements", y = "Density")
+techthickmes <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickmes",
+                mean = mean(techthickmes, na.rm = TRUE),
+                sd = sd(techthickmes, na.rm = TRUE),
+                min = min(techthickmes, na.rm=T),
+                max = max(techthickmes, na.rm=T),
+                median = median(techthickmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickmes)))
 
-# mass
-ggplot(data=filter(test,variable=="mass"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Mass",
-        x ="Range of measurements", y = "Density")
+techthickdist <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickdist",
+                mean = mean(techthickdist, na.rm = TRUE),
+                sd = sd(techthickdist, na.rm = TRUE),
+                min = min(techthickdist, na.rm=T),
+                max = max(techthickdist, na.rm=T),
+                median = median(techthickdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickdist)))
 
-# maximumwidth
-ggplot(data=filter(test,variable=="maximumwidth"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Maximum width",
-        x ="Range of measurements", y = "Density")
+platfwidth <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfwidth",
+                mean = mean(platfwidth, na.rm = TRUE),
+                sd = sd(platfwidth, na.rm = TRUE),
+                min = min(platfwidth, na.rm=T),
+                max = max(platfwidth, na.rm=T),
+                median = median(platfwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfwidth)))
 
-# maximumthickness
-ggplot(data=filter(test,variable=="maximumthickness"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Maximum thickness",
-        x ="Range of measurements", y = "Density")
+platfthickimpact <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickimpact",
+                mean = mean(platfthickimpact, na.rm = TRUE),
+                sd = sd(platfthickimpact, na.rm = TRUE),
+                min = min(platfthickimpact, na.rm=T),
+                max = max(platfthickimpact, na.rm=T),
+                median = median(platfthickimpact, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickimpact)))
 
-# techlength
-ggplot(data=filter(test,variable=="techlength"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological length",
-        x ="Range of measurements", y = "Density")
+platfthickmax <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickmax",
+                mean = mean(platfthickmax, na.rm = TRUE),
+                sd = sd(platfthickmax, na.rm = TRUE),
+                min = min(platfthickmax, na.rm=T),
+                max = max(platfthickmax, na.rm=T),
+                median = median(platfthickmax, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmax)))
 
-# techmaxwidth
-ggplot(data=filter(test,variable=="techmaxwidth"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological max width",
-        x ="Range of measurements", y = "Density")
+platfthickmid <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickmid",
+                mean = mean(platfthickmid, na.rm = TRUE),
+                sd = sd(platfthickmid, na.rm = TRUE),
+                min = min(platfthickmid, na.rm=T),
+                max = max(platfthickmid, na.rm=T),
+                median = median(platfthickmid, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmid)))
 
-# techmaxthickness
-ggplot(data=filter(test,variable=="techmaxthickness"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological max thickness",
-        x ="Range of measurements", y = "Density")
+edgeplatf <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "edgeplatf",
+                mean = mean(edgeplatf, na.rm = TRUE),
+                sd = sd(edgeplatf, na.rm = TRUE),
+                min = min(edgeplatf, na.rm=T),
+                max = max(edgeplatf, na.rm=T),
+                median = median(edgeplatf, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(edgeplatf)))
 
-# techwidthprox
-ggplot(data=filter(test,variable=="techwidthprox"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological width proximal",
-        x ="Range of measurements", y = "Density")
+angle_height <- data1 %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "angle_height",
+                mean = mean(angle_height, na.rm = TRUE),
+                sd = sd(angle_height, na.rm = TRUE),
+                min = min(angle_height, na.rm=T),
+                max = max(angle_height, na.rm=T),
+                median = median(angle_height, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(angle_height)))
 
-# techwidthmes
-ggplot(data=filter(test,variable=="techwidthmes"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological width mesial",
-        x ="Range of measurements", y = "Density")
+sumquant <- rbind(mass, cortex,maxdim, maxwidth, maxT, techL, techmaxwidth,
+                  techmaxthickness, techwidthprox, techwidthmes,
+                  techwidthdist, techthickprox, techthickmes,
+                  techthickdist, platfwidth, platfthickimpact,
+                  platfthickmax, platfthickmid, edgeplatf, angle_height)
 
-# techwidthdist
-ggplot(data=filter(test,variable=="techwidthdist"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological width distal",
-        x ="Range of measurements", y = "Density")
-
-# techthickprox
-ggplot(data=filter(test,variable=="techthickprox"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological thickness proximal",
-        x ="Range of measurements", y = "Density")
-
-# techthickmes
-ggplot(data=filter(test,variable=="techthickmes"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological thickness mesial",
-        x ="Range of measurements", y = "Density")
-
-# techthickdist
-ggplot(data=filter(test,variable=="techthickdist"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Technological thickness distal",
-        x ="Range of measurements", y = "Density")
-
-# platfwidth
-ggplot(data=filter(test,variable=="platfwidth"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Platform width",
-        x ="Range of measurements", y = "Density")
-
-# platfthickimpact
-ggplot(data=filter(test,variable=="platfthickimpact"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Platform thickness impact",
-        x ="Range of measurements", y = "Density")
-
-# platfthickmid
-ggplot(data=filter(test,variable=="platfthickmid"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Platform thickness mid-point",
-        x ="Range of measurements", y = "Density")
-
-# platfthickmax
-ggplot(data=filter(test,variable=="platfthickmax"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Platform thickness maximum",
-        x ="Range of measurements", y = "Density")
-
-# edgeplatf
-ggplot(data=filter(test,variable=="edgeplatf"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="EPA",
-        x ="Range of measurements", y = "Density")
+write.csv(sumquant, file="Tables/sumquant.csv")
