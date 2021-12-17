@@ -135,13 +135,21 @@ for(i in 1:length(unique(data.B$flake_id))){
    count = count+1
 }
 
-new_comsafrica_data <- rbind(data.A, data.B)
+new_comsafrica_data <- rbind(data.A, data.B) %>%
+  filter(!new_flake_id %in% c(89,97)) #remove two flakes with fragmentation issues
 
 comsafrica_data_complete<-new_comsafrica_data %>%
       select(c(assemblage_code,analyst_id,analysis_order,flake_id,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
                dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
                techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
                platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height))
+
+#adjust cortex values to fix data entry errors
+comsafrica_data_complete$dorsal_cortex[comsafrica_data_complete$new_flake_id == 46
+                                       & comsafrica_data_complete$analyst_id == "46b96"] <- 100
+
+comsafrica_data_complete$dorsal_cortex[comsafrica_data_complete$new_flake_id == 31
+                                       & comsafrica_data_complete$analyst_id == "46b96"] <- NA
 
 ##### Inter rater data analyses
 
