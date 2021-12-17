@@ -1338,20 +1338,20 @@ ggplot(data=filter(irr_summary_subcat,variable == "distal_plan_form"),
 
 ############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
-data1 <- comsafrica_data
+data1 <- new_comsafrica_data
 
 #create a unique flake ID for each flake
-summary(data1$assemblage_code)
-
-data1$assemblage_code <- as.character(data1$assemblage_code)
-data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
-data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
-data1$assemblage_code <- as.factor(data1$assemblage_code)
-
-data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
-data1$cond_flake_id <- as.factor(data1$cond_flake_id)
-
-summary(data1$cond_flake_id)
+# summary(data1$assemblage_code)
+# 
+# data1$assemblage_code <- as.character(data1$assemblage_code)
+# data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
+# data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
+# data1$assemblage_code <- as.factor(data1$assemblage_code)
+# 
+# data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
+# data1$cond_flake_id <- as.factor(data1$cond_flake_id)
+# 
+# summary(data1$cond_flake_id)
 
 #completeness
 summary(data1$completeness)
@@ -1360,7 +1360,7 @@ data1$completeness[data1$completeness %in% c("fragment", "shatter", "lateral")] 
 data1$completeness[data1$completeness == ""] <- NA #could possibly be all grouped with indeterminate
 data1$completeness <- as.factor(data1$completeness)
 
-tableCOMPLETENESS <-  table(data1$cond_flake_id, data1$completeness)
+tableCOMPLETENESS <-  table(data1$new_flake_id, data1$completeness)
 tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS)))
 write.csv(tabCOMP, file="Tables/tablecompleteness.csv")
 
@@ -1370,7 +1370,7 @@ data1$damage <- as.character(data1$damage)
 data1$damage[data1$damage ==""] <- "yes" #in that case, NAs correspond to yes
 data1$damage <- as.factor(data1$damage)
 
-table2 <- table(data1$cond_flake_id, data1$damage)
+table2 <- table(data1$new_flake_id, data1$damage)
 tabDAM=cbind(addmargins(round(prop.table(addmargins(table2,1),1),2)*100,2), c(margin.table(table2,1),sum(table2)))
 write.csv(tabDAM, file="Tables/tabledamage.csv")
 
@@ -1386,7 +1386,7 @@ data1$platform_cortex[data1$platform_cortex =="complete"] <- "Complete"
 data1$platform_cortex <- as.factor(data1$platform_cortex)
  
 
-table3 <- table(data1$cond_flake_id, data1$platform_cortex)
+table3 <- table(data1$new_flake_id, data1$platform_cortex)
 tabCORTEXPLATF=cbind(addmargins(round(prop.table(addmargins(table3,1),1),2)*100,2), c(margin.table(table3,1),sum(table3)))
 write.csv(tabCORTEXPLATF, file="Tables/tablecortexplatf.csv")
 
@@ -1399,7 +1399,7 @@ data1$directionality[data1$directionality == "centripetal"] <- "Centripetal"
 data1$directionality[data1$directionality == "other"] <- "Other"
 data1$directionality <- as.factor(data1$directionality)
 
-table4 <- table(data1$cond_flake_id, data1$directionality)
+table4 <- table(data1$new_flake_id, data1$directionality)
 tabDIRECTIONALITY=cbind(addmargins(round(prop.table(addmargins(table4,1),1),2)*100,2), c(margin.table(table4,1),sum(table4)))
 write.csv(tabDIRECTIONALITY, file="Tables/tabledirectionality.csv")
 
@@ -1414,7 +1414,7 @@ data1$platfmorph[data1$platfmorph == "facetted"] <- "Facetted"
 data1$platfmorph[data1$platfmorph == "linear"] <- "Linear"
 data1$platfmorph <- as.factor(data1$platfmorph)
 
-table5 <- table(data1$cond_flake_id, data1$platfmorph)
+table5 <- table(data1$new_flake_id, data1$platfmorph)
 tabPLATFMORPH=cbind(addmargins(round(prop.table(addmargins(table5,1),1),2)*100,2), c(margin.table(table5,1),sum(table5)))
 write.csv(tabPLATFMORPH, file="Tables/tableplatfmorph.csv")
 
@@ -1428,7 +1428,7 @@ data1$platflipp[data1$platflipp %in% c("yes", "YES")] <- "Yes"
 data1$platflipp[data1$platflipp == "NOT APPLICABLE"] <- "Indeterminate"
 data1$platflipp <- as.factor(data1$platflipp)
 
-table6 <- table(data1$cond_flake_id, data1$platflipp)
+table6 <- table(data1$new_flake_id, data1$platflipp)
 tabPLATFLIPP=cbind(addmargins(round(prop.table(addmargins(table6,1),1),2)*100,2), c(margin.table(table6,1),sum(table6)))
 write.csv(tabPLATFLIPP, file="Tables/tableplatflipp.csv")
 
@@ -1442,7 +1442,7 @@ data1$bulb[data1$bulb == "NO"] <- "No"
 data1$bulb[data1$bulb == "YES"] <- "Yes"
 data1$bulb <- as.factor(data1$bulb)
 
-table7 <- table(data1$cond_flake_id, data1$bulb)
+table7 <- table(data1$new_flake_id, data1$bulb)
 tabBULB=cbind(addmargins(round(prop.table(addmargins(table7,1),1),2)*100,2), c(margin.table(table7,1),sum(table7)))
 write.csv(tabBULB, file="Tables/tablebulb.csv")
 
@@ -1458,7 +1458,7 @@ data1$shattbulb[data1$shattbulb %in% c("no","NO" )] <- "No"
 data1$shattbulb[data1$shattbulb =="YES"] <- "Yes"
 data1$shattbulb <- as.factor(data1$shattbulb)
 
-table8 <- table(data1$cond_flake_id, data1$shattbulb)
+table8 <- table(data1$new_flake_id, data1$shattbulb)
 tabSHATTBULB=cbind(addmargins(round(prop.table(addmargins(table8,1),1),2)*100,2), c(margin.table(table8,1),sum(table8)))
 write.csv(tabSHATTBULB, file="Tables/tableshattbulb.csv")
 
@@ -1472,7 +1472,7 @@ data1$initiation[data1$initiation %in% c("hertzian", "HERTZIAN")] <- "Hertzian"
 data1$initiation[data1$initiation == "WEDGING"] <- "Wedging"
 data1$initiation <- as.factor(data1$initiation)
 
-table9 <- table(data1$cond_flake_id, data1$initiation)
+table9 <- table(data1$new_flake_id, data1$initiation)
 tabINITIATION=cbind(addmargins(round(prop.table(addmargins(table9,1),1),2)*100,2), c(margin.table(table9,1),sum(table9)))
 write.csv(tabINITIATION, file="Tables/tableinitiation.csv")
 
@@ -1489,7 +1489,7 @@ data1$ventr_plane_form[data1$ventr_plane_form == "TWISTED"] <- "Twisted"
 data1$ventr_plane_form[data1$ventr_plane_form %in% c("VERY CONCAVE", "VERY_CONCAVE")] <- "Very_concave"
 data1$ventr_plane_form <- as.factor(data1$ventr_plane_form)
 
-table10 <- table(data1$cond_flake_id, data1$ventr_plane_form)
+table10 <- table(data1$new_flake_id, data1$ventr_plane_form)
 tabVENTRPLANEFORM=cbind(addmargins(round(prop.table(addmargins(table10,1),1),2)*100,2), c(margin.table(table10,1),sum(table10)))
 write.csv(tabVENTRPLANEFORM, file="Tables/tableventralplaneform.csv")
 
@@ -1509,7 +1509,7 @@ data1$section[data1$section %in% c("TRI", "TRIANGULAR")] <- "Triangular"
 data1$section <- as.factor(data1$section)
 
 
-table11 <- table(data1$cond_flake_id, data1$section)
+table11 <- table(data1$new_flake_id, data1$section)
 tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), c(margin.table(table11,1),sum(table11)))
 write.csv(tabSECTION, file="Tables/tablesection.csv")
 
@@ -1529,7 +1529,7 @@ data1$latedgetype[data1$latedgetype %in% c("OVAL", "OVOID")] <- "Ovoid"
 data1$latedgetype[data1$latedgetype == "PARALLEL"] <- "Parallel"
 data1$latedgetype <- as.factor(data1$latedgetype)
 
-table12 <- table(data1$cond_flake_id, data1$latedgetype)
+table12 <- table(data1$new_flake_id, data1$latedgetype)
 tabLATEDGE=cbind(addmargins(round(prop.table(addmargins(table12,1),1),2)*100,2), c(margin.table(table12,1),sum(table12)))
 write.csv(tabLATEDGE, file="Tables/tablelatedge.csv")
 
@@ -1546,7 +1546,7 @@ data1$flaketerm[data1$flaketerm == "INDET"] <- "Indeterminate"
 data1$flaketerm[data1$flaketerm == "OVERSHOT"] <- "Overshot"
 data1$flaketerm <- as.factor(data1$flaketerm)
 
-table13 <- table(data1$cond_flake_id, data1$flaketerm)
+table13 <- table(data1$new_flake_id, data1$flaketerm)
 tabFLAKETERM=cbind(addmargins(round(prop.table(addmargins(table13,1),1),2)*100,2), c(margin.table(table13,1),sum(table13)))
 write.csv(tabFLAKETERM, file="Tables/tableflaketerm.csv")
 
@@ -1562,7 +1562,7 @@ data1$kombewa <- as.character(data1$kombewa)
 data1$kombewa[data1$kombewa %in% c("no", "NO")] <- "No"
 data1$kombewa <- as.factor(data1$kombewa)
 
-table14 <- table(data1$cond_flake_id, data1$kombewa)
+table14 <- table(data1$new_flake_id, data1$kombewa)
 tabKOMB=cbind(addmargins(round(prop.table(addmargins(table14,1),1),2)*100,2), c(margin.table(table14,1),sum(table14)))
 write.csv(tabKOMB, file="Tables/tablekombewa.csv")
 
@@ -1579,7 +1579,7 @@ data1$distplanform[data1$distplanform == "POINTED"] <- "Pointed"
 data1$distplanform[data1$distplanform %in% c("rounded", "ROUNDED")] <- "Rounded"
 data1$distplanform <- as.factor(data1$distplanform)
 
-table15 <- table(data1$cond_flake_id, data1$distplanform)
+table15 <- table(data1$new_flake_id, data1$distplanform)
 tabDISTPLANFORM=cbind(addmargins(round(prop.table(addmargins(table15,1),1),2)*100,2), c(margin.table(table15,1),sum(table15)))
 write.csv(tabDISTPLANFORM, file="Tables/tabledistplanform.csv")
 
@@ -1618,7 +1618,7 @@ data1$red_syst[data1$red_syst %in% c("laminar", "Platform (laminar?)",
 
 data1$red_syst <- as.factor(data1$red_syst)
 
-table16 <- table(data1$cond_flake_id, data1$red_syst)
+table16 <- table(data1$new_flake_id, data1$red_syst)
 tabREDSYST=cbind(addmargins(round(prop.table(addmargins(table16,1),1),2)*100,2), c(margin.table(table16,1),sum(table16)))
 write.csv(tabREDSYST, file="Tables/tableredsyst.csv")
 
@@ -1633,7 +1633,7 @@ data1$flk_form[data1$flk_form %in% c("flake", "Flake")] <- "FLAKE"
 data1$flk_form[data1$flk_form == "Convflake"] <- "CONVFLAKE"
 data1$flk_form <- as.factor(data1$flk_form)
 
-table17 <- table(data1$cond_flake_id, data1$flk_form)
+table17 <- table(data1$new_flake_id, data1$flk_form)
 tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
 write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
 
@@ -1648,7 +1648,7 @@ write.csv(data1, file="comsafrica_complete_adjusted_catcleaned.csv")
 summary(data1$dorsal_scar_count)
 data1$dorsal_scar_count <- as.factor(data1$dorsal_scar_count)
 
-table18 <- table(data1$cond_flake_id, data1$dorsal_scar_count)
+table18 <- table(data1$new_flake_id, data1$dorsal_scar_count)
 tabDORSSCARCOUNT=cbind(addmargins(round(prop.table(addmargins(table18,1),1),2)*100,2), c(margin.table(table18,1),sum(table18)))
 write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
 
@@ -1656,7 +1656,7 @@ write.csv(tabDORSSCARCOUNT, file="Tables/tabledorsscars.csv")
 summary(data1$proximal_scars)
 data1$proximal_scars <- as.factor(data1$proximal_scars)
 
-table19 <- table(data1$cond_flake_id, data1$proximal_scars)
+table19 <- table(data1$new_flake_id, data1$proximal_scars)
 tabPROXSCARS=cbind(addmargins(round(prop.table(addmargins(table19,1),1),2)*100,2), 
                    c(margin.table(table19,1),sum(table19)))
 write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
@@ -1665,7 +1665,7 @@ write.csv(tabPROXSCARS, file="Tables/tableproxscars.csv")
 summary(data1$left_scars)
 data1$left_scars <- as.factor(data1$left_scars)
 
-table20 <- table(data1$cond_flake_id, data1$left_scars)
+table20 <- table(data1$new_flake_id, data1$left_scars)
 tabLEFTSCARS=cbind(addmargins(round(prop.table(addmargins(table20,1),1),2)*100,2), 
                    c(margin.table(table20,1),sum(table20)))
 write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
@@ -1674,7 +1674,7 @@ write.csv(tabLEFTSCARS, file="Tables/tableleftscars.csv")
 summary(data1$distal_scars)
 data1$distal_scars <- as.factor(data1$distal_scars)
 
-table21 <- table(data1$cond_flake_id, data1$distal_scars)
+table21 <- table(data1$new_flake_id, data1$distal_scars)
 tabDISTSCARS=cbind(addmargins(round(prop.table(addmargins(table21,1),1),2)*100,2), 
                    c(margin.table(table21,1),sum(table21)))
 write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
@@ -1683,7 +1683,7 @@ write.csv(tabDISTSCARS, file="Tables/tabledistscars.csv")
 summary(data1$right_scars)
 data1$right_scars <- as.factor(data1$right_scars)
 
-table22 <- table(data1$cond_flake_id, data1$right_scars)
+table22 <- table(data1$new_flake_id, data1$right_scars)
 tabRIGHTSCARS=cbind(addmargins(round(prop.table(addmargins(table22,1),1),2)*100,2), 
                    c(margin.table(table22,1),sum(table22)))
 write.csv(tabRIGHTSCARS, file="Tables/tablerightscars.csv")
@@ -1758,67 +1758,13 @@ summary(data1$edgeplatf_deg) #should be recalculated
 
 write.csv(data1, file="comsafrica_complete_adjusted_cleaned.csv")
 
-library(gtsummary)
-
-tbl1 <-  data1 %>%
-      tbl_summary(
-            include = c(mass, maximumdimension, maximumwidth, 
-                        maximumthickness,
-                  ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      )%>%
-      italicize_levels()
-      
-tbl1
-
-as_gt(tbl1)
-
-
-tbl2 <-  data1 %>%
-      tbl_summary(
-            include = c(techlength, techmaxwidth, techmaxthickness,
-                        techwidthprox, techwidthmes, techwidthdist,
-                        techthickprox, techthickmes, techthickdist
-            ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      )
-
-
-
-as_gt(tbl2)
-tbl2
-
-tbl3 <- 
- data1 %>%
-      tbl_summary(
-            include = c(platfwidth, platfthickimpact, platfthickmax,
-                        platfthickmid, edgeplatf, angle_height
-            ),
-            statistic = all_continuous() ~ "{mean} ({sd}) - {median} [{min} - {max}]",
-            by = cond_flake_id,
-            digits = all_continuous() ~ 1,
-            missing = "always",
-            missing_text = "NAs"
-      ) 
-
-
-
-as_gt(tbl3)
-tbl3
 
 ###Alternative summary table for quantitative variables using dplyr
 
 ###tables per quantitative variables
+
 mass <- data1 %>%
-      group_by(cond_flake_id) %>% #change cond_flake_id by flake id created by Justin
+      group_by(new_flake_id) %>% 
       summarize(variable = "mass",
                   mean = mean(mass, na.rm = TRUE),
                 sd = sd(mass, na.rm = TRUE),
@@ -1828,8 +1774,21 @@ mass <- data1 %>%
                 count=n(),
                 count2 = sum(!is.na(mass)))
 
+cortex <- data1 %>%
+      group_by(new_flake_id) %>% 
+      summarize(variable = "cortex",
+                mean = mean(dorsal_cortex, na.rm = TRUE),
+                sd = sd(dorsal_cortex, na.rm = TRUE),
+                min = min(dorsal_cortex, na.rm=T),
+                max = max(dorsal_cortex, na.rm=T),
+                median = median(dorsal_cortex, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(dorsal_cortex)))
+
+
+
 maxdim <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "Max Dim",
                 mean = mean(maximumdimension, na.rm = TRUE),
                 sd = sd(maximumdimension, na.rm = TRUE),
@@ -1840,7 +1799,7 @@ maxdim <- data1 %>%
                 count2 = sum(!is.na(maximumdimension)))
 
 maxwidth <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "Max Width",
                 mean = mean(maximumwidth, na.rm = TRUE),
                 sd = sd(maximumwidth, na.rm = TRUE),
@@ -1851,7 +1810,7 @@ maxwidth <- data1 %>%
                 count2 = sum(!is.na(maximumwidth)))
 
 maxT <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "Max Thick",
                 mean = mean(maximumthickness, na.rm = TRUE),
                 sd = sd(maximumthickness, na.rm = TRUE),
@@ -1863,7 +1822,7 @@ maxT <- data1 %>%
 
 
 techL <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "Tech Length",
                 mean = mean(techlength, na.rm = TRUE),
                 sd = sd(techlength, na.rm = TRUE),
@@ -1874,7 +1833,7 @@ techL <- data1 %>%
                 count2 = sum(!is.na(techlength)))
 
 techmaxwidth <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techmaxwidth",
                 mean = mean(techmaxwidth, na.rm = TRUE),
                 sd = sd(techmaxwidth, na.rm = TRUE),
@@ -1885,7 +1844,7 @@ techmaxwidth <- data1 %>%
                 count2 = sum(!is.na(techmaxwidth)))
 
 techmaxthickness <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techmaxthickness",
                 mean = mean(techmaxthickness, na.rm = TRUE),
                 sd = sd(techmaxthickness, na.rm = TRUE),
@@ -1896,7 +1855,7 @@ techmaxthickness <- data1 %>%
                 count2 = sum(!is.na(techmaxthickness)))
 
 techwidthprox <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techwidthprox",
                 mean = mean(techwidthprox, na.rm = TRUE),
                 sd = sd(techwidthprox, na.rm = TRUE),
@@ -1907,7 +1866,7 @@ techwidthprox <- data1 %>%
                 count2 = sum(!is.na(techwidthprox)))
 
 techwidthmes <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techwidthmes",
                 mean = mean(techwidthmes, na.rm = TRUE),
                 sd = sd(techwidthmes, na.rm = TRUE),
@@ -1918,7 +1877,7 @@ techwidthmes <- data1 %>%
                 count2 = sum(!is.na(techwidthmes)))
 
 techwidthdist <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techwidthdist",
                 mean = mean(techwidthdist, na.rm = TRUE),
                 sd = sd(techwidthdist, na.rm = TRUE),
@@ -1929,7 +1888,7 @@ techwidthdist <- data1 %>%
                 count2 = sum(!is.na(techwidthdist)))
 
 techthickprox <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techthickprox",
                 mean = mean(techthickprox, na.rm = TRUE),
                 sd = sd(techthickprox, na.rm = TRUE),
@@ -1940,7 +1899,7 @@ techthickprox <- data1 %>%
                 count2 = sum(!is.na(techthickprox)))
 
 techthickmes <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techthickmes",
                 mean = mean(techthickmes, na.rm = TRUE),
                 sd = sd(techthickmes, na.rm = TRUE),
@@ -1951,7 +1910,7 @@ techthickmes <- data1 %>%
                 count2 = sum(!is.na(techthickmes)))
 
 techthickdist <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "techthickdist",
                 mean = mean(techthickdist, na.rm = TRUE),
                 sd = sd(techthickdist, na.rm = TRUE),
@@ -1962,7 +1921,7 @@ techthickdist <- data1 %>%
                 count2 = sum(!is.na(techthickdist)))
 
 platfwidth <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "platfwidth",
                 mean = mean(platfwidth, na.rm = TRUE),
                 sd = sd(platfwidth, na.rm = TRUE),
@@ -1973,7 +1932,7 @@ platfwidth <- data1 %>%
                 count2 = sum(!is.na(platfwidth)))
 
 platfthickimpact <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "platfthickimpact",
                 mean = mean(platfthickimpact, na.rm = TRUE),
                 sd = sd(platfthickimpact, na.rm = TRUE),
@@ -1984,7 +1943,7 @@ platfthickimpact <- data1 %>%
                 count2 = sum(!is.na(platfthickimpact)))
 
 platfthickmax <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "platfthickmax",
                 mean = mean(platfthickmax, na.rm = TRUE),
                 sd = sd(platfthickmax, na.rm = TRUE),
@@ -1995,7 +1954,7 @@ platfthickmax <- data1 %>%
                 count2 = sum(!is.na(platfthickmax)))
 
 platfthickmid <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "platfthickmid",
                 mean = mean(platfthickmid, na.rm = TRUE),
                 sd = sd(platfthickmid, na.rm = TRUE),
@@ -2006,7 +1965,7 @@ platfthickmid <- data1 %>%
                 count2 = sum(!is.na(platfthickmid)))
 
 edgeplatf <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "edgeplatf",
                 mean = mean(edgeplatf, na.rm = TRUE),
                 sd = sd(edgeplatf, na.rm = TRUE),
@@ -2017,7 +1976,7 @@ edgeplatf <- data1 %>%
                 count2 = sum(!is.na(edgeplatf)))
 
 angle_height <- data1 %>%
-      group_by(cond_flake_id) %>%
+      group_by(new_flake_id) %>%
       summarize(variable = "angle_height",
                 mean = mean(angle_height, na.rm = TRUE),
                 sd = sd(angle_height, na.rm = TRUE),
@@ -2027,40 +1986,10 @@ angle_height <- data1 %>%
                 count=n(),
                 count2 = sum(!is.na(angle_height)))
 
-sumquant <- rbind(mass, maxdim, maxwidth, maxT, techL, techmaxwidth,
+sumquant <- rbind(mass, cortex,maxdim, maxwidth, maxT, techL, techmaxwidth,
                   techmaxthickness, techwidthprox, techwidthmes,
                   techwidthdist, techthickprox, techthickmes,
                   techthickdist, platfwidth, platfthickimpact,
                   platfthickmax, platfthickmid, edgeplatf, angle_height)
 
 write.csv(sumquant, file="Tables/sumquant.csv")
-
-
-####Summary table using coefficient of variation
-
-CV <- function(x){
-      (sd(x)/mean(x))*100
-}
-
-dataCV <- data1 %>%
-      group_by(cond_flake_id) %>% #change cond_flake_id by flake id created by Justin
-      mutate(cvmass = CV(mass),
-             cvmaxdim = CV(maximumdimension),
-             cvmaxW = CV(maximumwidth),
-             cvmaxT = CV(maximumthickness),
-             cvtechL = CV(techlength),
-             cvtechmaxW = CV(techmaxwidth),
-             cvtechmaxT = CV(techmaxthickness),
-             cvtechwidthprox = CV(techwidthprox),
-             cvtechwidthmes = CV(techwidthmes),
-             cvtechwidthdist = CV(techwidthdist),
-             cvtechthickprox = CV(techthickprox),
-             cvtechthickdist = CV(techthickdist),
-             cvplatfwidth = CV(platfwidth),
-             cvplatfthickimpact = CV(platfthickimpact),
-             cvplatfthickmax = CV(platfthickmax),
-             cvplatfthickmid = CV(platfthickmid),
-             cvedgeplatf = CV(edgeplatf),
-             cvangle_height = CV(angle_height)) 
-
-#next step is to compute the mean,sd,range and median of the CVs for the whole assemblage?
