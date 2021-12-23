@@ -12,21 +12,21 @@
     "path" : null,
     "project_path" : null,
     "properties" : {
-        "cacheKey" : "FCBA4601",
+        "cacheKey" : "C16FD4BC",
         "caption" : "test",
-        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=test&cache_key=FCBA4601",
-        "displayedObservations" : 20026,
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=test&cache_key=C16FD4BC",
+        "displayedObservations" : "1086",
         "environment" : "",
         "expression" : "test",
         "object" : "test",
-        "preview" : 0,
-        "totalObservations" : 20026,
-        "variables" : 4
+        "preview" : "0",
+        "totalObservations" : "1086",
+        "variables" : "53"
     },
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 3,
+    "relative_order" : 2,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_dataframe"

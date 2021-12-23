@@ -1,0 +1,1209 @@
+##Libraries####
+detachAllPackages <- function() {
+   
+   basic.packages <- c("package:stats","package:graphics","package:grDevices","package:utils","package:datasets","package:methods","package:base")
+   
+   package.list <- search()[ifelse(unlist(gregexpr("package:",search()))==1,TRUE,FALSE)]
+   
+   package.list <- setdiff(package.list,basic.packages)
+   
+   if (length(package.list)>0)  for (package in package.list) detach(package, character.only=TRUE)
+   
+}
+
+detachAllPackages()
+
+library(ggplot2)
+library(reshape2)
+library(tidyr)
+library(plyr)
+library(dplyr)
+library(DescTools)
+library(stringr)
+library("factoextra")
+library("psych") 
+library(Hmisc)
+library(glmulti)
+library(report)
+library(ggeffects) 
+library(sjPlot)
+
+getwd()
+
+## Data ####
+
+experiment_data<-read.csv("/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/past_cores_result.csv") %>%
+      rename(subject_id = Subject,
+             core_number = nodule_number) %>%
+      mutate(subject_id=as.factor(subject_id),
+             core_number=as.factor(core_number),
+             Condition=as.factor(Condition))
+
+experiment_core_usedata<-read.csv("/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/core_use_records.csv") %>%
+   mutate(subject=as.factor(subject),
+          core_number=as.factor(core_number))
+
+lithic_data<-read.csv("past_pilot_lithics.csv") %>%
+      rename(flake_mass = flake_mass,
+             flake_max_thickness = max_thickness,
+             core_final_mass=core_mass) %>%
+      mutate(core_number_nyu=core_number) %>%
+      rename(subject_id_nyu=subject_id) 
+
+pre_exp_cores_data<-read.csv("/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/pre_exp_cores_data.csv") %>%
+      rename(core_number = nodule_number) %>%
+      mutate(core_number=as.factor(core_number))
+
+incremental_width<-list.files("/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/combined_txt_files", pattern="*.txt")
+area_size<- read.csv(file = "/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/area_size_combined_cheng_aditi_megan.csv")
+
+psychometrics<-read.csv(file = "/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/past_psychometrics.csv") %>%
+   rename(subject = Subject) %>%
+   mutate(subject=as.factor(subject))
+   
+#### create merged dataset ####
+
+# txt file opening function
+open_read<-function(filename, foldername){
+   open_file<-read.delim(paste(foldername,"/",filename,sep=""),header=F,sep='_')
+   colnames(open_file)<-c("variable","measurement_point","measurement")
+   open_file$individual<-gsub(".txt","",filename)
+   return(open_file)
+}
+
+# execute the txt file opening function
+flake_plan_measurements<-do.call(rbind,lapply(incremental_width,open_read,"/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/combined_txt_files"))
+
+# reshape the herbi measurement data
+
+cols <- c("subject","core_number","flake_number")
+
+flake_plan_measurements_reshape<-flake_plan_measurements %>%
+   mutate(variable=recode(flake_plan_measurements$variable, Width = "width"),
+          measurement_point = paste(variable, measurement_point, sep="_"),
+          shape_width_mm=measurement*10) %>% #convert cm to mm
+   separate(individual, into = c("delete", "subject","core_number","delete_2","flake_number"), sep="_") %>%
+   dplyr::select(-c(delete,delete_2,variable,measurement)) %>%
+   dcast(... ~ measurement_point,value.var="shape_width_mm") %>%
+   mutate_at(cols, funs(factor(.)))
+
+# reformat area size data
+
+area_size_data<-area_size %>%
+   mutate(area=area*100,
+          max_width=max_width*10,
+          max_length=max_length*10) %>% #convert cm2 to mm2
+   separate(individual, into = c("delete", "subject","core_number","delete_2","flake_number"), sep="_") %>%
+   dplyr::select(-c(delete,delete_2)) %>%
+   mutate_at(cols, funs(factor(.)))
+
+#find duplicates if necessary (if dcast is returning 1's instead of measurements)
+duplicates<-flake_plan_measurements_reshape[duplicated(flake_plan_measurements_reshape[,1:4]),]
+
+unique_data <- unique(flake_plan_measurements_reshape)
+
+## join the two data sets
+merged_shape_data<- full_join(area_size_data,flake_plan_measurements_reshape, by=c("subject","core_number","flake_number")) %>%
+   rename(max_flake_length=max_length) 
+
+# remove leading zeros
+merged_shape_data$subject<-str_remove(merged_shape_data$subject, "^0+")
+merged_shape_data$core_number<-str_remove(merged_shape_data$core_number, "^0+")
+merged_shape_data$core_number<-str_remove(merged_shape_data$core_number, "^0+")
+merged_shape_data$flake_number<-str_remove(merged_shape_data$flake_number, "^0+")
+
+## Fill in missing expert cores data
+#create unique ID column for demos to extract relevant core information
+
+merged_shape_data_demo_identifier<-merged_shape_data %>% #a bunch of data missing for the expert cores 236-246 and 35
+   mutate(subject=as.factor(subject)) %>%
+   distinct(core_number,.keep_all = TRUE) %>%
+   select(c(subject,core_number))
+
+pre_exp_cores_data_demo_ID<-merge(pre_exp_cores_data,merged_shape_data_demo_identifier,
+                                  by="core_number",
+                                  all=T)
+
+experiment_data_filled<-merge(x = experiment_data, y = pre_exp_cores_data_demo_ID 
+                              [ , c("subject","core_number","mass")], 
+                              by = "core_number", all=TRUE) %>%
+      select(-("start_mass")) %>%
+      mutate(subject_id = coalesce(subject, subject_id)) %>%
+      rename(start_mass=mass) %>%
+      filter(!core_number %in% c(2,22,42,149,168, 169, 174, 204, 207, 223, 228)) %>%
+      subset(!core_number == "sample") %>% #no starting mass-flakes shown to subjects prior to the experiment
+      select(-("subject"))
+
+# merge with NYU lithic data
+
+complete_past_data<-full_join(experiment_data_filled,lithic_data,by=c("core_number")) %>%
+      subset(Used==1 | subject_id == "demo") %>% #only cores actually used in the experiment
+      select(c("subject_id", "subject_id_nyu","recorder_name","Condition", "flake_number","core_number","core_number_nyu",
+               "Total_Cores_Used","Order","Used",
+               "maxlength","maxwidth","maxthickness","edge_angle_degree",
+               "start_mass","core_final_mass","Proportion_Mass_Removed",
+               "flake_mass","flake_max_thickness","flake_count",
+               "Highest_nBack","RPM","BEAST","Grip_Strength")) %>%
+      arrange(subject_id,core_number) %>%
+      mutate(delta_mass=(start_mass-core_final_mass)/start_mass) %>%
+      group_by(subject_id) %>%
+      mutate(core_count=n_distinct(core_number),
+             core_counts_compared=ifelse(core_count==Total_Cores_Used,1,0),
+             subject_id=as.factor(subject_id),
+             core_number=as.factor(core_number),
+             flake_number=as.factor(flake_number)) %>%
+      rename(subject=subject_id) %>%
+      ungroup() %>%
+      select(-c("recorder_name","subject_id_nyu","core_number_nyu","core_count","core_counts_compared","Proportion_Mass_Removed"))
+
+# Check missing data
+new_DF <- complete_past_data[is.na(complete_past_data$subject),]
+new_DF <- complete_past_data[is.na(complete_past_data$flake_number),] #core 210 missing flakes from the NYU database
+
+# merge with flake size and shape data
+#issue is with the merging column names (subject, core number, flake number)
+complete_past_data_plusflakes<-full_join(complete_past_data,merged_shape_data,by=c("subject","core_number","flake_number"))
+
+# Check missing data
+# S4 core 39 flake 2 herbi measurements just not working
+# s4 29 14, 15
+# S4 core 45 flake 6 herbi measurements just not working
+# S9 core 129 flake 7 herbi measurements just not working
+# S9 core 129 flake 8
+# S9 core 129 flake 18, 19, 21, 25, 27
+# S20 212 002, 006, 014, 20
+# S21 210 001, 007, 011, 012, 013, 015
+
+new_DF <- complete_past_data_plusflakes[is.na(complete_past_data_plusflakes$delta_mass),] %>%
+   distinct(core_number,.keep_all = TRUE)
+
+new_DF <- complete_past_data_plusflakes[!complete.cases(complete_past_data_plusflakes),] %>%
+   distinct(core_number,.keep_all = TRUE)
+
+# Check against list of cores knapped during the experiment
+test_core_comparison<-merge(x = complete_past_data_plusflakes[ , c("subject","core_number")], 
+                            y = experiment_core_usedata[ , c("subject","core_number")], 
+                            by = "core_number", all=TRUE) %>%
+   rename(merged_subject=subject.x,
+          exp_notes_subject=subject.y) %>%
+   distinct(core_number,.keep_all = TRUE) %>%
+   mutate(subject_id_compared=ifelse(exp_notes_subject==merged_subject,1,0))
+
+# write data
+
+write.csv(complete_past_data_plusflakes,"/Users/JustinPargeter/Google Drive/Projects/PaST/Pilot experiment/Lithics/Experiment database/past_stats/past_stats/complete_past_data.csv", row.names = FALSE)
+
+
+### Psychometrics PCA ####
+
+## Merge with larger dataset
+
+complete_past_data_plusflakes_psycho<-full_join(complete_past_data_plusflakes,psychometrics,by=c("subject"))
+
+# check for missing data
+new_DF <- complete_past_data_plusflakes_psycho[!complete.cases(complete_past_data_plusflakes_psycho),] %>%
+   distinct(core_number,.keep_all = TRUE)
+
+pca_psychometrics<- complete_past_data_plusflakes_psycho %>%
+   subset(!subject %in% c("6","9", "demo")) %>%
+   distinct(subject,.keep_all = TRUE)
+
+subject <- pca_psychometrics[, 1] 
+
+# PCA data
+
+test_2<-pca_psychometrics[,c(17:20,38,44,47)]
+
+test_minus_grip_fitts<-pca_psychometrics[,c(17:19,38,44)]
+
+# determine factorability
+library(psych)
+cor(pca_psychometrics[,c(17:20,38,44,47)])
+KMO(pca_psychometrics[,c(17:20,38,44,47)])$ImCov
+bartlett.test(pca_psychometrics[,c(17:20,38,44,47)])
+principal(pca_psychometrics[,c(17:20,38,44,47)])
+
+# Calculate PCA
+library(stats)
+pca_psychometrics_complete<-prcomp(test_minus_grip_fitts, scale. = T)
+
+varimax_psych<- varimax(pca_psychometrics_complete$rotation[,1:7])
+newData <- scale(pca_psychometrics[,c(17:20,38,44,47)]) %*% varimax_psych$loadings
+
+#screeplot
+screeplot(pca_psychometrics_complete,type='line')
+
+# Graph of variables
+library(factoextra)
+
+fviz_pca_var(pca_psychometrics_complete,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+
+# Graph of overall contributions
+
+fviz_contrib(pca_psychometrics_complete, choice = "var", axes = 1, top = 10)
+fviz_contrib(pca_psychometrics_complete, choice = "var", axes = 2, top = 10)
+fviz_contrib(pca_psychometrics_complete, choice = "var", axes = 3, top = 10)
+
+###Access PCA results###
+
+# Eigenvalues
+
+eig.val <- get_eigenvalue(pca_psychometrics_complete)
+
+# Results for Variables
+
+res.var_psychometrics<- get_pca_var(pca_psychometrics_complete)
+variable_loadings_psychometrics<-data.frame(res.var_psychometrics$coord)         # Coordinates
+
+# Results for individuals
+
+res.ind <- get_pca_ind(pca_psychometrics_complete)
+
+# add data back to dataset
+
+indiv_subject_scores<-data.frame(res.ind$coord) %>%
+   select(c("Dim.1","Dim.2","Dim.3")) %>%
+   cbind(subject_name = subject) %>%
+   rename(psych_pca_dim1_intelligence_motivation = Dim.1,
+          psych_pca_dim2_spatial_awareness_self_control = Dim.2,
+          psych_pca_dim3_social_information_cognition = Dim.3)
+   
+complete_past_data_plusflakes_psycho_pca<-full_join(complete_past_data_plusflakes_psycho,indiv_subject_scores,by=c("subject")) #%>%
+   select(-c(35:46,48))
+
+#### Flake shape PCA ####
+
+# adjust linear measurements to ensure top is pointed, base is wider
+
+complete_past_data_plusflakes = complete_past_data_plusflakes %>% 
+   mutate(index = as.numeric(row.names(complete_past_data_plusflakes)))
+complete_past_data_plusflakes_diff <- complete_past_data_plusflakes %>% filter(width_0.1 > width_0.9 &
+                            width_0.2 > width_0.8 &
+                            width_0.3 > width_0.7)
+complete_past_data_plusflakes_no_diff = complete_past_data_plusflakes %>% 
+   filter(!(index %in% complete_past_data_plusflakes_diff$index)) %>%
+   rename_with( tolower)
+complete_past_data_plusflakes_updated <- complete_past_data_plusflakes_diff %>% mutate(
+   Width_0.1 = width_0.9,
+   Width_0.2 = width_0.8,
+   Width_0.3 = width_0.7,
+   Width_0.9 = width_0.1,
+   Width_0.8 = width_0.2,
+   Width_0.7 = width_0.3
+) %>%
+   select(-c(width_0.9,width_0.8,width_0.7,width_0.1,width_0.2,width_0.3)) %>%
+   rename_with( tolower)
+complete_past_data_plusflakes_updated = union_all(complete_past_data_plusflakes_no_diff,
+                                                  complete_past_data_plusflakes_updated)
+
+complete_past_data_plusflakes_updated = complete_past_data_plusflakes_updated %>% select(-index)
+
+# calculate geomean
+
+pca_flakes<- complete_past_data_plusflakes_updated[!is.na(complete_past_data_plusflakes_updated$width_0.1), ] %>%
+   subset(!subject %in% c("demo")) %>%
+   mutate(geomean=apply(pca_flakes[c(15,24,26:34)],1,geometric.mean))
+
+pca_flakes[c(15,24,26:34)]=pca_flakes[c(15,24,26:34)]/pca_flakes$geomean
+pca_flakes$geomean<-NULL
+
+subject_core_flakes <- pca_flakes[, 1:4] 
+
+test<-pca_flakes[,c(15,24,26:34)]
+
+# Calculate PCA
+
+pca_flakes_complete<-prcomp(pca_flakes[,c(15,24,26:34)], scale. = F)
+
+# Graph of variables
+
+fviz_pca_var(pca_flakes_complete,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+
+# Graph of overall contributions
+
+fviz_contrib(pca_flakes_complete, choice = "var", axes = 1, top = 10)
+fviz_contrib(pca_flakes_complete, choice = "var", axes = 2, top = 10)
+
+###Access PCA results###
+
+# Eigenvalues
+
+eig.val_flakes <- get_eigenvalue(pca_flakes_complete)
+
+# Results for Variables
+
+res.var_flakes<- get_pca_var(pca_flakes_complete)
+data.frame(res.var_flakes$coord) %>% select(c("Dim.1","Dim.2","Dim.3"))        # Coordinates
+
+# plot cos2
+
+library("corrplot")
+head(res.var_flakes$cos2, 4)
+corrplot(res.var_flakes$cos2, is.corr=FALSE)
+
+# results for individuals
+res.ind_flakes <- get_pca_ind(pca_flakes_complete)
+indiv_flake_scores<-data.frame(res.ind_flakes$coord)        # Coordinates
+
+## add data back to dataset 
+
+indiv_subject_scores<-data.frame(res.ind_flakes$coord) %>%
+   select(c("Dim.1","Dim.2")) %>%
+   dplyr::rename(flake_pca_dim1 = Dim.1,
+          flake_pca_dim2 = Dim.2)
+
+joined_to_identifiers<-cbind(indiv_subject_scores,subject_core_flakes) %>%
+   dplyr::rename(Condition = condition)
+
+# plot against absolute size measure to track allometry in variance. 
+
+ggplot(complete_past_data_psych_shape_pca, aes(y = area, x = flake_pca_dim1)) +
+   #facet_wrap(~Condition, nrow=2) +   # a panel for each mountain range
+   geom_point(alpha = 0.5) +
+   theme_classic() +
+   ylab("Flake area (mm2)") +
+   xlab("Flake shape Factor 1")
+
+ggplot(complete_past_data_psych_shape_pca, aes(y = area, x = flake_pca_dim2)) +
+   #facet_wrap(~Condition, nrow=2) +   # a panel for each mountain range
+   geom_point(alpha = 0.5) +
+   theme_classic()+
+   ylab("Flake area (mm2)") +
+   xlab("Flake shape Factor 2")
+
+#### generate skill metric summary variables for study stats ####
+
+# add counts of flakes >40mm
+
+complete_past_data_psych_shape_pca<-full_join(complete_past_data_plusflakes_psycho_pca,
+                                              joined_to_identifiers,
+                                              by=c("subject","Condition","flake_number","core_number"))
+
+large_flake_count<-complete_past_data_psych_shape_pca %>% group_by(core_number) %>% tally()
+complete_past_data_psych_shape_pca<-join(complete_past_data_psych_shape_pca,large_flake_count,by="core_number")
+names(complete_past_data_psych_shape_pca)[names(complete_past_data_psych_shape_pca) == "n"] <- "total_flakes_above40mm_5g_bycore"
+
+large_flake_count_subject<-complete_past_data_psych_shape_pca %>% group_by(subject) %>% tally()
+complete_past_data_psych_shape_pca<-join(complete_past_data_psych_shape_pca,large_flake_count_subject,by="subject")
+names(complete_past_data_psych_shape_pca)[names(complete_past_data_psych_shape_pca) == "n"] <- "total_flakes_above40mm_5g_bysubject"
+
+complete_past_data_psych_shape_pca<- complete_past_data_psych_shape_pca %>%
+   rename(maxlength_core = maxlength,
+          maxwidth_core = maxwidth,
+          maxthickness_core=maxthickness,
+          core_start_mass=start_mass,
+          total_flake_count_over_10mm=flake_count) %>%
+   mutate(flaked_mass=core_start_mass-core_final_mass,
+          flake_area_mass=area/flake_mass) %>%
+   group_by(core_number) %>%
+   mutate(total_mass_flakes_percore_greater40mm_5g=sum(flake_mass),
+          flake_area_mass_bycore=mean(flake_area_mass)) %>%
+   ungroup() %>%
+   group_by(core_number) %>%
+   filter(!core_number %in% c("39") & !flake_number %in% c("2")) %>% #flakes with missing area measurements
+   filter(!core_number %in% c("45") & !flake_number %in% c("6")) %>%
+   mutate(total_mass_allflakes_greater40mm_5g=sum(flake_mass),
+          total_flaked_mass_bycore=sum(unique(flaked_mass)),
+          mass_flakes_flaked_mass_bycore=(total_mass_allflakes_greater40mm_5g/total_flaked_mass_bycore),
+          flake_area_mass_bycore=mean(flake_area_mass),
+          mass_removed_bycore=core_start_mass-core_final_mass,
+          flake_pca_dim1_bycore=mean(flake_pca_dim1),
+          flake_pca_dim2_bycore=mean(flake_pca_dim2)) %>%
+   ungroup() %>%
+   group_by(subject) %>%
+   mutate(total_mass_allflakes_greater40mm_5g_bysubject=sum(flake_mass),
+          total_flaked_mass_bysubject=sum(unique(flaked_mass)),
+          mass_flakes_flaked_mass_bysubject=total_mass_allflakes_greater40mm_5g,
+          flake_area_mass_bysubject=mean(flake_area_mass),
+          delta_mass_bysubject=mean(delta_mass))
+
+plot(complete_past_data_psych_shape_pca$flake_area_mass_bycore, complete_past_data_psych_shape_pca$flake_area_mass_calculated)
+
+#plots
+ggplot(complete_past_data_psych_shape_pca, aes(y=log(flake_area_mass),x=log(max_flake_length))) +
+   geom_point()
+
+# extract last worked core and its reduction % 
+last_worked_core<-complete_past_data_psych_shape_pca %>%
+   group_by(subject) %>%
+   filter(Order==max(Order)) %>%
+   distinct(delta_mass,.keep_all = TRUE) %>%
+   mutate(last_core_delta_mass=delta_mass) %>%
+   ungroup()
+
+complete_past_data_psych_shape_pca_core<-join(complete_past_data_psych_shape_pca,
+                                last_worked_core[c("subject","last_core_delta_mass")],
+                                by=c("subject")) %>%
+                                 subset(!subject=="demo") %>%
+   ungroup()
+
+#### Skill metric PCA ####
+
+# Calculate PCA
+
+subject_flake_core_skill_pca <- complete_past_data_psych_shape_pca_core[,1:4]
+
+pca_skill_data_bycore<-subset(complete_past_data_psych_shape_pca_core[,c("mass_flakes_flaked_mass_bycore",
+                                                                            "delta_mass","flake_pca_dim1_bycore","flake_pca_dim2_bycore",
+                                                                         "Total_Cores_Used")]) %>%
+   dplyr::rename(Mass_flakes_flaked_mass = mass_flakes_flaked_mass_bycore,
+                 Delta_mass = delta_mass,
+                 Shape_PC2_thickness = flake_pca_dim2_bycore,
+                 Shape_PC1_size = flake_pca_dim1_bycore,
+                 Total_cores_used = Total_Cores_Used)
+
+pca_skill_metrics<-prcomp(na.omit(pca_skill_data_bycore), scale. = T)
+summary(pca_skill_metrics)
+
+# determine factorability
+library(psych)
+cor(pca_skill_data_bycore)
+KMO(pca_skill_data_bycore)$ImCov
+bartlett.test(pca_skill_data_bycore)
+
+# Graph of variables
+library(factoextra)
+fviz_pca_var(pca_skill_metrics,
+             col.ind = "cos2", # Color by the quality of representation
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+
+#screeplot
+screeplot(pca_skill_metrics,type='line')
+
+# Graph of overall contributions
+
+fviz_contrib(pca_skill_metrics, choice = "var", axes = 1, top = 10)
+fviz_contrib(pca_skill_metrics, choice = "var", axes = 2, top = 10)
+
+## Access PCA results
+
+# Eigenvalues
+
+eig.val <- get_eigenvalue(pca_skill_metrics)
+
+# Results for Variables
+
+res.var_skill_metrics<- get_pca_var(pca_skill_metrics)
+variable_loadings_skill_metric<-data.frame(res.var_skill_metrics$coord)         # Coordinates
+
+# results for individuals
+res.ind_skill_metrics <- get_pca_ind(pca_skill_metrics)
+indiv_skill_scores<-data.frame(res.ind_skill_metrics$coord)  
+
+## add data back to dataset 
+indiv_subject_skill_scores<-indiv_skill_scores %>%
+   tibble::rowid_to_column( "FIPS") %>%
+   select(c("FIPS","Dim.1","Dim.2")) %>%
+   dplyr::rename(skill_pca_dim1_brute_force = Dim.1,
+          skill_pca_dim2_careful_flaking = Dim.2) %>%
+   mutate(skill_pca_dim1_brute_force=skill_pca_dim1_brute_force*-1) #flip the sign so higher=better
+   
+   subject_flake_core_skill_pca$FIPS<-rownames(subject_flake_core_skill_pca)
+   
+skill_joined_to_identifiers<-merge(indiv_subject_skill_scores,subject_flake_core_skill_pca, by="FIPS") %>%
+   select(-FIPS)
+
+complete_past_data_allpca<-join(complete_past_data_psych_shape_pca_core,
+                                     skill_joined_to_identifiers,
+                                     by=c("subject","Condition","core_number","flake_number"))
+
+ggplot(complete_past_data_allpca, aes(x=Condition, y=skill_pca_dim1_brute_force))+
+   geom_boxplot()
+
+ggplot(complete_past_data_allpca, aes(x=Condition, y=skill_pca_dim2_careful_flaking))+
+   geom_boxplot()
+
+#### learning rates ####
+
+# creat grouping variable for learning rates
+
+learning_rate_data<-complete_past_data_allpca %>%
+   na.omit(flake_pca_dim1) %>%
+   distinct(core_number,.keep_all=T) %>%
+   group_by(subject,Order) %>%
+   mutate(adjusted_cores_used=(Order/Total_Cores_Used)*100) %>%
+   mutate(core_order_stage = case_when(adjusted_cores_used < 50 ~ "cores_0_49", 
+                                       TRUE ~ "cores_50_100")) %>%
+   group_by(subject,core_order_stage) %>%
+   mutate(flake_mass=mean(flake_mass),
+          flake_pca_dim1=mean(flake_pca_dim1),
+          flake_pca_dim2=mean(flake_pca_dim2)) %>%
+   select(subject,core_number,Condition,adjusted_cores_used,core_order_stage,flake_mass,flake_pca_dim1,flake_pca_dim2,psych_pca_dim1_cognition,
+          psych_pca_dim2_spatial_awareness,psych_pca_dim3_social_information,skill_pca_dim1_brute_force,
+          skill_pca_dim2_careful_flaking) %>%
+   ungroup() %>%
+   distinct(core_number,.keep_all=T)
+
+#no significant learning effects
+
+summary(lm(psych_pca_dim1_cognition~Condition*core_order_stage, data=learning_rate_data))
+summary(lm(psych_pca_dim2_spatial_awareness~Condition*core_order_stage, data=learning_rate_data))
+summary(lm(psych_pca_dim3_social_information~Condition*core_order_stage, data=learning_rate_data))
+summary(lm(skill_pca_dim1_brute_force~Condition*core_order_stage, data=learning_rate_data))
+summary(lm(skill_pca_dim2_careful_flaking~Condition*core_order_stage, data=learning_rate_data))
+
+######## Exploring data #######
+#### summary stats ####
+
+complete_past_data_allpca<- complete_past_data_allpca %>%
+   mutate(core_shape=log(maxlength_core*maxwidth_core*maxthickness_core))
+
+summary(aov(core_start_mass~Condition, data=complete_past_data_allpca))
+summary(aov(core_shape~Condition, data=complete_past_data_allpca))
+
+#gt_summary version
+complete_past_data_allpca %>%
+   distinct(core_number,.keep_all=T) %>%
+   select(Condition, maxlength_core,maxwidth_core,maxthickness_core,core_start_mass,edge_angle_degree,core_shape) %>%
+   tbl_summary(
+      by = Condition,
+      type = all_continuous() ~ "continuous2",
+      statistic = all_continuous() ~ c("{min}",
+                                       "{max}",
+                                       "{median} ({p25}, {p75})", 
+                                       "{mean} ({sd})"),
+      missing = "no",
+      digits=list(maxlength_core~c(1,1,1,1,1),
+                  maxwidth_core~c(0,0,1,1,1),
+                  maxthickness_core~c(1,1,1,1,1),
+                  core_start_mass~c(1,1,1,1,1),
+                  edge_angle_degree~c(0,0,1,1,1),
+                  core_shape~c(0,0,1,1,1)),
+      label=list(maxlength_core~"Core max length (mm)",
+                 maxwidth_core~"Core max width (mm)", 
+                 maxthickness_core~"Core max thickness (mm)",
+                 core_start_mass~"Core starting mass (g)",
+                 edge_angle_degree ~"Core edge angle (deg)",
+                 core_shape ~"Core shape (L*W*T) [log transformed]")
+   ) %>%
+   add_p()%>%
+   bold_labels() %>%
+   bold_p()
+
+fisher.test.simulate.p.values <- function(data, variable, by, ...) {
+   result <- list()
+   test_results <- stats::fisher.test(data[[variable]], data[[by]], simulate.p.value = TRUE)
+   result$p <- test_results$p.value
+   result$test <- test_results$method
+   result
+}
+
+complete_past_data_allpca %>%
+   distinct(core_number,.keep_all=T) %>%
+   select(Condition, Total_Cores_Used,mass_flakes_flaked_mass_bycore,total_flakes_above40mm_5g_bycore,delta_mass) %>%
+   tbl_summary(
+      by = Condition,
+      type = all_continuous() ~ "continuous2",
+      statistic = all_continuous() ~ c("{min}",
+                                       "{max}",
+                                       "{median} ({p25}, {p75})", 
+                                       "{mean} ({sd})"),
+      missing = "no",
+      digits=list(mass_flakes_flaked_mass_bycore~c(2,2,2,2,2),
+                  total_flakes_above40mm_5g_bycore~c(0,0,0,0,0),
+                  delta_mass~c(2,2,2,2,2)),
+      label=list(Total_Cores_Used~"Total cores used",
+                 mass_flakes_flaked_mass_bycore~"Flake mass:flaked core mass (g)", 
+                 total_flakes_above40mm_5g_bycore~"Flakes >40 mm & 5 g",
+                 delta_mass ~"Core delta mass")
+   ) %>%
+   add_p(test = list(all_categorical() ~ "fisher.test.simulate.p.values")) %>%
+   bold_labels() %>%
+   bold_p()
+
+flake_basic_vars <-
+   list("Flake mass (g)" =
+           list("min"       = ~ min(flake_mass),
+                "median"    = ~ median(flake_mass),
+                "max"       = ~ max(flake_mass),
+                "mean (sd)" = ~ qwraps2::mean_sd(flake_mass)),
+        "Flake thickness (mm)" =
+           list("min"       = ~ round(min(flake_max_thickness), digits=2),
+                "median"    = ~ round(median(flake_max_thickness), digits=2),
+                "max"       = ~ round(max(flake_max_thickness), digits=2),
+                "mean (sd)" = ~ qwraps2::mean_sd(flake_max_thickness)),
+        "Flake max width (mm)" =
+           list("min"       = ~ round(min(max_width), digits=2),
+                "median"    = ~ round(median(max_width), digits=2),
+                "max"       = ~ round(max(max_width), digits=2),
+                "mean (sd)" = ~ qwraps2::mean_sd(max_width)),
+        "Flake max length (mm)" =
+           list("min"       = ~ round(min(max_flake_length), digits=2),
+                "median"    = ~ round(median(max_flake_length), digits=2),
+                "max"       = ~ round(max(max_flake_length), digits=2),
+                "mean (sd)" = ~ qwraps2::mean_sd(max_flake_length))
+   )
+
+flakebasic_variables_condition <- summary_table(dplyr::group_by(complete_past_data_allpca, Condition), flake_basic_vars) 
+
+library(gtsummary)
+flakes_summary_table<-complete_past_data_allpca %>%
+   select(Condition, flake_mass,flake_max_thickness,max_width,max_flake_length) %>%
+   tbl_summary(
+      by = Condition,
+      type = all_continuous() ~ "continuous2",
+      statistic = all_continuous() ~ c("{min}",
+                                       "{max}",
+                                       "{median} ({p25}, {p75})", 
+                                       "{mean} ({sd})"),
+      missing = "no",
+      digits=list(flake_mass~c(0,0,1,1,1),
+                  flake_max_thickness~1,
+                  max_width~1,
+                  max_flake_length~1),
+      label=list(flake_mass~"Flake mass (g)", 
+                 flake_max_thickness~"Flake max thickness (mm)",
+                 max_width~"Flake max width (mm)",
+                 max_flake_length ~"Flake max length (mm)")
+   ) %>%
+   add_difference() %>%
+   bold_labels() %>%
+   bold_p()
+
+###### main models ####
+#performance outcomes relative to training
+
+##multimodal inference
+
+model_data<-complete_past_data_allpca %>%
+   drop_na(skill_pca_dim1_brute_force) %>%
+   mutate(core_shape=maxlength_core*maxwidth_core*maxthickness_core) %>%
+   select(c(subject,Condition,core_number,skill_pca_dim1_brute_force,
+            skill_pca_dim2_careful_flaking,
+            psych_pca_dim1_intelligence_motivation,
+            psych_pca_dim2_spatial_awareness_self_control,
+            psych_pca_dim3_social_information_cognition,
+            Grip_Strength, fitts_mtavg_ms,
+            core_shape,core_start_mass)) %>%
+   group_by(subject) %>%
+   mutate(skill_pca_dim1_brute_force=mean(skill_pca_dim1_brute_force),
+          skill_pca_dim2_careful_flaking=mean(skill_pca_dim2_careful_flaking)) %>%
+   ungroup() %>%
+   mutate(psych_pca_dim1_intelligence_motivation=as.numeric(scale(psych_pca_dim1_intelligence_motivation,center = TRUE)),
+          psych_pca_dim2_spatial_awareness_self_control=as.numeric(scale(psych_pca_dim2_spatial_awareness_self_control,center = TRUE)),
+          psych_pca_dim3_social_information_cognition=as.numeric(scale(psych_pca_dim3_social_information_cognition,center = TRUE)),
+          core_start_mass=as.numeric(scale(core_start_mass,center = TRUE)),
+          Grip_Strength=as.numeric(scale(Grip_Strength,center = TRUE)),
+          fitts_mtavg_ms=as.numeric(scale(fitts_mtavg_ms,center = TRUE)),
+          core_shape=as.numeric(scale(core_shape,center=T))) %>%
+   distinct(subject,.keep_all = TRUE) %>%
+   subset(!subject %in% c(6,9)) #missing psych measures, maybe also 21 as outlier
+
+test_data<-complete_past_data_allpca %>%
+   drop_na(skill_pca_dim1_brute_force) %>%
+   mutate(core_shape=maxlength_core*maxwidth_core*maxthickness_core) %>%
+   select(c(subject,Condition,core_number,skill_pca_dim1_brute_force,
+            skill_pca_dim2_careful_flaking,
+            Highest_nBack,RPM,BEAST,exit.questionnaire.score,
+            Grip_Strength, fitts_mtavg_ms,
+            core_shape,core_start_mass)) %>%
+   group_by(subject) %>%
+   mutate(skill_pca_dim1_brute_force=mean(skill_pca_dim1_brute_force),
+          skill_pca_dim2_careful_flaking=mean(skill_pca_dim2_careful_flaking)) %>%
+   ungroup() %>%
+   mutate(Highest_nBack=as.numeric(scale(Highest_nBack,center = TRUE)),
+          RPM=as.numeric(scale(RPM,center = TRUE)),
+          BEAST=as.numeric(scale(BEAST,center = TRUE)),
+          exit.questionnaire.score=as.numeric(scale(exit.questionnaire.score,center = TRUE)),
+          core_start_mass=as.numeric(scale(core_start_mass,center = TRUE)),
+          Grip_Strength=as.numeric(scale(Grip_Strength,center = TRUE)),
+          fitts_mtavg_ms=as.numeric(scale(fitts_mtavg_ms,center = TRUE)),
+          core_shape=as.numeric(scale(core_shape,center=T))) %>%
+   distinct(subject,.keep_all = TRUE) %>%
+   subset(!subject %in% c(6,9)) #missing psych measures, maybe also 21 as outlier
+
+# PC 1
+
+# are core shape and mass correlated before we decide which one to control for in the model?
+ggplot(model_data,aes(x=core_shape, y=core_start_mass))+
+   geom_point() +
+   geom_smooth(method="lm")
+
+core_shape_data<-complete_past_data_allpca %>%
+   mutate(core_shape=maxlength_core*maxwidth_core*maxthickness_core) %>%
+   distinct(core_number,.keep_all=T)
+   
+summary(lm(core_shape~core_start_mass, data=core_shape_data))
+
+#What about fitts and grip strength?
+
+ggplot(model_data,aes(x=Grip_Strength, y=fitts_mtavg_ms))+
+   geom_point() +
+   geom_smooth(method="lm")
+
+summary(lm(Grip_Strength~fitts_mtavg_ms, data=model_data))
+
+#Now for model building
+
+g1_complete<- lm(skill_pca_dim1_brute_force ~  Condition + psych_pca_dim1_intelligence_motivation +
+                    psych_pca_dim2_spatial_awareness_self_control + psych_pca_dim3_social_information_cognition + 
+                    core_shape + 
+                    fitts_mtavg_ms + 
+                    Grip_Strength,
+                    data = model_data)
+
+g1_complete_test<- lm(skill_pca_dim1_brute_force ~  Condition + Highest_nBack +
+                         RPM + BEAST + exit.questionnaire.score+
+                    core_shape + 
+                    fitts_mtavg_ms + 
+                    Grip_Strength,
+                 data = test_data)
+
+g1 <- glmulti(g1_complete, # use the model with built as a starting point
+                          level = 2, #1=just look at main effects, 2=look at main and interraction effects
+                          method='g',
+                          crit="aic",minsize = 0, maxsize = 7, minK = 0, maxK = -1) 
+
+g1_test <- glmulti(g1_complete_test, # use the model with built as a starting point
+              level = 2, #1=just look at main effects, 2=look at main and interraction effects
+              method='g',
+              crit="aic",minsize = 0, maxsize = 7, minK = 0, maxK = -1) 
+
+print(g1_test) #all models
+plot(g1_test)
+
+summary(g1_test@objects[[1]]) #best model
+
+# add mass to final model, but not in model selection
+best_model<-lm(skill_pca_dim1_brute_force~1+psych_pca_dim3_social_information_cognition+
+                  fitts_mtavg_ms+
+                  psych_pca_dim3_social_information_cognition:psych_pca_dim2_spatial_awareness_self_control+
+                  core_shape:psych_pca_dim1_intelligence_motivation+
+                  core_shape:psych_pca_dim2_spatial_awareness_self_control+
+                  core_shape:psych_pca_dim3_social_information_cognition+
+                  Condition:fitts_mtavg_ms+
+                  core_start_mass,
+                 data = model_data)
+
+summary(best_model)
+
+best_model %>%
+   report() %>%
+   as.report_table(summary=TRUE)
+
+# plot model
+
+pred.mm_soc_inf <- ggpredict(best_model, terms = c("psych_pca_dim3_social_information_cognition"))  # this gives overall predictions for the model
+plot(pred.mm_soc_inf,facet=F, add.data = T,show.title =F, alpha=0.07) + 
+   labs(x = "Factor 3 social information/cognition", 
+         y = "Brute force flaking (higher = less brute force flaking)")+
+   theme(text = element_text(size=20))
+
+pred.mm_fitts <- ggpredict(best_model, terms = c("fitts_mtavg_ms"))  # this gives overall predictions for the model
+plot(pred.mm_fitts,facet=F, add.data = T,show.title =F, alpha=0.07) + 
+   labs(x = "Fitt's speed/accuracy tradeoff", 
+        y = "Brute force flaking (higher = less brute force flaking)")+
+   theme(text = element_text(size=20))
+
+pred.mm_shape_intell_mot <- ggpredict(best_model, terms = c("psych_pca_dim1_intelligence_motivation", "core_shape"))  # this gives overall predictions for the model
+plot(pred.mm_shape_intell_mot,facet=T, add.data = F,show.title =F)
+
+pred.mm_shape_space <- ggpredict(best_model, terms = c("psych_pca_dim2_spatial_awareness_self_control","core_shape"))  # this gives overall predictions for the model
+plot(pred.mm_shape_space,facet=F, add.data = F,show.title =F) 
+
+pred.mm_shape_soc_inf <- ggpredict(best_model, terms = c("psych_pca_dim3_social_information_cognition","core_shape"))  # this gives overall predictions for the model
+plot(pred.mm_shape_soc_inf,facet=F, add.data = F,show.title =F) 
+
+pred.mm_fitts_cond <- ggpredict(best_model, terms = c("fitts_mtavg_ms","Condition"))  # this gives overall predictions for the model
+levels(pred.mm_fitts_cond$group) <- c("Untrained", "Trained")
+plot(pred.mm_fitts_cond,facet=T, add.data = F,show.title =F, alpha=0.07) + 
+   labs(x = "Fitt's speed/accuracy tradeoff", 
+        y = "Brute force flaking (higher = less brute force flaking)")+
+   theme(text = element_text(size=20))
+
+#plot test model
+
+best_model_test<-lm(skill_pca_dim1_brute_force~1+BEAST + core_shape + exit.questionnaire.score:BEAST+
+                       core_shape:Highest_nBack + core_shape:BEAST + core_shape:exit.questionnaire.score +
+                       Grip_Strength:BEAST+
+                  core_start_mass,
+               data = test_data)
+
+best_model_test %>%
+   report() %>%
+   as.report_table(summary=TRUE)
+
+pred.mm_1a <- ggpredict(best_model_test, terms = c("BEAST"))  # this gives overall predictions for the model
+plot(pred.mm_1a,facet=F, add.data = F,show.title =F, alpha=0.07)
+
+pred.mm_1b <- ggpredict(g1_test@objects[[1]], terms = c("BEAST","core_shape"))  # this gives overall predictions for the model
+plot(pred.mm_1b,facet=F, add.data = F,show.title =F, alpha=0.07)
+
+pred.mm_1c <- ggpredict(g1_test@objects[[1]], terms = c("BEAST",""))  # this gives overall predictions for the model
+plot(pred.mm_1a,facet=F, add.data = F,show.title =F, alpha=0.07)
+
+
+# interpreting the interaction effects
+#does core order impact core shape and skill?
+ggplot(core_shape_data, aes(y=core_shape, x=Order)) +
+   geom_point()+
+   geom_smooth(method="loess", se=F) +
+   facet_wrap(~Condition)
+
+ggplot(model_data, aes(y=skill_pca_dim1_brute_force, x=Grip_Strength)) +
+   geom_point()+
+   geom_smooth(method="lm", se=T) +
+   facet_wrap(~Condition)
+
+summary(lm(skill_pca_dim1_brute_force~Grip_Strength+Condition, data=model_data))
+
+summary(lm(core_shape~Order, data=core_shape_data))
+summary(lm(core_start_mass~Order, data=core_shape_data))
+
+# plots of order effect on mass and possible also effect of psych_PC_1 on # of cores used
+
+plot_data<-complete_past_data_allpca %>%
+   distinct(core_number, .keep_all = TRUE)
+
+ggplot(complete_past_data_allpca, aes(y=core_start_mass, x=Order)) +
+   geom_point()+
+   geom_smooth(method = 'lm')
+
+ggplot(plot_data, aes(y=psych_pca_dim1_cognition, x=Total_Cores_Used)) +
+   geom_point()+
+   geom_smooth(method = 'lm') +
+   facet_wrap(~Condition)
+
+#Skill PC 2
+
+g2_complete<- lm(skill_pca_dim2_careful_flaking~Condition + psych_pca_dim1_intelligence_motivation +
+                    psych_pca_dim2_spatial_awareness_self_control + psych_pca_dim3_social_information_cognition + 
+                    core_shape + 
+                    fitts_mtavg_ms + 
+                    Grip_Strength,
+                 data = model_data)
+
+g2_complete_test<- lm(skill_pca_dim2_careful_flaking~Condition + Highest_nBack +
+                         RPM + BEAST + exit.questionnaire.score+
+                         core_shape + 
+                         fitts_mtavg_ms + 
+                         Grip_Strength,
+                 data = test_data)
+
+g2 <- glmulti(g2_complete, # use the model with built as a starting point
+              level = 2, #1=just look at main effects, 2=look at main and interraction effects
+              method='g',
+              crit="aic",minsize = 0, maxsize = 7) 
+
+g2_test <- glmulti(g2_complete_test, # use the model with built as a starting point
+              level = 2, #1=just look at main effects, 2=look at main and interraction effects
+              method='g',
+              crit="aic",minsize = 0, maxsize = 7) 
+
+print(g2) #all models
+
+summary(g2_test@objects[[1]]) #best model
+summary(g2_test@objects[[2]]) #best model
+
+best_model_2<-lm(skill_pca_dim2_careful_flaking~
+                    1+Condition+
+                    core_shape+
+                    Grip_Strength+
+                    psych_pca_dim2_spatial_awareness_self_control:psych_pca_dim1_intelligence_motivation+
+                    psych_pca_dim3_social_information_cognition:psych_pca_dim1_intelligence_motivation+
+                    psych_pca_dim3_social_information_cognition:psych_pca_dim2_spatial_awareness_self_control+
+                    Condition:Grip_Strength+
+                    core_start_mass,
+                 data=model_data)
+
+summary(best_model_2)
+
+best_model_2 %>%
+   report() %>%
+   as.report_table(summary=TRUE)
+
+# plot model
+
+pred.mm_cond <- ggpredict(best_model_2, terms = c("Condition"))  # this gives overall predictions for the model
+plot(pred.mm_cond,facet=F, add.data = T,show.title =F) 
+
+pred.mm_grip <- ggpredict(best_model_2, terms = c("Grip_Strength"))  # this gives overall predictions for the model
+plot(pred.mm_grip,facet=F, add.data = F,show.title =F) 
+
+pred.mm_shape <- ggpredict(best_model_2, terms = c("core_shape"))  # this gives overall predictions for the model
+plot(pred.mm_shape,facet=F, add.data = F,show.title =F) 
+
+pred.mm_space_intell <- ggpredict(best_model_2, terms = c("psych_pca_dim1_intelligence_motivation","psych_pca_dim2_spatial_awareness_self_control"))  # this gives overall predictions for the model
+plot(pred.mm_space_intell,facet=T, add.data = F,show.title =F, ci = FALSE) + 
+   labs(x = "Factor 1 intelligence/motivation", 
+        y = "Careful flaking (higher = more careful flaking")+
+   theme(text = element_text(size=20))
+
+pred.mm_control_info <- ggpredict(best_model_2, terms = c("psych_pca_dim2_spatial_awareness_self_control","psych_pca_dim3_social_information_cognition"))  # this gives overall predictions for the model
+plot(pred.mm_control_info,facet=T, add.data = F,show.title =F,ci = FALSE) + 
+   labs(x = "Factor 2 spatial awareness/self-control", 
+        y = "Careful flaking (higher = more careful flaking)")+
+   theme(text = element_text(size=20))
+
+pred.mm_train_strength <- ggpredict(best_model_2, terms = c("Condition", "Grip_Strength"))  # this gives overall predictions for the model
+plot(pred.mm_train_strength,facet=F, add.data = F,show.title =F, alpha=0.07) + 
+   labs(x = "Training condition", 
+        y = "Careful flaking (higher = more careful flaking)")+
+   theme(text = element_text(size=20))
+
+best_model_2_test<-lm(skill_pca_dim2_careful_flaking~
+                    1+RPM+
+                    exit.questionnaire.score+
+                    core_shape+
+                       RPM:exit.questionnaire.score+
+                       core_shape:BEAST+
+                       fitts_mtavg_ms:Highest_nBack+
+                       exit.questionnaire.score:Grip_Strength+
+                    core_start_mass,
+                 data=test_data)
+
+summary(best_model_2_test)
+
+best_model_2_test %>%
+   report() %>%
+   as.report_table(summary=TRUE)
+
+# plot test model
+
+pred.mm_1 <- ggpredict(best_model_2_test, terms = c("RPM"))  # this gives overall predictions for the model
+plot(pred.mm_1,facet=F, add.data = F,show.title =F) 
+
+pred.mm_2 <- ggpredict(best_model_2_test, terms = c("exit.questionnaire.score"))  # this gives overall predictions for the model
+plot(pred.mm_2,facet=F, add.data = F,show.title =F) 
+
+pred.mm_3 <- ggpredict(best_model_2_test, terms = c("exit.questionnaire.score","RPM"))  # this gives overall predictions for the model
+plot(pred.mm_3,facet=F, add.data = F,show.title =F,ci = FALSE) 
+
+pred.mm_4 <- ggpredict(best_model_2_test, terms = c("fitts_mtavg_ms","Highest_nBack"))  # this gives overall predictions for the model
+plot(pred.mm_4,facet=F, add.data = F,show.title =F, ci = FALSE)
+
+pred.mm_5 <- ggpredict(best_model_2_test, terms = c("exit.questionnaire.score","Grip_Strength"))  # this gives overall predictions for the model
+plot(pred.mm_5,facet=F, add.data = F,show.title =F,ci = FALSE)
+
+##### Condition, shape, size, order, comparisons ####
+
+flake_model_data<-complete_past_data_allpca %>%
+   distinct(core_number,.keep_all=T) %>%
+   group_by(subject,Order) %>%
+   mutate(adjusted_cores_used=(Order/Total_Cores_Used)*100) %>%
+   ungroup() %>%
+   select(c(subject,Condition,Order,adjusted_cores_used,
+            flake_mass,flake_pca_dim1,flake_pca_dim2)) %>%
+   mutate(flake_mass=as.numeric(scale(flake_mass,center = TRUE)),
+          flake_pca_dim1=as.numeric(scale(flake_pca_dim1,center = TRUE)),
+          flake_pca_dim2=as.numeric(scale(flake_pca_dim2,center = TRUE)))
+
+mass<-aov(flake_mass~Condition*adjusted_cores_used,data=flake_model_data)
+mass %>% report() %>%as.report_table(summary=TRUE)
+
+shape_1<-aov(flake_pca_dim1~Condition*adjusted_cores_used,data=flake_model_data)
+shape_1 %>% report() %>% as.report_table(summary=TRUE)
+
+shape_2<-aov(flake_pca_dim2~Condition*adjusted_cores_used,data=flake_model_data)
+shape_2 %>% report() %>% as.report_table(summary=TRUE)
+
+ggplot(flake_model_data, aes(x=Condition, y=flake_mass, color=Condition)) +
+   geom_boxplot()
+
+ggplot(flake_model_data, aes(x=Condition, y=flake_pca_dim1, color=Condition)) +
+   geom_boxplot()
+
+ggplot(flake_model_data, aes(x=Condition, y=flake_pca_dim2, color=Condition)) +
+   geom_boxplot()
+
+library(jmv)
+mancova_1<-mancova(data = flake_model_data,
+        deps = vars(flake_mass, flake_pca_dim1, flake_pca_dim2),
+        factors = c(Condition,Order))
+
+mancova_1
+
+mancova_1$assump$boxM
+
+summary(mancova_1)
+
+##### Group level learning curves ####
+
+plot_data<-complete_past_data_allpca %>%
+   select(c(subject,Condition,core_number,Order,skill_pca_dim1_strong_arm,skill_pca_dim2_good_flakes,
+            flake_pca_dim1, flake_pca_dim2)) %>%
+   group_by(core_number,subject) %>%
+   mutate(flake_pca_dim1_bycore=mean(flake_pca_dim1),
+          flake_pca_dim2_bycore=mean(flake_pca_dim2),
+          Order_factor=as.factor(Order)) %>%
+   ungroup() %>%
+   distinct(core_number, .keep_all = TRUE) %>%
+   select(-c(flake_pca_dim1,flake_pca_dim2)) %>%
+   mutate(Order_factor = factor(Order_factor, levels=c("1", "2", "3", "4", "5", "6", "7", "8"))) %>%
+   na.omit()
+
+trained <- plot_data %>%
+   subset(Condition==1) %>%
+   group_by(Order) %>% 
+   summarise(flake_pca_dim1_bycore_t = mean(flake_pca_dim1_bycore),
+             flake_pca_dim2_bycore_t  = mean(flake_pca_dim2_bycore),
+             skill_pca_dim1_strong_arm_t=mean(skill_pca_dim1_strong_arm),
+             skill_pca_dim2_good_flakes_t=mean(skill_pca_dim2_good_flakes),
+             Condition_t=Condition) %>%
+   distinct(Order,.keep_all = TRUE)
+
+untrained <- plot_data %>% 
+   subset(Condition==0) %>%
+   group_by(Order) %>% 
+   summarise(flake_pca_dim1_bycore_ut = mean(flake_pca_dim1_bycore),
+             flake_pca_dim2_bycore_ut  = mean(flake_pca_dim2_bycore),
+             skill_pca_dim1_strong_arm_ut=mean(skill_pca_dim1_strong_arm),
+             skill_pca_dim2_good_flakes_ut=mean(skill_pca_dim2_good_flakes),
+             Condition_ut=Condition) %>%
+   distinct(Order,.keep_all = TRUE)
+
+merged_data<-cbind(trained,untrained) %>%
+   mutate(flake_pca_dim1_difference = flake_pca_dim1_bycore_t-flake_pca_dim1_bycore_ut,
+          flake_pca_dim2_difference=flake_pca_dim2_bycore_t-flake_pca_dim2_bycore_ut,
+          skill_pca_dim1_strong_arm_difference=skill_pca_dim1_strong_arm_t-skill_pca_dim1_strong_arm_ut,
+          skill_pca_dim2_good_flakes_difference=skill_pca_dim2_good_flakes_t-skill_pca_dim2_good_flakes_ut) %>%
+   rename(Order=Order...1) %>%
+   select(c(Order,flake_pca_dim1_difference,flake_pca_dim2_difference,skill_pca_dim1_strong_arm_difference,skill_pca_dim2_good_flakes_difference))
+
+gd_trained <- plot_data %>%
+   subset(Condition==1) %>%
+   group_by(Order) %>% 
+   summarise(flake_pca_dim1_bycore = mean(flake_pca_dim1_bycore),
+             flake_pca_dim2_bycore  = mean(flake_pca_dim2_bycore),
+             skill_pca_dim1_strong_arm=mean(skill_pca_dim1_strong_arm),
+             skill_pca_dim2_good_flakes=mean(skill_pca_dim2_good_flakes),
+             Condition=Condition) %>%
+   distinct(Order,.keep_all = TRUE)
+
+gd_untrained <- plot_data %>% 
+   subset(Condition==0) %>%
+   group_by(Order) %>% 
+   summarise(flake_pca_dim1_bycore = mean(flake_pca_dim1_bycore),
+             flake_pca_dim2_bycore  = mean(flake_pca_dim2_bycore),
+             skill_pca_dim1_strong_arm=mean(skill_pca_dim1_strong_arm),
+             skill_pca_dim2_good_flakes=mean(skill_pca_dim2_good_flakes),
+             Condition=Condition) %>%
+   distinct(Order,.keep_all = TRUE)
+
+ggplot(plot_data, aes(x=Order, y=flake_pca_dim1_bycore)) +
+   #geom_point(alpha = .4) +
+   geom_point(data = gd_trained, size = 4) +
+   geom_point(data = gd_untrained, size = 4, color="red") +
+   geom_smooth(data = gd_untrained, se=F, method='lm', color="red") +
+   geom_smooth(data = gd_trained, se=F, method='lm', color="black")
+
+library(remotes)
+library("report")
+test_1<-lm(Order~flake_pca_dim1_bycore, data=gd_trained)
+report(test_1)
+test_2<-lm(Order~flake_pca_dim1_bycore, data=gd_untrained)
+report(test_2)
+
+ggplot(plot_data, aes(x=Order, y=flake_pca_dim2_bycore)) +
+   #geom_point(alpha = .4)+
+   geom_point(data = gd_trained, size = 4) +
+   geom_point(data = gd_untrained, size = 4, color="red")+
+   geom_smooth(data = gd_untrained, se=F, method='lm', color="red") +
+   geom_smooth(data = gd_trained, se=F, method='lm', color="black")
+
+test_3<-lm(Order~flake_pca_dim2_bycore, data=gd_trained)
+report(test_3)
+test_4<-lm(Order~flake_pca_dim2_bycore, data=gd_untrained)
+report(test_4)
+
+ggplot(plot_data, aes(x=Order, y=skill_pca_dim1_strong_arm))+
+   #geom_point(alpha = .4)+
+   geom_point(data = gd_trained, size = 4) +
+   geom_point(data = gd_untrained, size = 4, color="red")+
+   geom_smooth(data = gd_untrained, se=F, method='lm', color="red") +
+   geom_smooth(data = gd_trained, se=F, method='lm', color="black")
+
+test_5<-lm(Order~skill_pca_dim1_strong_arm, data=gd_trained)
+report(test_5)
+test_6<-lm(Order~skill_pca_dim1_strong_arm, data=gd_untrained)
+report(test_6)
+
+lm_data <- rbind(gd_trained,gd_untrained)
+test_7<-aov(Order~skill_pca_dim1_strong_arm*Condition, data=lm_data)
+report(test_7)
+
+ggplot(plot_data, aes(x=Order, y=skill_pca_dim2_good_flakes)) +
+   #geom_point(alpha = .4)+
+   geom_point(data = gd_trained, size = 4) +
+   geom_point(data = gd_untrained, size = 4, color="red")+
+   geom_smooth(data = gd_untrained, se=F, method='lm', color="red") +
+   geom_smooth(data = gd_trained, se=F, method='lm', color="black")
+
+summary(lm(Order~skill_pca_dim2_good_flakes, data=gd_trained))
+summary(lm(Order~skill_pca_dim2_good_flakes, data=gd_untrained))
+
+ggplot(merged_data, aes(x=Order, y=flake_pca_dim1_difference)) +
+   geom_point(size=4)
+
+ggplot(merged_data, aes(x=Order, y=flake_pca_dim2_difference)) +
+   geom_point(size=4)
+
+ggplot(merged_data, aes(x=Order, y=skill_pca_dim1_strong_arm_difference)) +
+   geom_point(size=4)
+
+ggplot(merged_data, aes(x=Order, y=skill_pca_dim2_good_flakes_difference)) +
+   geom_point(size=4)
+
+###### what effect does nodule size and shape have on outcomes ######
+
+scaling_model_PC1<-lm(skill_pca_dim1_strong_arm~core_start_mass+core_shape+
+                         core_shape*Condition+edge_angle_degree*Condition + core_start_mass*Condition, data=complete_past_data_allpca)
+summary(scaling_model_PC1)
+report(scaling_model_PC1)
+plot(allEffects(scaling_model_PC1))
+
+scaling_model_PC2<-lm(skill_pca_dim2_good_flakes~core_start_mass+core_shape+
+                         core_shape*Condition+edge_angle_degree*Condition + core_start_mass*Condition, data=complete_past_data_allpca)
+summary(scaling_model_PC2)
+report(scaling_model_PC2)
+library(effects)
+plot(allEffects(scaling_model_PC2))
+
+#how do cobble size/shape differ between groups
+boxplot(core_start_mass~Condition, data=complete_past_data_allpca)
+size_aov<-aov(core_start_mass~Condition, data=complete_past_data_allpca)
+report(size_aov)
+shape_aov<-aov(core_shape~Condition, data=complete_past_data_allpca)
+report(shape_aov)
+boxplot(core_shape~Condition, data=complete_past_data_allpca)
+boxplot(edge_angle_degree~Condition, data=complete_past_data_allpca)
+angle_aov<-aov(edge_angle_degree~Condition, data=complete_past_data_allpca)
+report(angle_aov)
+
+#PC1
+
+ggplot(complete_past_data_allpca,
+       aes(x=core_start_mass, y=skill_pca_dim1_strong_arm)) + 
+   geom_point()
+
+ggplot(complete_past_data_allpca,
+       aes(x=maxlength_core, y=skill_pca_dim1_strong_arm)) + 
+   geom_point()
+
+ggplot(complete_past_data_allpca,
+       aes(x=maxwidth_core, y=skill_pca_dim1_strong_arm)) + 
+   geom_point()
+
+#PC2
+
+ggplot(complete_past_data_allpca,
+       aes(x=log(core_start_mass), y=skill_pca_dim2_good_flakes)) + 
+   geom_point() +
+   geom_smooth(method='lm')
+
+ggplot(complete_past_data_allpca,
+       aes(x=maxlength_core, y=skill_pca_dim2_good_flakes)) + 
+   geom_point()+
+   geom_smooth(method='lm')
+
+ggplot(complete_past_data_allpca,
+       aes(x=maxwidth_core, y=skill_pca_dim2_good_flakes)) + 
+   geom_point()+
+   geom_smooth(method='lm')

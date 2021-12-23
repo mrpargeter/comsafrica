@@ -854,6 +854,11 @@ test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
 test_2<-cbind(gwet_data_merged,test[,1])%>%
    rename("factor_levels"='test[, 1]') 
 
+ggplot(test_2, aes(x=factor_levels, y=pa, color=var_names))+
+   geom_point(size=3)+
+   labs(title="", x ="Number of categories", y = "IRR")+ 
+   guides(color=guide_legend(title="Variable names"))
+
 summary(glm(factor_levels~pa,data=test_2,family = "poisson"))
 
 ### IRR visualizations ####
