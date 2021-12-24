@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1640274971150.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "26489D22",
+    "lastKnownWriteTime" : 4377021571,
+    "last_content_update" : 1640274971150,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "9C84FB39",
+        "caption" : "flake_measurements_summary",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=flake_measurements_summary&cache_key=9C84FB39",
+        "displayedObservations" : "1824",
+        "environment" : "",
+        "expression" : "flake_measurements_summary",
+        "object" : "flake_measurements_summary",
+        "preview" : "0",
+        "totalObservations" : "1824",
+        "variables" : "11"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

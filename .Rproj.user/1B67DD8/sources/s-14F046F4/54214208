@@ -12,21 +12,21 @@
     "path" : null,
     "project_path" : null,
     "properties" : {
-        "cacheKey" : "8EFDECE7",
+        "cacheKey" : "B63CE21A",
         "caption" : "comsafrica_data_complete",
-        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=comsafrica_data_complete&cache_key=8EFDECE7",
-        "displayedObservations" : "1086",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=comsafrica_data_complete&cache_key=B63CE21A",
+        "displayedObservations" : "1064",
         "environment" : "",
         "expression" : "comsafrica_data_complete",
         "object" : "comsafrica_data_complete",
         "preview" : "0",
-        "totalObservations" : "1086",
-        "variables" : "28"
+        "totalObservations" : "1064",
+        "variables" : "29"
     },
     "read_only" : false,
     "read_only_alternatives" : [
     ],
-    "relative_order" : 6,
+    "relative_order" : 3,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_dataframe"
