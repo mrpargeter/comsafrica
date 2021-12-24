@@ -61,6 +61,7 @@ library(EnvStats)
 library(naniar)
 library(irrCAC)
 library(stringr)
+library(ggrepel)
 
 ##############################
 # Set working directory and load datafile
@@ -830,22 +831,22 @@ write.csv(gwet_data_merged,"categorical_summary.csv")
 
 ## check if factor levels determine rater reliability
 
-aa<-nlevels(comsafrica_data_cat_data$completeness)
-ab<-nlevels(comsafrica_data_cat_data$platform_cortex)
-ac<-nlevels(comsafrica_data_cat_data$directionality)
-ad<-nlevels(comsafrica_data_cat_data$platfmorph)
-ae<-nlevels(comsafrica_data_cat_data$platflipp)
-af<-nlevels(comsafrica_data_cat_data$bulb)
-ag<-nlevels(comsafrica_data_cat_data$shattbulb)
-ah<-nlevels(comsafrica_data_cat_data$initiation)
-ai<-nlevels(comsafrica_data_cat_data$ventr_plane_form)
-aj<-nlevels(comsafrica_data_cat_data$section)
-ak<-nlevels(comsafrica_data_cat_data$latedgetype)
-al<-nlevels(comsafrica_data_cat_data$flaketerm)
-am<-nlevels(comsafrica_data_cat_data$distplanform)
-an<-nlevels(comsafrica_data_cat_data$kombewa)
-ao<-nlevels(comsafrica_data_cat_data$red_syst)
-ap<-nlevels(comsafrica_data_cat_data$flk_form)
+aa<-nlevels(comsafrica_data_cat_data$red_syst)
+ab<-nlevels(comsafrica_data_cat_data$flk_form)
+ac<-nlevels(comsafrica_data_cat_data$completeness)
+ad<-nlevels(comsafrica_data_cat_data$platform_cortex)
+ae<-nlevels(comsafrica_data_cat_data$directionality)
+af<-nlevels(comsafrica_data_cat_data$platfmorph)
+ag<-nlevels(comsafrica_data_cat_data$platflipp)
+ah<-nlevels(comsafrica_data_cat_data$bulb)
+ai<-nlevels(comsafrica_data_cat_data$shattbulb)
+aj<-nlevels(comsafrica_data_cat_data$initiation)
+ak<-nlevels(comsafrica_data_cat_data$ventr_plane_form)
+al<-nlevels(comsafrica_data_cat_data$section)
+am<-nlevels(comsafrica_data_cat_data$latedgetype)
+an<-nlevels(comsafrica_data_cat_data$flaketerm)
+ao<-nlevels(comsafrica_data_cat_data$kombewa)
+ap<-nlevels(comsafrica_data_cat_data$distplanform)
 
 test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
             ak,al,am,an,ao,ap)) %>%
@@ -854,12 +855,22 @@ test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
 test_2<-cbind(gwet_data_merged,test[,1])%>%
    rename("factor_levels"='test[, 1]') 
 
+ggplot(test_2, aes(x=factor_levels, y=pa,label=var_names))+
+   geom_point(size=3)+
+   labs(title="", x ="Number of categories", y = "IRR")+ 
+   guides(color=guide_legend(title="Variable names"))+ 
+   geom_label_repel(aes(label = var_names),
+                    box.padding   = 0.35, 
+                    point.padding = 0.5,
+                    segment.color = 'grey50') +
+   theme_classic()+ 
+   scale_x_continuous(breaks=seq(0,10,1))
+
 summary(glm(factor_levels~pa,data=test_2,family = "poisson"))
 
 ### IRR visualizations ####
 
 irr_summary<-read.csv("irr_summary_data.csv")
-#irr_summary_subcat<-read.csv("irr_summary_data_subcategorical.csv", stringsAsFactors = T)
 
 ## Continuous data, analyst ID
 
@@ -930,24 +941,24 @@ ggplot(gwet_data_merged,aes(y=pa, x=reorder(var_names,pa))) +
 
 ############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
-# CHANGE TO USING comsafrica_data_cat_data
+# CHANGE TO USING comsafrica_data_cat_data to ensure category states 
+# are the same
 
-data1 <- comsafrica_data
+data1 <- comsafrica_data_cat_data
 
-#create a unique flake ID for each flake 
-# CHANGE TO USING NEW FLAKE ID
-summary(data1$assemblage_code)
-
-data1$assemblage_code <- as.character(data1$assemblage_code)
-data1$assemblage_code[data1$assemblage_code =="chert_condition_A"] <- "A"
-data1$assemblage_code[data1$assemblage_code =="chert_condition_B"] <- "B"
-data1$assemblage_code <- as.factor(data1$assemblage_code)
-
-data1$cond_flake_id <- paste(data1$assemblage_code, data1$flake_id)
-data1$cond_flake_id <- as.factor(data1$cond_flake_id)
+# another option using tbl_summary
+library(gtsummary)
+data1 %>% 
+   select(c(new_flake_id,completeness)) %>% 
+   tbl_summary(by = new_flake_id,
+               statistic = list(all_categorical() ~ "{p}%")
+   ) %>%
+   add_overall() %>% # add an overall column
+   add_n() %>% # add column with total number of non-missing observations
+   bold_labels() 
 
 #completeness
-tableCOMPLETENESS <-  table(data1$cond_flake_id, data1$completeness)
+tableCOMPLETENESS <-  table(data1$new_flake_id, data1$completeness)
 tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS)))
 write.csv(tabCOMP, file="Tables/tablecompleteness.csv")
 
@@ -1235,9 +1246,17 @@ flake_measurements_summary<- comsafrica_data_complete %>%
           min=min(value, na.rm=T),
           max=max(value, na.rm=T),
           median=median(value, na.rm=T),
-          range=max-min) %>%
-   distinct(flake_id,new_flake_id,assemblage_code,variable,cv,mean,sd,min,max,median,range) %>%
-   round_df(2)
+          range=max-min)  %>%
+   distinct(flake_id,new_flake_id,assemblage_code,
+            variable,cv,mean,sd,min,max,median,range) %>%
+   mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2)))
+
+range_summary<-flake_measurements_summary %>%
+   filter(!platfthickimpact > -Inf) %>%
+   select(c(variable,range)) %>%
+   group_by(variable) %>%
+   mutate(range_mean=mean(range, na.rm=T)),
+          range_sd=sd(range,rm=T))
 
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
@@ -1592,3 +1611,5 @@ sumquant <- rbind(mass, cortex,maxdim, maxwidth, maxT, techL, techmaxwidth,
                   platfthickmax, platfthickmid, edgeplatf, angle_height)
 
 write.csv(sumquant, file="Tables/sumquant.csv")
+
+
