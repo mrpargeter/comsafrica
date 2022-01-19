@@ -62,6 +62,10 @@ library(naniar)
 library(irrCAC)
 library(stringr)
 library(ggrepel)
+library(forcats)
+library(ggstatsplot)
+library(Rcpp)
+
 
 ##############################
 # Set working directory and load datafile
@@ -80,7 +84,7 @@ comsafrica_data<-read.csv("comsafrica_complete_adjusted.csv",stringsAsFactors=TR
 # change column names to lower case
 colnames(comsafrica_data) <- tolower(colnames(comsafrica_data))
 
-# clean categorical variables
+######clean categorical variables######
 comsafrica_data<-comsafrica_data %>%
    mutate(completeness=recode(completeness, 
                               fragment="Indeterminate",
@@ -171,8 +175,69 @@ summary(comsafrica_data$flaketerm) #indet can be both na and indet, so replaced 
 summary(comsafrica_data$kombewa) #indet are indet and nas are indet with maybe few NAs, I think we can replace NAs by indet.
 summary(comsafrica_data$distplanform) #concave does not exist --> indeterminate; indet seems to correspond to NAs (prox or medial fragments?) so grouped with NAs
 
+#######cleaning quantitative data######
+summary(comsafrica_data$dorsal_cortex)
+
+summary(comsafrica_data$maximumdimension)
+comsafrica_data$maximumdimension[comsafrica_data$maximumdimension==0] <- NA
+
+summary(comsafrica_data$mass)
+comsafrica_data$mass[comsafrica_data$mass==0] <- NA
+
+summary(comsafrica_data$maximumwidth)
+comsafrica_data$maximumwidth[comsafrica_data$maximumwidth==0] <- NA
+
+summary(comsafrica_data$maximumthickness)
+comsafrica_data$maximumthickness[comsafrica_data$maximumthickness==0] <- NA
+
+summary(comsafrica_data$techlength)
+comsafrica_data$techlength[comsafrica_data$techlength==0] <- NA
+
+summary(comsafrica_data$techmaxwidth)
+comsafrica_data$techmaxwidth[comsafrica_data$techmaxwidth==0] <- NA
+
+summary(comsafrica_data$techmaxthickness)
+comsafrica_data$techmaxthickness[comsafrica_data$techmaxthickness==0] <- NA
+
+summary(comsafrica_data$techwidthprox)
+comsafrica_data$techwidthprox[comsafrica_data$techwidthprox==0] <- NA
+
+summary(comsafrica_data$techwidthmes)
+comsafrica_data$techwidthmes[comsafrica_data$techwidthmes==0] <- NA
+
+summary(comsafrica_data$techwidthdist)
+comsafrica_data$techwidthdist[comsafrica_data$techwidthdist==0] <- NA
+
+summary(comsafrica_data$techthickprox)
+comsafrica_data$techthickprox[comsafrica_data$techthickprox==0] <- NA
+
+summary(comsafrica_data$techthickmes)
+comsafrica_data$techthickmes[comsafrica_data$techthickmes==0] <- NA
+
+summary(comsafrica_data$techthickdist)
+comsafrica_data$techthickdist[comsafrica_data$techthickdist==0] <- NA
+
+summary(comsafrica_data$platfwidth)
+comsafrica_data$platfwidth[comsafrica_data$platfwidth==0] <- NA
+
+summary(comsafrica_data$platfthickmax)
+comsafrica_data$platfthickmax[comsafrica_data$platfthickmax==0] <- NA
+
+summary(comsafrica_data$platfthickimpact)
+comsafrica_data$platfthickimpact[comsafrica_data$platfthickimpact==0] <- NA
+
+
+summary(comsafrica_data$platfthickmid)
+comsafrica_data$platfthickmid[comsafrica_data$platfthickmid==0] <- NA
+
+summary(comsafrica_data$edgeplatf)
+comsafrica_data$edgeplatf[comsafrica_data$edgeplatf==0] <- NA
+
+summary(comsafrica_data$angle_height)
+
+
 ##############################
-# Trim/tidy data and subset data for analyses
+######## Trim/tidy data and subset data for analyses####
 ##### Recode flake ID ####
 
 ## subset
@@ -198,24 +263,57 @@ for(i in 1:length(unique(data.B$flake_id))){
    count = count+1
 }
 
-new_comsafrica_data <- rbind(data.A, data.B) %>%
-  filter(!new_flake_id %in% c(89,97)) #remove two flakes with fragmentation issues
-
-comsafrica_data_complete<-new_comsafrica_data %>%
-      select(c(assemblage_code,analyst_id,analysis_order,flake_id,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
-               dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
-               techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
-               platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height))
+new_comsafrica_data <- rbind(data.A, data.B) 
+new_comsafrica_data <- new_comsafrica_data %>%
+      filter(!new_flake_id %in% c(94,99)) #remove two flakes with fragmentation issues
 
 #adjust cortex values to fix data entry errors
 #A10 and B25 have strange values because of misinterpretations
 #around cortex
 
-comsafrica_data_complete$dorsal_cortex[comsafrica_data_complete$new_flake_id == 46
-                                       & comsafrica_data_complete$analyst_id == "46b96"] <- 100
+new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 46
+                                       & new_comsafrica_data$analyst_id == "46b96"] <- 100
 
-comsafrica_data_complete$dorsal_cortex[comsafrica_data_complete$new_flake_id == 31
-                                       & comsafrica_data_complete$analyst_id == "46b96"] <- NA
+new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 31
+                                       & new_comsafrica_data$analyst_id == "46b96"] <- NA
+
+
+
+write.csv(new_comsafrica_data, file="new_comsafrica_data.csv")
+
+
+
+
+########Quantitative data - looking for outliers######
+mass <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "mass",
+                mean = mean(mass, na.rm = TRUE),
+                sd = sd(mass, na.rm = TRUE),
+                min = min(mass, na.rm=T),
+                max = max(mass, na.rm=T),
+                median = median(mass, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(mass)))
+
+mass$maxmin <- (mass$max - mass$min)
+
+boxplot(mass$maxmin)$out
+Q <- quantile(mass$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(mass$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+massoutliers <- mass %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+massoutliers
+
+#Flk new ID 58 --> fragmentation during transport
+#Flk new ID 83 --> one abnormal entry (human error?)
+#others are probably in the range of errors of a scale?
+
+
 
 ##### Inter rater data analyses
 
