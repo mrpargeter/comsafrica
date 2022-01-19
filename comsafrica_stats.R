@@ -271,10 +271,10 @@ new_comsafrica_data <- new_comsafrica_data %>%
 #A10 and B25 have strange values because of misinterpretations
 #around cortex
 
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 46
+new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 23
                                        & new_comsafrica_data$analyst_id == "46b96"] <- 100
 
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 31
+new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 27
                                        & new_comsafrica_data$analyst_id == "46b96"] <- NA
 
 
@@ -285,6 +285,8 @@ write.csv(new_comsafrica_data, file="new_comsafrica_data.csv")
 
 
 ########Quantitative data - looking for outliers######
+## MASS
+
 mass <- new_comsafrica_data %>%
       group_by(new_flake_id) %>%
       summarize(variable = "mass",
@@ -312,6 +314,243 @@ massoutliers
 #Flk new ID 58 --> fragmentation during transport
 #Flk new ID 83 --> one abnormal entry (human error?)
 #others are probably in the range of errors of a scale?
+
+## DORSAL CORTEX
+
+cortex <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "cortex",
+                mean = mean(dorsal_cortex, na.rm = TRUE),
+                sd = sd(dorsal_cortex, na.rm = TRUE),
+                min = min(dorsal_cortex, na.rm=T),
+                max = max(dorsal_cortex, na.rm=T),
+                median = median(dorsal_cortex, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(dorsal_cortex)))
+
+cortex$maxmin <- (cortex$max - cortex$min)
+
+boxplot(cortex$maxmin)$out
+Q <- quantile(cortex$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(cortex$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+cortexoutliers <- cortex %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+cortexoutliers
+
+#New flk IDs 3, 73 and 81 have discrepancies on dorsal cortex because of what is considered 'cortex'
+
+
+## MAX DIM
+
+maxwidth <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Dim",
+                mean = mean(maximumdimension, na.rm = TRUE),
+                sd = sd(maximumdimension, na.rm = TRUE),
+                min = min(maximumdimension, na.rm=T),
+                max = max(maximumdimension, na.rm=T),
+                median = median(maximumdimension, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumdimension)))
+
+maxdim$maxmin <- (maxdim$max - maxdim$min)
+
+boxplot(maxdim$maxmin)$out
+Q <- quantile(maxdim$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(maxdim$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+maxdimoutliers <- maxdim %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+maxdimoutliers
+
+#interesting to see that most outliers are due to one analyst having a strong difference with the others
+#looking at the flakes, they are of a quadrangular / squarish shape: difficulty to eyeball the location of the max dim?
+#flk id 58, like for mass, the discrepancy is due to fragmentation during transport
+#flk id 52 (B80), analyst 0202a human error? no mistake in flk number
+
+
+
+## MAX WIDTH
+maxwidth <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Width",
+                mean = mean(maximumwidth, na.rm = TRUE),
+                sd = sd(maximumwidth, na.rm = TRUE),
+                min = min(maximumwidth, na.rm=T),
+                max = max(maximumwidth, na.rm=T),
+                median = median(maximumwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumwidth)))
+
+maxwidth$maxmin <- (maxwidth$max - maxwidth$min)
+
+boxplot(maxwidth$maxmin)$out
+Q <- quantile(maxwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(maxwidth$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+maxwidthoutliers <- maxwidth %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+maxwidthoutliers
+
+#new flk id 40, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced
+#flk id 59, wide range, probably related to quadrangular flake morphology 
+# flk id 85, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced
+
+## MAX THICKNESS
+maxT <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Max Thick",
+                mean = mean(maximumthickness, na.rm = TRUE),
+                sd = sd(maximumthickness, na.rm = TRUE),
+                min = min(maximumthickness, na.rm=T),
+                max = max(maximumthickness, na.rm=T),
+                median = median(maximumthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(maximumthickness)))
+
+maxT$maxmin <- (maxT$max - maxT$min)
+
+boxplot(maxT$maxmin)$out
+Q <- quantile(maxT$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(maxT$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+maxToutliers <- maxT %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+maxToutliers
+
+#new flk id 11, one human error, duplication of maxwidth (analyst r42o8) --> probably all measurements are displaced, maxT = 17.59 
+#flk id 40 one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 27.05, maxT=7.69
+#flk id 83 one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 55.01, maxT = 12.59
+### !!!! Flk id 83 NOT identified as an outlier, so to be checked
+# flk id 85, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 19.93, maxT=NA
+
+
+###Corrections duplicates for analyst r42o8
+
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 11
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 17.59
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 83.46
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 48
+new_comsafrica_data$techmaxthickness[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.77
+new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 11
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 11
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 40
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 27.05
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 40
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 7.69
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 40
+                               & new_comsafrica_data$analyst_id == "r42o8"] <- 50.42
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 40
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 55.01
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 83
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.59
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 83
+                               & new_comsafrica_data$analyst_id == "r42o8"] <- 51.39
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 83
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 19.93
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 85
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+
+
+## TECHL
+
+summary(new_comsafrica_data$techlength)
+techL <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "Tech Length",
+                mean = mean(techlength, na.rm = TRUE),
+                sd = sd(techlength, na.rm = TRUE),
+                min = min(techlength, na.rm=T),
+                max = max(techlength, na.rm=T),
+                median = median(techlength, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techlength)))
+
+
+techL$maxmin <- (techL$max - techL$min)
+
+boxplot(techL$maxmin)$out
+Q <- quantile(techL$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techL$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techLoutliers <- techL %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techLoutliers
+
+#flk id 40  - one abherrant value
+#flk id 58 - discrepancy due to transport
+#flk id 68 - discrepancy due to clarity of definition for length / shape of flake (one side of the flake much longer than the other)
+#flk id 84 - clarity of technological axis?
+#flk id 91 - shape of the flake
+
+
+## TECHMAXWIDTH
+
+techmaxwidth <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techmaxwidth",
+                mean = mean(techmaxwidth, na.rm = TRUE),
+                sd = sd(techmaxwidth, na.rm = TRUE),
+                min = min(techmaxwidth, na.rm=T),
+                max = max(techmaxwidth, na.rm=T),
+                median = median(techmaxwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxwidth)))
+
+techmaxwidth$maxmin <- (techmaxwidth$max - techmaxwidth$min)
+
+boxplot(techmaxwidth$maxmin)$out
+Q <- quantile(techmaxwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techmaxwidth$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techmaxwidthoutliers <- techmaxwidth %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techmaxwidthoutliers
+
+
+#flk id 6, shape flake?
+#flk id 58, combination of analysis order and shape flake?
 
 
 
