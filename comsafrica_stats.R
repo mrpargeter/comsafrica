@@ -87,7 +87,8 @@ comsafrica_data<-comsafrica_data %>%
                               shatter="Indeterminate",
                               lateral="Indeterminate",
                               indeterminate="Indeterminate",
-                              Indet="Indeterminate"),
+                              Indet="Indeterminate",
+                              other="Indeterminate"),
           red_syst=recode(red_syst,Discoidal = "Discoid",idnet = "Indet",inde = "Indet",
                           Indeterminate = "Indet",other = "Indet",Ind = "Indet",
                           indet = "Indet",Indet = "Indet",INDET = "Indet",'indeterminate (broken)' = "Indet",
@@ -104,68 +105,71 @@ comsafrica_data<-comsafrica_data %>%
                           'potential Lev' = "Levallois",'potential Levallois' = "Levallois",
                           CENTRIPETAL = "Discoid",discoid = "Discoid",DISCOID = "Discoid",
                           'Discoid?' = "Discoid",'Core Edge Flake' = "Indet",FLAKE = "Flake",bipolar = "Bipolar"),
+          red_syst=na_if(red_syst, "Indet"),                                                                    #replace indet by NAs
           platform_cortex=recode(platform_cortex, INDET = "Indeterminate",
                                  complete = "Complete", absent = "Absent"),
+          platform_cortex=na_if(platform_cortex, "Indeterminate"),
           flk_form=recode(flk_form,BLADE = "Blade",CONVFLAKE = "Convflake",ELONG = "Blade",
                           Elong = "Blade",flake = "Flake",FLAKE = "Flake",INDET="Indeterminate"),
-          directionality=recode(directionality,centripetal = "Centripetal",Other = "Indeterminate",other = "Indeterminate"),
+          flk_form=na_if(flk_form, "Indeterminate"), 
+          directionality=recode(directionality,centripetal = "Centripetal",other = "Other"),
           platfmorph=recode(platfmorph,'Chapeau de Gendarme' = "ChapeauDeGendarme",linear = "Linear",
-                                   Diherdral = "Dihedral",Other = "Indeterminate",facetted = "Facetted"),
+                                   Diherdral = "Dihedral",facetted = "Facetted"),
           platflipp=recode_factor(platflipp, YES = "yes", Yes='yes',NO = "no", No="no", 'NOT APPLICABLE' = "Indeterminate"),
+          platflipp=na_if(platflipp, "Indeterminate"),
           bulb=recode(bulb, YES = "yes", Yes="yes",NO = "no",No="no",Indet="Indeterminate"),
+          bulb=na_if(bulb, "Indeterminate"),
           shattbulb=recode(shattbulb,Indet = "Indeterminate",Indeterminateerminate = "Indeterminate",
                                   NO = "No",no="No",YES = "Yes"),
           initiation=recode(initiation,BENDING = "Bending",HERTZIAN = "Hertzian",hertzian = "Hertzian",
-                                   WEDGING = "Wedging",INDET = "Other"),
+                                   WEDGING = "Wedging"),
+          initiation=na_if(initiation, "INDET"),
           ventr_plane_form=recode(ventr_plane_form,very_concave = "Very concave",Very_concave = "Very concave",
                                   BULBAR = "Bulbar",CONCAVE = "Concave",FLAT = "Flat",
                                   TWISTED = "Twisted",'VERY CONCAVE' = "Very concave",VERY_CONCAVE = "Very concave"),
           section=recode(section,DOMED = "Domed",INDET = "Indeterminate",LENTIC = "Lenticular",
-                         LENTICULAR = "Lenticular",RIGHTTRI = "Righttriangle",RIGHTTRIANGLE = "Righttriangle",FLAT="Flat",
+                         LENTICULAR = "Lenticular",RIGHTTRI = "Righttriangle",RIGHTTRIANGLE = "Righttriangle",FLAT="Lenticular",
                          TRAP = "Trapezoidal",TRAPEZOIDAL = "Trapezoidal",TRI = "Triangular",TRIANGULAR = "Triangular"),
+          section=na_if(section, "Indeterminate"),
           latedgetype=recode(latedgetype,AMORPH = "Amorphous",CONV = "Convergent",CONVERGENT = "Convergent",SQUARE = "Square",
-                             'SUB-PARALLEL' = "Sub_parallel",DIAMOND = "Diamond",DIV = "Divergent",DIVERGENT = "Divergent",INDET = "Indeterminate",
-                             na = "Indeterminate",OVAL = "Ovoid",OVOID = "Ovoid",PARALLEL = "Parallel"),
+                             'SUB-PARALLEL' = "Parallel",DIAMOND = "Diamond",DIV = "Divergent",DIVERGENT = "Divergent",
+                             OVAL = "Ovoid",OVOID = "Ovoid",PARALLEL = "Parallel", INDET = "Indeterminate"),
+          latedgetype=na_if(latedgetype, "na"),
+          latedgetype=na_if(latedgetype, "Indeterminate"),
           flaketerm=recode(flaketerm,FEATHER = "Feather",HINGE = "Hinge",INDET = "Indeterminate",
                            OVERSHOT = "Overshot",AXIAL= "Axial",CRUSHED = "Crushed"),
-          kombewa=recode(kombewa,NO = "No",YES = "Yes",'0.84'="Indet",no="No"),
-          distplanform=recode(distplanform,FLAT = "Flat",INDET = "Indeterminate",INDETERMINATE = "Indeterminate",CONCAVE="Concave",
-                              IRR = "Irregular",Irreg = "Irregular",POINTED = "Pointed",rounded = "Rounded",ROUNDED = "Rounded")) %>% 
+          flaketerm=na_if(flaketerm, "Indeterminate"),
+          kombewa=recode(kombewa,NO = "No",YES = "Yes",no="No", Indet="Indeterminate"),
+          distplanform=recode(distplanform,FLAT = "Flat",INDET = "Indeterminate",INDETERMINATE = "Indeterminate",CONCAVE="Indeterminate",
+                              IRR = "Irregular",Irreg = "Irregular",POINTED = "Pointed",rounded = "Rounded",ROUNDED = "Rounded"),
+          distplanform=na_if(distplanform, "Indeterminate"))%>% 
    map_df(~ na_if(.x, "")) %>% 
    droplevels
 
-####################################
-# exploring data to identify and rectify potential numbering mistakes
-##################################
-
-attach(comsafrica_data)
-cols <- c("assemblage_code", "analyst_id", "flake_id", "completeness", "damage",
-          "dorsal_cortex", "Dorsal_Cortex_Location", "dorsal_cortex_location_other",
-          "platform_cortex", "dorsal_scar_count", "directionality", "Proximal_Scars",
-          "Left_Scars", "Distal_Scars", "Right_Scars", "PLATFMORPH", "PLATFLIPP", "BULB",
-          "SHATTBULB", "INITIATION", "VENTR_PLANE_FORM", "SECTION", "LATEDGETYPE", "FLAKETERM",
-          "DISTPLANFORM", "KOMBEWA", "FLK_TYPE", "RED_SYST", "FLK_FORM")
-data1[cols] <- lapply(comsafrica_data[cols], factor) #not clear where data1 is here?
+#replacement of NA values by 'Indeterminate' for specific variables where NAs = indet
+comsafrica_data$completeness <- fct_explicit_na(comsafrica_data$completeness, na_level = "Indeterminate") 
+comsafrica_data$kombewa <- fct_explicit_na(comsafrica_data$kombewa, na_level = "Indeterminate") 
 
 
-table1 <- table(analyst_id, flake_id) #identify errors in flake numbering. A number should not appear more than twice.
-#And should appear equally among all analysts
-# e.g., analyst 8240a has 3 no 23; 3 no 60;  d764f has 3 no 86
-table1
-#write.csv(table1, file = "Tables/table1.csv")
+#summary of qualitative variables + explanations of changes above
 
-#errors corrected:
-#99 condition B --> 94
-#8 condition B removed from the analysis --> too broken for too many analysts
-#nonr corresponds to 34 and 95 for two other analysts. The others may not have included it (total between 99 and 100)
-#For 8240a, a number of duplicates were identified (analysis took place in two areas if I am not mistaken)
-#Some pieces were misnumbered (e.g. 17 for 19 or 14, etc)
-#I cross-checked the number of artefacts per analyst and comparisons with all artefacts from all analysts
-#when in a doubt, I checked with the actual artefacts to see if the confusion in the numbers made sense or if there were any notes in the bags
-#in total, around 25 pieces were reassigned. Other numbering mistakes may
-# appear and in case of too strong inter-analyst discrepancies, this is a factor that should be considered
-
-detach()
+summary(comsafrica_data$completeness)# I grouped together other and indeterminate too as it seems that analysts
+#used one or the other, but rarely both
+summary(comsafrica_data$red_syst) 
+summary(comsafrica_data$platform_cortex) #indet used for distal fragments as well (as na), so grouped with NAs
+summary(comsafrica_data$flk_form) #indet removed, not an option in the E4 file
+summary(comsafrica_data$directionality) #indet and other kept as used by same analysts. NAs correspond to when it was not possible to record data (100% cortex) and some human errors
+summary(comsafrica_data$platfmorph) #other and indet used by same analysts. Nas correspond to mostly fragments and a few human errors
+summary(comsafrica_data$platflipp) #indet exclusively produced by E4 users while NAs correspond to fragments as well as likely indet from non-E4 users (as they are associated with 
+#a determined platf) --> indet to be removed from the analysis.  
+summary(comsafrica_data$bulb) #indet are also present when medial fragment so indet is also used as NAs. removed from analysis
+summary(comsafrica_data$initiation) #only one INDET, removed from the analysis --> NA
+summary(comsafrica_data$ventr_plane_form)
+summary(comsafrica_data$section) #flat doesn't exist in E4, grouped with Lenticular; indeterminate can be NA or indet, so replaced by NA
+summary(comsafrica_data$latedgetype) #indet is mostly na with a few true indet, so replaced by NA
+summary(comsafrica_data$flaketerm) #indet can be both na and indet, so replaced by NA
+summary(comsafrica_data$kombewa) #indet are indet and nas are indet with maybe few NAs, I think we can replace NAs by indet.
+summary(comsafrica_data$distplanform) #concave does not exist --> indeterminate; indet seems to correspond to NAs (prox or medial fragments?) so grouped with NAs
 
 ##############################
 # Trim/tidy data and subset data for analyses
