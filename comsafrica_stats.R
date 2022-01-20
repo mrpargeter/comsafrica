@@ -278,6 +278,79 @@ new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 27
                                        & new_comsafrica_data$analyst_id == "46b96"] <- NA
 
 
+###Corrections duplicates for analyst r42o8
+
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 17.59
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 11
+                               & new_comsafrica_data$analyst_id == "r42o8"] <- 83.46
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 11
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 48
+new_comsafrica_data$techmaxthickness[new_comsafrica_data$new_flake_id == 11
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.77
+new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 11
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 11
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 11
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 40
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 27.05
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 40
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 7.69
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 40
+                               & new_comsafrica_data$analyst_id == "r42o8"] <- 50.42
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 40
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 55.01
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 83
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.59
+new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 83
+                               & new_comsafrica_data$analyst_id == "r42o8"] <- 51.39
+new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 83
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 19.93
+new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 85
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 41
+                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 70
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 38.53
+new_comsafrica_data$techthickprox[new_comsafrica_data$new_flake_id == 70
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 16.75
+new_comsafrica_data$techthickmes[new_comsafrica_data$new_flake_id == 70
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 12.55
+new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 70
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+
+new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 33
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 41.17
+new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 33
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 26.43
+new_comsafrica_data$techthickprox[new_comsafrica_data$new_flake_id == 33
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 9.09
+new_comsafrica_data$techthickmes[new_comsafrica_data$new_flake_id == 33
+                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 7.77
+new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 33
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 5.34
+new_comsafrica_data$platfwidth[new_comsafrica_data$new_flake_id == 33
+                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
 
 write.csv(new_comsafrica_data, file="new_comsafrica_data.csv")
 
@@ -346,7 +419,7 @@ cortexoutliers
 
 ## MAX DIM
 
-maxwidth <- new_comsafrica_data %>%
+maxdim <- new_comsafrica_data %>%
       group_by(new_flake_id) %>%
       summarize(variable = "Max Dim",
                 mean = mean(maximumdimension, na.rm = TRUE),
@@ -402,9 +475,11 @@ maxwidthoutliers <- maxwidth %>%
       filter(maxmin > up)
 maxwidthoutliers
 
-#new flk id 40, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced
+
+#flk id 6, wide platform --> definition problem?
+#flk id 58, one value distinct from the others --> definition problem for width?
 #flk id 59, wide range, probably related to quadrangular flake morphology 
-# flk id 85, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced
+
 
 ## MAX THICKNESS
 maxT <- new_comsafrica_data %>%
@@ -431,60 +506,7 @@ maxToutliers <- maxT %>%
       filter(maxmin > up)
 maxToutliers
 
-#new flk id 11, one human error, duplication of maxwidth (analyst r42o8) --> probably all measurements are displaced, maxT = 17.59 
-#flk id 40 one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 27.05, maxT=7.69
-#flk id 83 one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 55.01, maxT = 12.59
-### !!!! Flk id 83 NOT identified as an outlier, so to be checked
-# flk id 85, one human error, duplication of length (analyst r42o8) --> probably all measurements are displaced, maxwidth = 19.93, maxT=NA
-
-
-###Corrections duplicates for analyst r42o8
-
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 11
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 17.59
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 83.46
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 48
-new_comsafrica_data$techmaxthickness[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.77
-new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 11
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 11
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 40
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 27.05
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 40
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 7.69
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 40
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- 50.42
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 40
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-
-
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 55.01
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 83
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.59
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 83
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- 51.39
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 83
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 19.93
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 85
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-
+#flks 14, 51, 62, 67 are all relatively large flakes with prominent bulbs and thick platforms
 
 
 ## TECHL
@@ -553,6 +575,556 @@ techmaxwidthoutliers
 #flk id 58, combination of analysis order and shape flake?
 
 
+##TECHMAXTHICKNESS
+techmaxthickness <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techmaxthickness",
+                mean = mean(techmaxthickness, na.rm = TRUE),
+                sd = sd(techmaxthickness, na.rm = TRUE),
+                min = min(techmaxthickness, na.rm=T),
+                max = max(techmaxthickness, na.rm=T),
+                median = median(techmaxthickness, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techmaxthickness)))
+
+techmaxthickness$maxmin <- (techmaxthickness$max - techmaxthickness$min)
+
+boxplot(techmaxthickness$maxmin)$out
+Q <- quantile(techmaxthickness$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techmaxthickness$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techmaxthicknessoutliers <- techmaxthickness %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techmaxthicknessoutliers
+
+#flk ids 12, 51, 67 no straightforward explanation. Flakes with thick platforms - drift from definition of techW
+
+
+##TECHWIDTHPROX
+
+techwidthprox <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthprox",
+                mean = mean(techwidthprox, na.rm = TRUE),
+                sd = sd(techwidthprox, na.rm = TRUE),
+                min = min(techwidthprox, na.rm=T),
+                max = max(techwidthprox, na.rm=T),
+                median = median(techwidthprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthprox)))
+
+techwidthprox$maxmin <- (techwidthprox$max - techwidthprox$min)
+techwidthprox
+boxplot(techwidthprox$maxmin)$out
+Q <- quantile(techwidthprox$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techwidthprox$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techwidthproxoutliers <- techwidthprox %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techwidthproxoutliers
+
+
+#newflkid 79 - one abherrant value
+# all other flakes (15, 20, 56, 59, 62, 84) --> relatively large flakes - weird shape or expanding and then converging edges
+
+
+##TECHWIDTHMES
+
+techwidthmes <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthmes",
+                mean = mean(techwidthmes, na.rm = TRUE),
+                sd = sd(techwidthmes, na.rm = TRUE),
+                min = min(techwidthmes, na.rm=T),
+                max = max(techwidthmes, na.rm=T),
+                median = median(techwidthmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthmes)))
+
+techwidthmes$maxmin <- (techwidthmes$max - techwidthmes$min)
+techwidthmes
+boxplot(techwidthmes$maxmin)$out
+Q <- quantile(techwidthmes$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techwidthmes$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techwidthmesoutliers <- techwidthmes %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techwidthmesoutliers
+
+#id 9,59,71,84 --> flake shapes for 59 and 84?
+
+##TECHWIDTHDIST
+
+techwidthdist <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techwidthdist",
+                mean = mean(techwidthdist, na.rm = TRUE),
+                sd = sd(techwidthdist, na.rm = TRUE),
+                min = min(techwidthdist, na.rm=T),
+                max = max(techwidthdist, na.rm=T),
+                median = median(techwidthdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techwidthdist)))
+
+techwidthdist$maxmin <- (techwidthdist$max - techwidthdist$min)
+techwidthdist
+boxplot(techwidthdist$maxmin)$out
+Q <- quantile(techwidthdist$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techwidthdist$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techwidthdistoutliers <- techwidthdist %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techwidthdistoutliers
+
+#id 71, 84, 91 < weird shape
+
+###TECHTHICKPROX
+
+
+techthickprox <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickprox",
+                mean = mean(techthickprox, na.rm = TRUE),
+                sd = sd(techthickprox, na.rm = TRUE),
+                min = min(techthickprox, na.rm=T),
+                max = max(techthickprox, na.rm=T),
+                median = median(techthickprox, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickprox)))
+
+
+techthickprox$maxmin <- (techthickprox$max - techthickprox$min)
+techthickprox
+boxplot(techthickprox$maxmin)$out
+Q <- quantile(techthickprox$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techthickprox$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techthickproxoutliers <- techthickprox %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techthickproxoutliers
+
+
+#43 - human error (a8acd - 63.48 instead of 6.48?), #79 one abherrant value
+#3, 7, 11, 12, 49, 62 --> flake shape?
+
+
+###TECHTHICKMES
+
+
+
+techthickmes <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickmes",
+                mean = mean(techthickmes, na.rm = TRUE),
+                sd = sd(techthickmes, na.rm = TRUE),
+                min = min(techthickmes, na.rm=T),
+                max = max(techthickmes, na.rm=T),
+                median = median(techthickmes, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickmes)))
+
+
+techthickmes$maxmin <- (techthickmes$max - techthickmes$min)
+techthickmes
+boxplot(techthickmes$maxmin)$out
+Q <- quantile(techthickmes$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techthickmes$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techthickmesoutliers <- techthickmes %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techthickmesoutliers
+
+
+#flk id 1 < one abherrant value: human error?
+#flk id 3 < flk shape?
+
+
+
+
+###TECHTHICKDIST
+
+
+techthickdist <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "techthickdist",
+                mean = mean(techthickdist, na.rm = TRUE),
+                sd = sd(techthickdist, na.rm = TRUE),
+                min = min(techthickdist, na.rm=T),
+                max = max(techthickdist, na.rm=T),
+                median = median(techthickdist, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(techthickdist)))
+
+techthickdist$maxmin <- (techthickdist$max - techthickdist$min)
+techthickdist
+boxplot(techthickdist$maxmin)$out
+Q <- quantile(techthickdist$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(techthickdist$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+techthickdistoutliers <- techthickdist %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+techthickdistoutliers
+
+#flk 58 < no immediate explanation, flk shape?
+
+
+
+
+###PLATFWIDTH
+
+platfwidth <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfwidth",
+                mean = mean(platfwidth, na.rm = TRUE),
+                sd = sd(platfwidth, na.rm = TRUE),
+                min = min(platfwidth, na.rm=T),
+                max = max(platfwidth, na.rm=T),
+                median = median(platfwidth, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfwidth)))
+
+
+platfwidth$maxmin <- (platfwidth$max - platfwidth$min)
+platfwidth
+boxplot(platfwidth$maxmin)$out
+Q <- quantile(platfwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(platfwidth$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+platfwidthoutliers <- platfwidth %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+platfwidthoutliers
+
+#flk id 2 one abherrant value
+#flk id 9, 56, 63, 67 : cortical platform, platform not well defined
+#flk id 14-15, 74 : debordant flakes
+#flk 33 - human error, duplicates?
+
+
+###PLATFTHICKIMPACT
+
+platfthickimpact <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickimpact",
+                mean = mean(platfthickimpact, na.rm = TRUE),
+                sd = sd(platfthickimpact, na.rm = TRUE),
+                min = min(platfthickimpact, na.rm=T),
+                max = max(platfthickimpact, na.rm=T),
+                median = median(platfthickimpact, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickimpact)))
+
+platfthickimpact$maxmin <- (platfthickimpact$max - platfthickimpact$min)
+platfthickimpact
+boxplot(platfthickimpact$maxmin)$out
+Q <- quantile(platfthickimpact$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(platfthickimpact$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+platfthickimpactoutliers <- platfthickimpact %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+platfthickimpactoutliers
+
+
+
+## PLATFTHICKMAX
+
+
+platfthickmax <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickmax",
+                mean = mean(platfthickmax, na.rm = TRUE),
+                sd = sd(platfthickmax, na.rm = TRUE),
+                min = min(platfthickmax, na.rm=T),
+                max = max(platfthickmax, na.rm=T),
+                median = median(platfthickmax, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmax)))
+
+
+platfthickmax$maxmin <- (platfthickmax$max - platfthickmax$min)
+platfthickmax
+boxplot(platfthickmax$maxmin)$out
+Q <- quantile(platfthickmax$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(platfthickmax$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+platfthickmaxoutliers <- platfthickmax %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+platfthickmaxoutliers
+
+
+
+## PLATFTHICKMID
+
+platfthickmid <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "platfthickmid",
+                mean = mean(platfthickmid, na.rm = TRUE),
+                sd = sd(platfthickmid, na.rm = TRUE),
+                min = min(platfthickmid, na.rm=T),
+                max = max(platfthickmid, na.rm=T),
+                median = median(platfthickmid, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(platfthickmid)))
+
+
+platfthickmid$maxmin <- (platfthickmid$max - platfthickmid$min)
+platfthickmid
+boxplot(platfthickmid$maxmin)$out
+Q <- quantile(platfthickmid$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(platfthickmid$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+platfthickmidoutliers <- platfthickmid %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+platfthickmidoutliers
+
+
+
+## EDGEPLATF
+edgeplatf <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "edgeplatf",
+                mean = mean(edgeplatf, na.rm = TRUE),
+                sd = sd(edgeplatf, na.rm = TRUE),
+                min = min(edgeplatf, na.rm=T),
+                max = max(edgeplatf, na.rm=T),
+                median = median(edgeplatf, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(edgeplatf)))
+
+
+edgeplatf$maxmin <- (edgeplatf$max - edgeplatf$min)
+edgeplatf
+boxplot(edgeplatf$maxmin)$out
+Q <- quantile(edgeplatf$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(edgeplatf$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+edgeplatfoutliers <- edgeplatf %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+edgeplatfoutliers
+
+#check this variable for consistency (mm or degrees), remove all  that are degrees (NA)
+
+
+
+angle_height <- new_comsafrica_data %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "angle_height",
+                mean = mean(angle_height, na.rm = TRUE),
+                sd = sd(angle_height, na.rm = TRUE),
+                min = min(angle_height, na.rm=T),
+                max = max(angle_height, na.rm=T),
+                median = median(angle_height, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(angle_height)))
+
+angle_height
+angle_height$maxmin <- (angle_height$max - angle_height$min)
+angle_height
+boxplot(angle_height$maxmin)$out
+Q <- quantile(angle_height$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(angle_height$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+angle_heightoutliers <- angle_height %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+angle_heightoutliers
+
+
+##problems with angle height: is 0 a real value or automatic fill when not recorded?  (as seen for other measures?) seems to depend...
+
+#DORSAL SCAR COUNT
+
+
+new_comsafrica_data_scar <- new_comsafrica_data %>%
+      filter(!new_flake_id %in% c(3))
+
+
+dorsal_scar_count <- new_comsafrica_data_scar %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "dorsal_scar_count",
+                mean = mean(dorsal_scar_count, na.rm = TRUE),
+                sd = sd(dorsal_scar_count, na.rm = TRUE),
+                min = min(dorsal_scar_count, na.rm=T),
+                max = max(dorsal_scar_count, na.rm=T),
+                median = median(dorsal_scar_count, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(dorsal_scar_count)))
+
+dorsal_scar_count
+dorsal_scar_count$maxmin <- (dorsal_scar_count$max - dorsal_scar_count$min)
+dorsal_scar_count
+boxplot(dorsal_scar_count$maxmin)$out
+Q <- quantile(dorsal_scar_count$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(dorsal_scar_count$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+dorsal_scar_countoutliers <- dorsal_scar_count %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+dorsal_scar_countoutliers
+
+#flk id 3 < depends on cortex definitions too
+
+#if flk id 3 removed, no outliers, but looking at those with a min-max range >10, it seems that problems linked to cortex definitions and what is a scar
+
+
+#PROX SCAR COUNT
+
+proximal_scars <- new_comsafrica_data_scar %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "proximal_scars",
+                mean = mean(proximal_scars, na.rm = TRUE),
+                sd = sd(proximal_scars, na.rm = TRUE),
+                min = min(proximal_scars, na.rm=T),
+                max = max(proximal_scars, na.rm=T),
+                median = median(proximal_scars, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(proximal_scars)))
+
+proximal_scars
+proximal_scars$maxmin <- (proximal_scars$max - proximal_scars$min)
+proximal_scars
+boxplot(proximal_scars$maxmin)$out
+Q <- quantile(proximal_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(proximal_scars$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+proximal_scarsoutliers <- proximal_scars %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+proximal_scarsoutliers
+
+
+
+##LEFT SCARS
+
+left_scars <- new_comsafrica_data_scar %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "left_scars",
+                mean = mean(left_scars, na.rm = TRUE),
+                sd = sd(left_scars, na.rm = TRUE),
+                min = min(left_scars, na.rm=T),
+                max = max(left_scars, na.rm=T),
+                median = median(left_scars, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(left_scars)))
+
+left_scars
+left_scars$maxmin <- (left_scars$max - left_scars$min)
+left_scars
+boxplot(left_scars$maxmin)$out
+Q <- quantile(left_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(left_scars$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+left_scarsoutliers <- left_scars %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+left_scarsoutliers
+
+#no outliers
+
+##RIGHT SCARS
+
+right_scars <- new_comsafrica_data_scar %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "right_scars",
+                mean = mean(right_scars, na.rm = TRUE),
+                sd = sd(right_scars, na.rm = TRUE),
+                min = min(right_scars, na.rm=T),
+                max = max(right_scars, na.rm=T),
+                median = median(right_scars, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(right_scars)))
+
+right_scars
+right_scars$maxmin <- (right_scars$max - right_scars$min)
+right_scars
+boxplot(right_scars$maxmin)$out
+Q <- quantile(right_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(right_scars$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+right_scarsoutliers <- right_scars %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+right_scarsoutliers
+
+#id8 - human error? count does not add up between total number scars and number scars per sector
+#id46 - same + difference in interpretation? often same analyst (46b96) has much larger count scars
+#id60 - same, often does not add up to total count scars
+#id62 - same
+
+
+##DISTAL SCARS
+
+distal_scars <- new_comsafrica_data_scar %>%
+      group_by(new_flake_id) %>%
+      summarize(variable = "distal_scars",
+                mean = mean(distal_scars, na.rm = TRUE),
+                sd = sd(distal_scars, na.rm = TRUE),
+                min = min(distal_scars, na.rm=T),
+                max = max(distal_scars, na.rm=T),
+                median = median(distal_scars, na.rm=T),
+                count=n(),
+                count2 = sum(!is.na(distal_scars)))
+
+distal_scars
+distal_scars$maxmin <- (distal_scars$max - distal_scars$min)
+distal_scars
+boxplot(distal_scars$maxmin)$out
+Q <- quantile(distal_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
+iqr <- IQR(distal_scars$maxmin)
+up <-  Q[2]+1.5*iqr # Upper Range  
+up
+
+distal_scarsoutliers <- distal_scars %>%
+      select(new_flake_id, maxmin, min, max) %>%
+      filter(maxmin > up)
+distal_scarsoutliers
+
+#no outliers
 
 ##### Inter rater data analyses
 
