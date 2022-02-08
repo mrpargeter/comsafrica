@@ -8,12 +8,12 @@
 
 sessionInfo()
 
-#R version 3.6.1 (2019-07-05)
-#Platform: x86_64-apple-darwin15.6.0 (64-bit)
-#Running under: macOS Mojave 10.14.6
+#R version 4.0.3 (2020-10-10)
+#Platform: x86_64-apple-darwin17.0 (64-bit)
+#Running under: macOS Big Sur 10.16
 
 #attached base packages:
-#  [1] stats     graphics  grDevices utils     datasets  methods   base
+#[1] stats     graphics  grDevices utils     datasets  methods   base     
 
 ###############################
 #Print list of package versions
@@ -336,6 +336,12 @@ new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 33
                                   & new_comsafrica_data$analyst_id == "r42o8"] <- 5.34
 new_comsafrica_data$platfwidth[new_comsafrica_data$new_flake_id == 33
                                & new_comsafrica_data$analyst_id == "r42o8"] <- NA
+
+# remove 4 extra flake IDs that have crept into the analysis since we had
+# the last COMSAFRICA meeting
+
+new_comsafrica_data <- new_comsafrica_data %>%
+      filter(!new_flake_id %in% c(101:106))
 
 ##### Inter rater data analyses
 
