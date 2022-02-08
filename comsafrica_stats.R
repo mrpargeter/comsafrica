@@ -135,37 +135,9 @@ comsafrica_data<-comsafrica_data %>%
    droplevels
 
 ####################################
-# exploring data to identify and rectify potential numbering mistakes
+# Data cleaning
 ##################################
 
-attach(comsafrica_data)
-cols <- c("assemblage_code", "analyst_id", "flake_id", "completeness", "damage",
-          "dorsal_cortex", "Dorsal_Cortex_Location", "dorsal_cortex_location_other",
-          "platform_cortex", "dorsal_scar_count", "directionality", "Proximal_Scars",
-          "Left_Scars", "Distal_Scars", "Right_Scars", "PLATFMORPH", "PLATFLIPP", "BULB",
-          "SHATTBULB", "INITIATION", "VENTR_PLANE_FORM", "SECTION", "LATEDGETYPE", "FLAKETERM",
-          "DISTPLANFORM", "KOMBEWA", "FLK_TYPE", "RED_SYST", "FLK_FORM")
-data1[cols] <- lapply(comsafrica_data[cols], factor) #not clear where data1 is here?
-
-
-table1 <- table(analyst_id, flake_id) #identify errors in flake numbering. A number should not appear more than twice.
-#And should appear equally among all analysts
-# e.g., analyst 8240a has 3 no 23; 3 no 60;  d764f has 3 no 86
-table1
-#write.csv(table1, file = "Tables/table1.csv")
-
-#errors corrected:
-#99 condition B --> 94
-#8 condition B removed from the analysis --> too broken for too many analysts
-#nonr corresponds to 34 and 95 for two other analysts. The others may not have included it (total between 99 and 100)
-#For 8240a, a number of duplicates were identified (analysis took place in two areas if I am not mistaken)
-#Some pieces were misnumbered (e.g. 17 for 19 or 14, etc)
-#I cross-checked the number of artefacts per analyst and comparisons with all artefacts from all analysts
-#when in a doubt, I checked with the actual artefacts to see if the confusion in the numbers made sense or if there were any notes in the bags
-#in total, around 25 pieces were reassigned. Other numbering mistakes may
-# appear and in case of too strong inter-analyst discrepancies, this is a factor that should be considered
-
-detach()
 
 ##############################
 # Trim/tidy data and subset data for analyses
