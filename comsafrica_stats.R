@@ -361,9 +361,8 @@ comsafrica_cortex_boot<-rpt(dorsal_cortex ~ new_flake_id*analysis_order + (1 | n
                             data = comsafrica_data_complete,
                             datatype = "Gaussian",
                             nboot = 1000, npermut = 100)
-
-summary(comsafrica_cortex_boot)
 print(comsafrica_cortex_boot)
+
 #fixed effects (analysis order) alone explain almost none of the variance in the response variable
 
 # maxdim
@@ -374,8 +373,6 @@ comsafrica_maxdim_boot<-rpt(maximumdimension ~ new_flake_id*analysis_order + (1 
                   data = comsafrica_data_complete,
                   datatype = "Gaussian",
                   nboot = 1000, npermut = 100)
-
-summary(comsafrica_maxdim_boot)
 print(comsafrica_maxdim_boot)
 
 #mass
@@ -386,7 +383,6 @@ comsafrica_mass<-rpt(log(mass) ~ new_flake_id*analysis_order + (1 | new_flake_id
                        data = filter(comsafrica_data_complete,mass>0),
                        datatype = "Gaussian",
                        nboot = 1000, npermut = 100)
-summary(comsafrica_mass)
 print(comsafrica_mass)
 
 #flake width
@@ -396,8 +392,6 @@ comsafrica_maxwidth<-rpt(maximumwidth ~ new_flake_id*analysis_order + (1 | new_f
                      data = comsafrica_data_complete,
                      datatype = "Gaussian",
                      nboot = 1000, npermut = 100)
-
-summary(comsafrica_maxwidth)
 print(comsafrica_maxwidth)
 
 #flake max thickness
@@ -407,8 +401,6 @@ comsafrica_maxthick<-rpt(maximumthickness ~ new_flake_id*analysis_order + (1 | n
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
-
-summary(comsafrica_maxthick)
 print(comsafrica_maxthick)
 
 #flake tech length
@@ -418,8 +410,6 @@ comsafrica_techlength<-rpt(techlength ~ new_flake_id*analysis_order + (1 | new_f
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
-
-summary(comsafrica_techlength)
 print(comsafrica_techlength)
 
 #flake tech max width
@@ -429,8 +419,6 @@ comsafrica_techmaxwidth<-rpt(techmaxwidth ~ new_flake_id*analysis_order + (1 | n
                            data = comsafrica_data_complete,
                            datatype = "Gaussian",
                            nboot = 1000, npermut = 100)
-
-summary(comsafrica_techmaxwidth)
 print(comsafrica_techmaxwidth)
 
 #flake tech max thickness
@@ -440,7 +428,6 @@ comsafrica_techmaxthick<-rpt(techmaxthickness ~ new_flake_id*analysis_order + (1
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
-summary(comsafrica_techmaxthick)
 print(comsafrica_techmaxthick)
 
 #flake tech width prox
@@ -450,7 +437,6 @@ comsafrica_techwidthprox<-rpt(techwidthprox ~ new_flake_id*analysis_order + (1 |
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
-summary(comsafrica_techwidthprox)
 print(comsafrica_techwidthprox)
 
 #flake tech width mes
@@ -460,7 +446,6 @@ comsafrica_techwidthmes<-rpt(techwidthmes ~ new_flake_id*analysis_order + (1 | n
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_techwidthmes)
 print(comsafrica_techwidthmes)
 
 #flake tech width dist
