@@ -2004,7 +2004,7 @@ angle_heightoutliers
 
 #DORSAL SCAR COUNT
 
-dorsal_scar_count <- new_comsafrica_data_scar %>%
+dorsal_scar_count <- new_comsafrica_data %>%
    group_by(new_flake_id) %>%
    summarize(variable = "dorsal_scar_count",
              mean = mean(dorsal_scar_count, na.rm = TRUE),
