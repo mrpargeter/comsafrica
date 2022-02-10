@@ -1431,7 +1431,7 @@ ggplot(data=filter(test,variable=="mass"), aes(x=range)) +
    labs(title="Mass",
         x ="Range of measurements", y = "Density")
 
-### outlier detection 
+###### outlier detection ######
 
 ## MASS
 mass <- new_comsafrica_data %>%
@@ -2003,9 +2003,6 @@ angle_heightoutliers
 ##problems with angle height: is 0 a real value or automatic fill when not recorded?  (as seen for other measures?) seems to depend...
 
 #DORSAL SCAR COUNT
-new_comsafrica_data_scar <- new_comsafrica_data %>%
-   filter(!new_flake_id %in% c(3))
-
 
 dorsal_scar_count <- new_comsafrica_data_scar %>%
    group_by(new_flake_id) %>%
