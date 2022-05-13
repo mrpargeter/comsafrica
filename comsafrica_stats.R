@@ -1298,9 +1298,9 @@ round_df <- function(x, digits) {
 flake_measurements_summary<- comsafrica_data_complete %>%
    select(c(flake_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
             techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
-            platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf)) %>%
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height)) %>%
    filter(!new_flake_id %in% c(1,89,97)) %>%
-   mutate(across(c(5:21), na_if, 0)) %>%
+   mutate(across(c(5:23), na_if, 0)) %>%
    pivot_longer(!new_flake_id &!assemblage_code &!flake_id,
       names_to = "variable",
       values_to = "value") %>%
@@ -1317,15 +1317,33 @@ flake_measurements_summary<- comsafrica_data_complete %>%
             variable,cv,mean,sd,min,max,median,range) %>%
    mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2)))
 
-range_summary<-flake_measurements_summary %>% #CHECK WHY CORTEX IS THROWING AN ERROR
-   select(c(variable,sd)) %>%
+library(gmodels)
+range_summary<-flake_measurements_summary %>%
+   select(c(variable,mean,sd,range)) %>%
    group_by(variable) %>%
-   mutate(sd_mean=mean(sd, na.rm=T)) %>%
-   distinct(sd_mean, .keep_all=T)
-
+   mutate(sd_mean=mean(sd, na.rm=T),
+          mean_mean=mean(mean, na.rm=T),
+          cv_mean=(sd_mean/mean_mean*100),
+          range_mean=mean(range, na.rm=T)) %>%
+   distinct(sd_mean, .keep_all=T) %>%
+   mutate_at(vars(cv_mean,sd_mean,range_mean), funs(round(., 2))) %>%
+   select(variable,range_mean,sd_mean,cv_mean) %>%
+   arrange(cv_mean)
+ 
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
-## Range histograms-arranged by IRR performance (worst to best)
+## Visualize average measurement SD values
+library(ggforce)
+ggplot(data=range_summary,
+       aes(y=cv_mean, x=reorder(variable,cv_mean))) +
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   ylab(bquote("Average coefficient of variation")) +
+   xlab("")+
+   facet_zoom(ylim = c(0, 25), zoom.data = ifelse(cv_mean <= 25, NA, FALSE))
+
+#### Range histograms-arranged by IRR performance (worst to best) ####
 
 # edgeplatf
 ggplot(data=filter(flake_measurements_summary,variable=="edgeplatf"), aes(x=range)) +
@@ -1903,8 +1921,6 @@ platfthickimpactoutliers <- platfthickimpact %>%
    select(new_flake_id, maxmin, min, max) %>%
    filter(maxmin > up)
 platfthickimpactoutliers
-
-
 
 ## PLATFTHICKMAX
 platfthickmax <- new_comsafrica_data %>%
