@@ -62,6 +62,8 @@ library(naniar)
 library(irrCAC)
 library(stringr)
 library(ggrepel)
+library(stringr)
+library(formattable)
 
 ##############################
 # Set working directory and load datafile
@@ -70,7 +72,7 @@ library(ggrepel)
 # Set to source directory with relevant .csv datafile provided
 # through the Open Science repository
 getwd()
-setwd("/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis/CoMSA_stats")
+setwd("/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis//CoMSA_stats/comsafrica")
 
 ## Add datasets
 
@@ -337,12 +339,6 @@ new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 33
 new_comsafrica_data$platfwidth[new_comsafrica_data$new_flake_id == 33
                                & new_comsafrica_data$analyst_id == "r42o8"] <- NA
 
-# remove 4 extra flake IDs that have crept into the analysis since we had
-# the last COMSAFRICA meeting
-
-new_comsafrica_data <- new_comsafrica_data %>%
-      filter(!new_flake_id %in% c(101:106))
-
 ##### Inter rater data analyses
 
 comsafrica_data_complete<-new_comsafrica_data %>%
@@ -361,6 +357,7 @@ comsafrica_cortex_boot<-rpt(dorsal_cortex ~ new_flake_id*analysis_order + (1 | n
                             data = comsafrica_data_complete,
                             datatype = "Gaussian",
                             nboot = 1000, npermut = 100)
+summary(comsafrica_cortex_boot)
 print(comsafrica_cortex_boot)
 
 #fixed effects (analysis order) alone explain almost none of the variance in the response variable
@@ -373,16 +370,17 @@ comsafrica_maxdim_boot<-rpt(maximumdimension ~ new_flake_id*analysis_order + (1 
                   data = comsafrica_data_complete,
                   datatype = "Gaussian",
                   nboot = 1000, npermut = 100)
+summary(comsafrica_maxdim_boot)
 print(comsafrica_maxdim_boot)
 
 #mass
-hist(log(comsafrica_data_complete$mass))
 set.seed(50)
 comsafrica_mass<-rpt(log(mass) ~ new_flake_id*analysis_order + (1 | new_flake_id),
                        grname = c("new_flake_id","Fixed"),
                        data = filter(comsafrica_data_complete,mass>0),
                        datatype = "Gaussian",
                        nboot = 1000, npermut = 100)
+summary(comsafrica_mass)
 print(comsafrica_mass)
 
 #flake width
@@ -392,6 +390,7 @@ comsafrica_maxwidth<-rpt(maximumwidth ~ new_flake_id*analysis_order + (1 | new_f
                      data = comsafrica_data_complete,
                      datatype = "Gaussian",
                      nboot = 1000, npermut = 100)
+summary(comsafrica_maxwidth)
 print(comsafrica_maxwidth)
 
 #flake max thickness
@@ -401,6 +400,7 @@ comsafrica_maxthick<-rpt(maximumthickness ~ new_flake_id*analysis_order + (1 | n
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
+summary(comsafrica_maxthick)
 print(comsafrica_maxthick)
 
 #flake tech length
@@ -410,6 +410,7 @@ comsafrica_techlength<-rpt(techlength ~ new_flake_id*analysis_order + (1 | new_f
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
+summary(comsafrica_techlength)
 print(comsafrica_techlength)
 
 #flake tech max width
@@ -419,6 +420,7 @@ comsafrica_techmaxwidth<-rpt(techmaxwidth ~ new_flake_id*analysis_order + (1 | n
                            data = comsafrica_data_complete,
                            datatype = "Gaussian",
                            nboot = 1000, npermut = 100)
+summary(comsafrica_techmaxwidth)
 print(comsafrica_techmaxwidth)
 
 #flake tech max thickness
@@ -428,6 +430,7 @@ comsafrica_techmaxthick<-rpt(techmaxthickness ~ new_flake_id*analysis_order + (1
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
+summary(comsafrica_techmaxthick)
 print(comsafrica_techmaxthick)
 
 #flake tech width prox
@@ -437,6 +440,7 @@ comsafrica_techwidthprox<-rpt(techwidthprox ~ new_flake_id*analysis_order + (1 |
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
+summary(comsafrica_techwidthprox)
 print(comsafrica_techwidthprox)
 
 #flake tech width mes
@@ -446,6 +450,7 @@ comsafrica_techwidthmes<-rpt(techwidthmes ~ new_flake_id*analysis_order + (1 | n
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
+summary(comsafrica_techwidthmes)
 print(comsafrica_techwidthmes)
 
 #flake tech width dist
@@ -459,8 +464,8 @@ summary(comsafrica_techwidthdist)
 print(comsafrica_techwidthdist)
 
 #flake tech thick prox
-tech_thick_prox_data<-comsafrica_data_complete %>%
-   filter(!new_flake_id %in% c(27,68,10))
+#tech_thick_prox_data<-comsafrica_data_complete %>%
+ #  filter(!new_flake_id %in% c(27,68,10))
 
 set.seed(50)
 comsafrica_techtechthickprox<-rpt(techthickprox ~ new_flake_id*analysis_order + (1 | new_flake_id),
@@ -501,6 +506,16 @@ comsafrica_platfwidth<-rpt(platfwidth ~ new_flake_id*analysis_order + (1 | new_f
 summary(comsafrica_platfwidth)
 print(comsafrica_platfwidth)
 
+#flake platform thickness
+set.seed(50)
+comsafrica_platfthickmax<-rpt(platfthickmax ~ new_flake_id*analysis_order + (1 | new_flake_id),
+                              grname = c("new_flake_id","Fixed"),
+                              data = comsafrica_data_complete,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+summary(comsafrica_platfthickmax)
+print(comsafrica_platfthickmax)
+
 #flake platform thickness impact
 set.seed(50)
 comsafrica_platfthicimpact<-rpt(platfthickimpact ~ new_flake_id*analysis_order + (1 | new_flake_id),
@@ -521,16 +536,6 @@ comsafrica_platfthickmid<-rpt(platfthickmid ~ new_flake_id*analysis_order + (1 |
 summary(comsafrica_platfthickmid)
 print(comsafrica_platfthickmid)
 
-#flake platform thickness
-set.seed(50)
-comsafrica_platfthickmax<-rpt(platfthickmax ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                           grname = c("new_flake_id","Fixed"),
-                           data = comsafrica_data_complete,
-                           datatype = "Gaussian",
-                           nboot = 1000, npermut = 100)
-summary(comsafrica_platfthickmax)
-print(comsafrica_platfthickmax)
-
 #flake EPA
 EPA_data<-comsafrica_data_complete %>%
    filter(!new_flake_id %in% c(53,64,82,56,54,55,60) & edgeplatf < 25)
@@ -541,8 +546,8 @@ comsafrica_edgeplatf<-rpt(edgeplatf ~ new_flake_id*analysis_order + (1 | new_fla
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_edgeplatf)
 print(comsafrica_edgeplatf)
+summary(comsafrica_edgeplatf)
 
 #angle height
 set.seed(50)
@@ -946,8 +951,14 @@ var_names<-c("reduction system","flake form","completeness","platform cortex",
              "lateral edge shape","flake termination","Kombewa","distal plan form")
 
 gwet_data_merged<-cbind(gwet_data,var_names) %>%
-   select(c(var_names,pa,pe))
-
+   select(c(var_names,coeff.val,conf.int)) %>%
+   mutate(conf.int=str_replace_all(conf.int,c("[(]"="","[)]"=""), "")) %>%
+   separate(conf.int, c("lower", "upper"), sep = ",") %>%
+   mutate(lower=as.numeric(lower),
+          upper=as.numeric(upper),
+          across(where(is.numeric), ~ round(., 2))) %>%
+   arrange(-coeff.val)
+   
 write.csv(gwet_data_merged,"categorical_summary.csv")
 
 ## check if factor levels determine rater reliability
@@ -1049,9 +1060,9 @@ ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_order"),
 
 ## Categorical data
 
-ggplot(gwet_data_merged,aes(y=pa, x=reorder(var_names,pa))) +
+ggplot(gwet_data_merged,aes(y=coeff.val, x=reorder(var_names,coeff.val))) +
    geom_bar(position=position_dodge(), stat="identity") +
-   geom_errorbar(aes(ymin=pa-pe, ymax=pa+pe),
+   geom_errorbar(aes(ymin=lower, ymax=upper),
                  width=.2,                    # Width of the error bars
                  position=position_dodge(.9))+
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
@@ -1293,6 +1304,7 @@ flake_measurements_summary<- comsafrica_data_complete %>%
    pivot_longer(!new_flake_id &!assemblage_code &!flake_id,
       names_to = "variable",
       values_to = "value") %>%
+   drop_na(value) %>%
    group_by(new_flake_id,variable) %>%
    mutate(cv=cv(value, na.rm=T),
           mean=mean(value, na.rm=T),
@@ -1305,128 +1317,127 @@ flake_measurements_summary<- comsafrica_data_complete %>%
             variable,cv,mean,sd,min,max,median,range) %>%
    mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2)))
 
-range_summary<-flake_measurements_summary %>%
-   filter(!platfthickimpact > -Inf) %>%
-   select(c(variable,range)) %>%
+range_summary<-flake_measurements_summary %>% #CHECK WHY CORTEX IS THROWING AN ERROR
+   select(c(variable,sd)) %>%
    group_by(variable) %>%
-   mutate(range_mean=mean(range, na.rm=T),
-          range_sd=sd(range,rm=T))
+   mutate(sd_mean=mean(sd, na.rm=T)) %>%
+   distinct(sd_mean, .keep_all=T)
 
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
 ## Range histograms-arranged by IRR performance (worst to best)
 
 # edgeplatf
-ggplot(data=filter(test,variable=="edgeplatf"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="edgeplatf"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="EPA [raw measurement]",
        x ="Range of measurements", y = "Density")
 
 # platfthickmid
-ggplot(data=filter(test,variable=="platfthickmid"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="platfthickmid"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Platform thickness mid-point",
        x ="Range of measurements", y = "Density")
 
 # techwidthdist
-ggplot(data=filter(test,variable=="techwidthdist"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techwidthdist"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological width distal",
        x ="Range of measurements", y = "Density")
 
 # techthickprox
-ggplot(data=filter(test,variable=="techthickprox"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techthickprox"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological thickness proximal",
        x ="Range of measurements", y = "Density")
 
 # techlength
-ggplot(data=filter(test,variable=="techlength"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techlength"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological length",
        x ="Range of measurements", y = "Density")
 
 # platfthickmax
-ggplot(data=filter(test,variable=="platfthickmax"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="platfthickmax"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Platform thickness maximum",
        x ="Range of measurements", y = "Density")
 
 # platfwidth
-ggplot(data=filter(test,variable=="platfwidth"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="platfwidth"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Platform width",
        x ="Range of measurements", y = "Density")
 
 # platfthickimpact
-ggplot(data=filter(test,variable=="platfthickimpact"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="platfthickimpact"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Platform thickness impact",
        x ="Range of measurements", y = "Density")
 
 # techwidthprox
-ggplot(data=filter(test,variable=="techwidthprox"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techwidthprox"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological width proximal",
        x ="Range of measurements", y = "Density")
 
 # techmaxthickness
-ggplot(data=filter(test,variable=="techmaxthickness"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techmaxthickness"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological max thickness",
        x ="Range of measurements", y = "Density")
 
 # techmaxwidth
-ggplot(data=filter(test,variable=="techmaxwidth"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techmaxwidth"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological max width",
        x ="Range of measurements", y = "Density")
 
 # techthickdist
-ggplot(data=filter(test,variable=="techthickdist"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techthickdist"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological thickness distal",
        x ="Range of measurements", y = "Density")
 
 # techwidthmes
-ggplot(data=filter(test,variable=="techwidthmes"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techwidthmes"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological width mesial",
        x ="Range of measurements", y = "Density")
 
 # techthickmes
-ggplot(data=filter(test,variable=="techthickmes"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="techthickmes"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Technological thickness mesial",
        x ="Range of measurements", y = "Density")
 
 # maximumthickness
-ggplot(data=filter(test,variable=="maximumthickness"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="maximumthickness"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Maximum thickness",
        x ="Range of measurements", y = "Density")
 
 # dorsal_cortex COME BACK TO THIS AFTER CHECKING DATA FOR WEIRD RANGE
 # VALUES
-ggplot(data=filter(test,variable=="dorsal_cortex"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="dorsal_cortex"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Dorsal cortex",
        x ="Range of measurements", y = "Density")
 
 # maximumwidth
-ggplot(data=filter(test,variable=="maximumwidth"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="maximumwidth"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Maximum width",
        x ="Range of measurements", y = "Density")
 
 # Max dimension
-ggplot(data=filter(test,variable=="maximumdimension"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="maximumdimension"), aes(x=range)) +
   geom_histogram(aes(y=..density..), colour="black", fill="white")+
   labs(title="Maximum dimension",
        x ="Range of measurements", y = "Density")
 
 # mass
-ggplot(data=filter(test,variable=="mass"), aes(x=range)) +
+ggplot(data=filter(flake_measurements_summary,variable=="mass"), aes(x=range)) +
    geom_histogram(aes(y=..density..), colour="black", fill="white")+
    labs(title="Mass",
         x ="Range of measurements", y = "Density")
