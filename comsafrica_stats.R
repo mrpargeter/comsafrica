@@ -563,7 +563,8 @@ print(comsafrica_angle_height)
 
 comsafrica_data_count_data<-new_comsafrica_data %>%
    select(c(assemblage_code,analyst_id,analysis_order,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
-            dorsal_scar_count))
+            dorsal_scar_count)) %>%
+   filter(!analyst_id == "r42o8")
 
 # proximal_scars
 hist(comsafrica_data_count_data$proximal_scars)
@@ -1342,6 +1343,20 @@ ggplot(data=range_summary,
    ylab(bquote("Average coefficient of variation")) +
    xlab("")+
    facet_zoom(ylim = c(0, 25), zoom.data = ifelse(cv_mean <= 25, NA, FALSE))
+
+#####Few follow up questions####
+
+# Dorsal scars by section vs. total
+
+dorsal_scars<-comsafrica_data_count_data %>%
+   mutate(sum_scars=left_scars+right_scars+distal_scars+proximal_scars,
+          difference_scars=sum_scars-dorsal_scar_count) %>%
+   select(c(analyst_id,new_flake_id,assemblage_code,sum_scars,dorsal_scar_count,difference_scars))
+
+summary(lm(sum_scars~dorsal_scar_count, data=dorsal_scars))
+
+ggplot(dorsal_scars, aes(x=sum_scars, y=dorsal_scar_count))+
+   geom_point()
 
 #### Range histograms-arranged by IRR performance (worst to best) ####
 
