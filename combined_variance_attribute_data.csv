@@ -1,0 +1,21 @@
+Variable,Comparison,Measurement,Est,Lower,Upper,Adj. P value
+platform_cortex,Complete-Absent,Platform width,7.03,2.44,11.61,0.001
+platfmorph,Indeterminate-Dihedral,Platform thickness midpoint,2.36,0,4.72,0.05
+platfmorph,Plain-Indeterminate,Platform thickness midpoint,-2.09,-4.08,-0.1,0.032
+platfmorph,Punctiform-Indeterminate,Platform thickness midpoint,-2.84,-5.68,-0.01,0.049
+platform_cortex,Complete-Absent,Platform width,7.03,2.44,11.61,0.001
+platform_cortex,Partial-Absent,Platform thickness midpoint,2.58,1.02,4.15,0.001
+platform_cortex,Partial-Absent,Platform thickness maximum,2.1,0.51,3.68,0.006
+latedgetype,Parallel-Amorphous,Technological width medial,-2.98,-5.25,-0.71,0.003
+latedgetype,Parallel-Divergent,Technological width medial,-2.28,-4.17,-0.39,0.008
+latedgetype,Parallel-Amorphous,Technological width proximal,-2.64,-5.21,-0.07,0.04
+latedgetype,Ovoid-Convergent,Technological width proximal,2.96,0.07,5.85,0.041
+latedgetype,Parallel-Ovoid,Technological width proximal,-3.47,-6.04,-0.9,0.002
+latedgetype,Parallel-Amorphous,Technological width proximal,-2.64,-5.21,-0.07,0.04
+latedgetype,Ovoid-Convergent,Technological width proximal,2.96,0.07,5.85,0.041
+latedgetype,Parallel-Ovoid,Technological width proximal,-3.47,-6.04,-0.9,0.002
+ventr_plane_form,Flat-Bulbar,Maximum thickness,-0.46,-0.85,-0.07,0.014
+ventr_plane_form,Concave-Bulbar,Technological maximum thickness,-0.81,-1.49,-0.12,0.014
+ventr_plane_form,Flat-Bulbar,Technological maximum thickness,-0.76,-1.51,-0.01,0.047
+flaketerm,Overshot-Feather,Technological thickness distal,2.24,0.23,4.24,0.025
+flaketerm,Overshot-Hinge,Technological thickness distal,2.76,0.69,4.84,0.006

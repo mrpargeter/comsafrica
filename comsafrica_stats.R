@@ -64,6 +64,7 @@ library(stringr)
 library(ggrepel)
 library(stringr)
 library(formattable)
+library(broom)
 
 ##############################
 # Set working directory and load datafile
@@ -1316,7 +1317,9 @@ flake_measurements_summary<- comsafrica_data_complete %>%
           range=max-min)  %>%
    distinct(flake_id,new_flake_id,assemblage_code,
             variable,cv,mean,sd,min,max,median,range) %>%
-   mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2)))
+   mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2))) %>%
+   select(-assemblage_code) %>%
+   na.omit()
 
 library(gmodels)
 range_summary<-flake_measurements_summary %>%
@@ -1357,6 +1360,182 @@ summary(lm(sum_scars~dorsal_scar_count, data=dorsal_scars))
 
 ggplot(dorsal_scars, aes(x=sum_scars, y=dorsal_scar_count))+
    geom_point()
+
+## how do technological features impact measurement variance? ##
+
+test_data<-new_comsafrica_data %>%
+   distinct(new_flake_id,.keep_all=T)
+
+features_variance_data<-merge(test_data[c("new_flake_id","platfmorph","latedgetype",
+                                          "ventr_plane_form","platform_cortex",
+                                          "distplanform","flaketerm")], 
+                              flake_measurements_summary[c("new_flake_id","variable","sd")], 
+                              by="new_flake_id")
+
+# platform morphology and platform measurements
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfwidth")
+aov_1<-aov(sd~platfmorph,data=features_variance_data_platform)
+as.data.frame(tidy(TukeyHSD(aov_1))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickimpact")
+aov_2<-aov(sd~platfmorph,data=features_variance_data_platform)
+as.data.frame(tidy(TukeyHSD(aov_2))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickmid")
+aov_3<-aov(sd~platfmorph,data=features_variance_data_platform)
+b<-as.data.frame(tidy(TukeyHSD(aov_3))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickmax")
+aov_4<-aov(sd~platfmorph,data=features_variance_data_platform)
+as.data.frame(tidy(TukeyHSD(aov_4))) %>% 
+   filter(adj.p.value < .05)
+
+# platform cortex and platform measurements
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfwidth")
+aov_5<-aov(sd~platform_cortex,data=features_variance_data_platform)
+c<-as.data.frame(tidy(TukeyHSD(aov_5))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickimpact")
+aov_6<-aov(sd~platform_cortex,data=features_variance_data_platform)
+as.data.frame(tidy(TukeyHSD(aov_6))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickmid")
+aov_7<-aov(sd~platform_cortex,data=features_variance_data_platform)
+d<-as.data.frame(tidy(TukeyHSD(aov_7))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_platform<-features_variance_data %>%
+   filter(variable == "platfthickmax")
+aov_8<-aov(sd~platform_cortex,data=features_variance_data_platform)
+e<-as.data.frame(tidy(TukeyHSD(aov_8))) %>% 
+   filter(adj.p.value < .05)
+
+# lateral edge type and tech measurements
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techlength")
+aov_9<-aov(sd~latedgetype,data=features_variance_data_edge)
+as.data.frame(tidy(TukeyHSD(aov_9))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techwidthdist")
+aov_10<-aov(sd~latedgetype,data=features_variance_data_edge)
+as.data.frame(tidy(TukeyHSD(aov_10))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techwidthmes")
+aov_11<-aov(sd~latedgetype,data=features_variance_data_edge)
+f<-as.data.frame(tidy(TukeyHSD(aov_11))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techwidthprox")
+aov_12<-aov(sd~latedgetype,data=features_variance_data_edge)
+g<-as.data.frame(tidy(TukeyHSD(aov_12))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techwidthprox")
+aov_12<-aov(sd~latedgetype,data=features_variance_data_edge)
+h<-as.data.frame(tidy(TukeyHSD(aov_12))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "techmaxwidth")
+aov_13<-aov(sd~latedgetype,data=features_variance_data_edge)
+as.data.frame(tidy(TukeyHSD(aov_13))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_edge<-features_variance_data %>%
+   filter(variable == "maximumwidth")
+aov_13a<-aov(sd~latedgetype,data=features_variance_data_edge)
+as.data.frame(tidy(TukeyHSD(aov_13a))) %>% 
+   filter(adj.p.value < .05)
+
+# ventral plane form and thickness measurements
+
+features_variance_data_thick<-features_variance_data %>%
+   filter(variable == "maximumthickness")
+aov_14<-aov(sd~ventr_plane_form,data=features_variance_data_thick)
+i<-as.data.frame(tidy(TukeyHSD(aov_14))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_thick<-features_variance_data %>%
+   filter(variable == "techmaxthickness")
+aov_15<-aov(sd~ventr_plane_form,data=features_variance_data_thick)
+j<-as.data.frame(tidy(TukeyHSD(aov_15))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_thick<-features_variance_data %>%
+   filter(variable == "techthickdist")
+aov_16<-aov(sd~ventr_plane_form,data=features_variance_data_thick)
+as.data.frame(tidy(TukeyHSD(aov_16))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_thick<-features_variance_data %>%
+   filter(variable == "techthickmes")
+aov_17<-aov(sd~ventr_plane_form,data=features_variance_data_thick)
+as.data.frame(tidy(TukeyHSD(aov_17))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_thick<-features_variance_data %>%
+   filter(variable == "techthickprox")
+aov_18<-aov(sd~ventr_plane_form,data=features_variance_data_thick)
+as.data.frame(tidy(TukeyHSD(aov_18))) %>% 
+   filter(adj.p.value < .05)
+
+# flake termination and distal measurements
+
+features_variance_data_dist<-features_variance_data %>%
+   filter(variable == "techthickdist")
+aov_19<-aov(sd~flaketerm,data=features_variance_data_dist)
+k<-as.data.frame(tidy(TukeyHSD(aov_19))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_dist<-features_variance_data %>%
+   filter(variable == "techwidthdist")
+aov_20<-aov(sd~flaketerm,data=features_variance_data_dist)
+as.data.frame(tidy(TukeyHSD(aov_20))) %>% 
+   filter(adj.p.value < .05)
+
+# distal plan form and distal measurements
+
+features_variance_data_dist<-features_variance_data %>%
+   filter(variable == "techthickdist")
+aov_21<-aov(sd~distplanform,data=features_variance_data_dist)
+as.data.frame(tidy(TukeyHSD(aov_21))) %>% 
+   filter(adj.p.value < .05)
+
+features_variance_data_dist<-features_variance_data %>%
+   filter(variable == "techwidthdist")
+aov_22<-aov(sd~distplanform,data=features_variance_data_dist)
+as.data.frame(tidy(TukeyHSD(aov_22))) %>% 
+   filter(adj.p.value < .05)
+
+# combined influences table
+
+combined_variance_attribute_data<-data.frame(rbind(a,b,c,d,e,f,g,h,i,j,k)) %>%
+   rename("Variable"=term,
+          "Comparison"=contrast) %>%
+   select(c(Variable, Comparison, estimate, conf.low, conf.high, adj.p.value)) %>%
+   mutate_at(vars(estimate,conf.low,conf.high), funs(round(., 2))) %>%
+   mutate_at(vars(adj.p.value), funs(round(., 3)))
+
+write.csv(combined_variance_attribute_data,"combined_variance_attribute_data.csv")
 
 #### Range histograms-arranged by IRR performance (worst to best) ####
 
