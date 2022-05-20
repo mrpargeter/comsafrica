@@ -350,215 +350,279 @@ comsafrica_data_complete<-new_comsafrica_data %>%
 
 ### repeatability coefficients for continuous (Gaussian) data ####
 
-# cortex-NOT SURE WHAT TO DO WITH CORTEX-STRANGE DISTRIBUTION?
+# cortex
 hist(log(comsafrica_data_complete$dorsal_cortex))
 set.seed(50)
-comsafrica_cortex_boot<-rpt(dorsal_cortex ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                            grname = c("new_flake_id","Fixed"),
+comsafrica_cortex_boot<-rpt(dorsal_cortex ~ (1 | assemblage_code) + (1 | new_flake_id),
+                            grname = c("assemblage_code","new_flake_id"),
                             data = comsafrica_data_complete,
                             datatype = "Gaussian",
                             nboot = 1000, npermut = 100)
-summary(comsafrica_cortex_boot)
 print(comsafrica_cortex_boot)
-
-#fixed effects (analysis order) alone explain almost none of the variance in the response variable
+cortex_irr<-comsafrica_cortex_boot$R
+cortex_ci<-comsafrica_cortex_boot$CI_emp
 
 # maxdim
 hist(comsafrica_data_complete$maximumdimension)
 set.seed(50)
-comsafrica_maxdim_boot<-rpt(maximumdimension ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                  grname = c("new_flake_id","Fixed"),
+comsafrica_maxdim_boot<-rpt(maximumdimension ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                  grname = c("assemblage_code","new_flake_id"),
                   data = comsafrica_data_complete,
                   datatype = "Gaussian",
                   nboot = 1000, npermut = 100)
-summary(comsafrica_maxdim_boot)
 print(comsafrica_maxdim_boot)
+maxdim_irr<-comsafrica_maxdim_boot$R
+maxdim_ci<-comsafrica_maxdim_boot$CI_emp
 
 #mass
 set.seed(50)
-comsafrica_mass<-rpt(log(mass) ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                       grname = c("new_flake_id","Fixed"),
+comsafrica_mass<-rpt(log(mass) ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                       grname = c("assemblage_code","new_flake_id"),
                        data = filter(comsafrica_data_complete,mass>0),
                        datatype = "Gaussian",
                        nboot = 1000, npermut = 100)
-summary(comsafrica_mass)
 print(comsafrica_mass)
+mass_irr<-comsafrica_mass$R
+mass_ci<-comsafrica_mass$CI_emp
 
 #flake width
 set.seed(50)
-comsafrica_maxwidth<-rpt(maximumwidth ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                     grname = c("new_flake_id","Fixed"),
+comsafrica_maxwidth<-rpt(maximumwidth ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                     grname = c("assemblage_code","new_flake_id"),
                      data = comsafrica_data_complete,
                      datatype = "Gaussian",
                      nboot = 1000, npermut = 100)
-summary(comsafrica_maxwidth)
 print(comsafrica_maxwidth)
+maxwidth_irr<-comsafrica_maxwidth$R
+maxwidth_ci<-comsafrica_maxwidth$CI_emp
 
 #flake max thickness
 set.seed(50)
-comsafrica_maxthick<-rpt(maximumthickness ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                         grname = c("new_flake_id","Fixed"),
+comsafrica_maxthick<-rpt(maximumthickness ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                         grname = c("assemblage_code","new_flake_id"),
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
-summary(comsafrica_maxthick)
 print(comsafrica_maxthick)
+maxthick_irr<-comsafrica_maxthick$R
+maxthick_ci<-comsafrica_maxthick$CI_emp
 
 #flake tech length
 set.seed(50)
-comsafrica_techlength<-rpt(techlength ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                         grname = c("new_flake_id","Fixed"),
+comsafrica_techlength<-rpt(techlength ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                         grname = c("assemblage_code","new_flake_id"),
                          data = comsafrica_data_complete,
                          datatype = "Gaussian",
                          nboot = 1000, npermut = 100)
-summary(comsafrica_techlength)
 print(comsafrica_techlength)
+techlength_irr<-comsafrica_techlength$R
+techlength_ci<-comsafrica_techlength$CI_emp
 
 #flake tech max width
 set.seed(50)
-comsafrica_techmaxwidth<-rpt(techmaxwidth ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                           grname = c("new_flake_id","Fixed"),
+comsafrica_techmaxwidth<-rpt(techmaxwidth ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                           grname = c("assemblage_code","new_flake_id"),
                            data = comsafrica_data_complete,
                            datatype = "Gaussian",
                            nboot = 1000, npermut = 100)
-summary(comsafrica_techmaxwidth)
 print(comsafrica_techmaxwidth)
+techmaxwidth_irr<-comsafrica_techmaxwidth$R
+techmaxwidth_ci<-comsafrica_techmaxwidth$CI_emp
 
 #flake tech max thickness
 set.seed(50)
-comsafrica_techmaxthick<-rpt(techmaxthickness ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                             grname = c("new_flake_id","Fixed"),
+comsafrica_techmaxthick<-rpt(techmaxthickness ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                             grname = c("assemblage_code","new_flake_id"),
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
-summary(comsafrica_techmaxthick)
 print(comsafrica_techmaxthick)
+techmaxthick_irr<-comsafrica_techmaxthick$R
+techmaxthick_ci<-comsafrica_techmaxthick$CI_emp
 
 #flake tech width prox
 set.seed(50)
-comsafrica_techwidthprox<-rpt(techwidthprox ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                             grname = c("new_flake_id","Fixed"),
+comsafrica_techwidthprox<-rpt(techwidthprox ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                             grname = c("assemblage_code","new_flake_id"),
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
-summary(comsafrica_techwidthprox)
 print(comsafrica_techwidthprox)
+techwidthprox_irr<-comsafrica_techwidthprox$R
+techwidthprox_ci<-comsafrica_techwidthprox$CI_emp
 
 #flake tech width mes
 set.seed(50)
-comsafrica_techwidthmes<-rpt(techwidthmes ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                              grname = c("new_flake_id","Fixed"),
+comsafrica_techwidthmes<-rpt(techwidthmes ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                              grname = c("assemblage_code","new_flake_id"),
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_techwidthmes)
 print(comsafrica_techwidthmes)
+techwidthmes_irr<-comsafrica_techwidthmes$R
+techwidthmes_ci<-comsafrica_techwidthmes$CI_emp
 
 #flake tech width dist
 set.seed(50)
-comsafrica_techwidthdist<-rpt(techwidthdist ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                             grname = c("new_flake_id","Fixed"),
+comsafrica_techwidthdist<-rpt(techwidthdist ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                             grname = c("assemblage_code","new_flake_id"),
                              data = comsafrica_data_complete,
                              datatype = "Gaussian",
                              nboot = 1000, npermut = 100)
-summary(comsafrica_techwidthdist)
 print(comsafrica_techwidthdist)
+techwidthdist_irr<-comsafrica_techwidthdist$R
+techwidthdist_ci<-comsafrica_techwidthdist$CI_emp
 
 #flake tech thick prox
 #tech_thick_prox_data<-comsafrica_data_complete %>%
  #  filter(!new_flake_id %in% c(27,68,10))
 
 set.seed(50)
-comsafrica_techtechthickprox<-rpt(techthickprox ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                              grname = c("new_flake_id","Fixed"),
+comsafrica_techtechthickprox<-rpt(techthickprox ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                              grname = c("assemblage_code","new_flake_id"),
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_techtechthickprox)
 print(comsafrica_techtechthickprox)
+techthickprox_irr<-comsafrica_techtechthickprox$R
+techthickprox_ci<-comsafrica_techtechthickprox$CI_emp
 
 #flake tech thick med
 set.seed(50)
-comsafrica_techtechthickmes<-rpt(techthickmes ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                  grname = c("new_flake_id","Fixed"),
+comsafrica_techtechthickmes<-rpt(techthickmes ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                                  grname = c("assemblage_code","new_flake_id"),
                                   data = comsafrica_data_complete,
                                   datatype = "Gaussian",
                                   nboot = 1000, npermut = 100)
-summary(comsafrica_techtechthickmes)
 print(comsafrica_techtechthickmes)
+techthickmes_irr<-comsafrica_techtechthickmes$R
+techthickmes_ci<-comsafrica_techtechthickmes$CI_emp
 
 #flake tech thick dist
 set.seed(50)
-comsafrica_techthickdist<-rpt(techthickdist ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                 grname = c("new_flake_id","Fixed"),
+comsafrica_techthickdist<-rpt(techthickdist ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                                 grname = c("assemblage_code","new_flake_id"),
                                  data = comsafrica_data_complete,
                                  datatype = "Gaussian",
                                  nboot = 1000, npermut = 100)
-summary(comsafrica_techthickdist)
 print(comsafrica_techthickdist)
+techthickdist_irr<-comsafrica_techthickdist$R
+techthickdist_ci<-comsafrica_techthickdist$CI_emp
 
 #flake platform width
 set.seed(50)
-comsafrica_platfwidth<-rpt(platfwidth ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                              grname = c("new_flake_id","Fixed"),
+comsafrica_platfwidth<-rpt(platfwidth ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                              grname = c("assemblage_code","new_flake_id"),
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_platfwidth)
 print(comsafrica_platfwidth)
+platfwidth_irr<-comsafrica_platfwidth$R
+platfwidth_ci<-comsafrica_platfwidth$CI_emp
 
 #flake platform thickness
 set.seed(50)
-comsafrica_platfthickmax<-rpt(platfthickmax ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                              grname = c("new_flake_id","Fixed"),
+comsafrica_platfthickmax<-rpt(platfthickmax ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                              grname = c("assemblage_code","new_flake_id"),
                               data = comsafrica_data_complete,
                               datatype = "Gaussian",
                               nboot = 1000, npermut = 100)
-summary(comsafrica_platfthickmax)
 print(comsafrica_platfthickmax)
+platfthickmax_irr<-comsafrica_platfthickmax$R
+platfthickmax_ci<-comsafrica_platfthickmax$CI_emp
 
 #flake platform thickness impact
 set.seed(50)
-comsafrica_platfthicimpact<-rpt(platfthickimpact ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                           grname = c("new_flake_id","Fixed"),
+comsafrica_platfthicimpact<-rpt(platfthickimpact ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                           grname = c("assemblage_code","new_flake_id"),
                            data = comsafrica_data_complete,
                            datatype = "Gaussian",
                            nboot = 1000, npermut = 100)
-summary(comsafrica_platfthicimpact)
 print(comsafrica_platfthicimpact)
+platfthickimpact_irr<-comsafrica_platfthicimpact$R
+platfthickimpact_ci<-comsafrica_platfthicimpact$CI_emp
 
 #flake platform thickness mid point
 set.seed(50)
-comsafrica_platfthickmid<-rpt(platfthickmid ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                grname = c("new_flake_id","Fixed"),
+comsafrica_platfthickmid<-rpt(platfthickmid ~  (1 | assemblage_code)  + (1 | new_flake_id),
+                                grname = c("assemblage_code","new_flake_id"),
                                 data = comsafrica_data_complete,
                                 datatype = "Gaussian",
                                 nboot = 1000, npermut = 100)
-summary(comsafrica_platfthickmid)
 print(comsafrica_platfthickmid)
+platfthickmid_irr<-comsafrica_platfthickmid$R
+platfthickmid_ci<-comsafrica_platfthickmid$CI_emp
 
-#flake EPA
-EPA_data<-comsafrica_data_complete %>%
-   filter(!new_flake_id %in% c(53,64,82,56,54,55,60) & edgeplatf < 25)
+## compile IRR continuous values into table
+irr_continuous_data<-rbind(cortex_irr,maxdim_irr,mass_irr,
+                           maxwidth_irr,maxthick_irr,techlength_irr,
+                           techmaxwidth_irr,techmaxthick_irr,techwidthprox_irr,
+                           techwidthmes_irr,techwidthdist_irr,techthickprox_irr,
+                           techthickmes_irr,techthickdist_irr,platfwidth_irr,
+                           platfthickmax_irr,platfthickimpact_irr,platfthickmid_irr) %>%
+   rownames_to_column()
 
-set.seed(50)
-comsafrica_edgeplatf<-rpt(edgeplatf ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                              grname = c("new_flake_id","Fixed"),
-                              data = comsafrica_data_complete,
-                              datatype = "Gaussian",
-                              nboot = 1000, npermut = 100)
-print(comsafrica_edgeplatf)
-summary(comsafrica_edgeplatf)
+var_contnames<-c("cortex","maxdim","mass",
+                  "maxwidth","maxthick","techlength",
+                  "techmaxwidth","techmaxthick","techwidthprox",
+                  "techwidthmes","techwidthdist","techthickprox",
+                  "techthickmes","techthickdist","platfwidth",
+                  "platfthickmax","platfthickimpact","platfthickmid")
 
-#angle height
-set.seed(50)
-comsafrica_angle_height<-rpt(angle_height ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                          grname = c("new_flake_id","Fixed"),
-                          data = comsafrica_data_complete,
-                          datatype = "Gaussian",
-                          nboot = 1000, npermut = 100)
-summary(comsafrica_angle_height)
-print(comsafrica_angle_height)
+irr_cont_data_merged<-cbind(irr_continuous_data,var_contnames) %>%
+   select(-rowname) %>%
+   select(c(var_contnames,assemblage_code,new_flake_id)) %>%
+   pivot_longer(cols=c("assemblage_code","new_flake_id"),
+                names_to = "variable", values_to = "irr")
+
+## compile IRR continuous value CI data into table
+irr_cont_cidata<-rbind(cortex_ci,maxdim_ci,mass_ci,
+                       maxwidth_ci,maxthick_ci,techlength_ci,
+                       techmaxwidth_ci,techmaxthick_ci,techwidthprox_ci,
+                       techwidthmes_ci,techwidthdist_ci,techthickprox_ci,
+                       techthickmes_ci,techthickdist_ci,platfwidth_ci,
+                       platfthickmax_ci,platfthickimpact_ci,platfthickmid_ci) %>%
+   rownames_to_column()
+
+var_cicontnames<-c("cortex","cortex","maxdim","maxdim","mass","mass",
+                   "maxwidth","maxwidth","maxthick","maxthick","techlength","techlength",
+                   "techmaxwidth","techmaxwidth","techmaxthick","techmaxthick","techwidthprox","techwidthprox",
+                   "techwidthmes","techwidthmes","techwidthdist","techwidthdist","techthickprox","techthickprox",
+                   "techthickmes","techthickmes","techthickdist","techthickdist","platfwidth","platfwidth",
+                   "platfthickmax","platfthickmax","platfthickimpact","platfthickimpact","platfthickmid","platfthickmid")
+
+irr_cont_cidata_merged<-cbind(irr_cont_cidata,var_cicontnames) %>%
+   rename(variable=rowname,
+          var_contnames=var_cicontnames,
+          lower='2.5%',
+          upper='97.5%') %>%
+   mutate(variable = gsub("[[:digit:]]", "", variable))
+
+## merge IRR and CI continuous Assemblage data
+irr_cont_data_merged_assemblage<-irr_cont_data_merged %>%
+   filter(variable=="assemblage_code")
+irr_cont_cidata_merged_assemblage<-irr_cont_cidata_merged %>%
+   filter(variable=="assemblage_code")
+
+irr_cont_data_complete_assemblage<-merge(irr_cont_data_merged_assemblage,
+                                         irr_cont_cidata_merged_assemblage,
+                                          by="var_contnames") %>%
+   select(-c(variable.x,variable.y)) %>%
+   select(c(var_contnames,irr,upper,lower)) %>%
+   mutate(across(where(is.numeric), ~ round(., 4)))
+
+## merge IRR and CI  flake ID data
+irr_cont_data_merged_flakeid<-irr_cont_data_merged %>%
+   filter(variable=="new_flake_id")
+irr_cont_cidata_merged_flakeid<-irr_cont_cidata_merged %>%
+   filter(variable=="new_flake_id")
+
+irr_cont_data_complete_flakeid<-merge(irr_cont_data_merged_flakeid,
+                                      irr_cont_cidata_merged_flakeid,
+                                       by="var_contnames") %>%
+   select(-c(variable.x,variable.y)) %>%
+   select(c(var_contnames,irr,lower,upper)) %>%
+   mutate(across(where(is.numeric), ~ round(., 2)))
 
 ### repeatability coefficients for Count data ####
 
@@ -570,57 +634,118 @@ comsafrica_data_count_data<-new_comsafrica_data %>%
 # proximal_scars
 hist(comsafrica_data_count_data$proximal_scars)
 set.seed(50)
-comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                    grname = c("new_flake_id","Fixed"),
+comsafrica_proximal_scars_boot<-rpt(proximal_scars ~ (1 | assemblage_code)  + (1 | new_flake_id),
+                                    grname = c("assemblage_code","new_flake_id"),
                                     data = comsafrica_data_count_data,
                                     datatype = "Poisson",
                                     nboot = 100, npermut = 100)
-summary(comsafrica_proximal_scars_boot)
 print(comsafrica_proximal_scars_boot)
+proximal_scars_irr<-comsafrica_proximal_scars_boot$R
+proximal_scars_ci<-comsafrica_proximal_scars_boot$CI_emp$CI_org
 
 # left_scars
 hist(comsafrica_data_count_data$left_scars)
 set.seed(50)
-comsafrica_left_scars_boot<-rpt(left_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                grname = c("new_flake_id","Fixed"),
+comsafrica_left_scars_boot<-rpt(left_scars ~ (1 | assemblage_code)  + (1 | new_flake_id),
+                                grname = c("assemblage_code","new_flake_id"),
                                 data = comsafrica_data_count_data,
                                 datatype = "Poisson",
                                 nboot = 100, npermut = 100)
-summary(comsafrica_left_scars_boot)
 print(comsafrica_left_scars_boot)
+left_scars_irr<-comsafrica_left_scars_boot$R
+left_scars_ci<-comsafrica_left_scars_boot$CI_emp$CI_org
 
 # distal_scars
 hist(comsafrica_data_count_data$distal_scars)
 set.seed(50)
-comsafrica_distal_scars_boot<-rpt(distal_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                  grname = c("new_flake_id","Fixed"),
+comsafrica_distal_scars_boot<-rpt(distal_scars ~ (1 | assemblage_code)  + (1 | new_flake_id),
+                                  grname = c("assemblage_code","new_flake_id"),
                                   data = comsafrica_data_count_data,
                                   datatype = "Poisson",
                                   nboot = 100, npermut = 100)
-summary(comsafrica_distal_scars_boot)
 print(comsafrica_distal_scars_boot)
+distal_scars_irr<-comsafrica_distal_scars_boot$R
+distal_scars_ci<-comsafrica_distal_scars_boot$CI_emp$CI_org
 
 # right_scars
 hist(comsafrica_data_count_data$right_scars)
 set.seed(50)
-comsafrica_right_scars_boot<-rpt(right_scars ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                 grname = c("new_flake_id","Fixed"),
+comsafrica_right_scars_boot<-rpt(right_scars ~ (1 | assemblage_code)  + (1 | new_flake_id),
+                                 grname = c("assemblage_code","new_flake_id"),
                                  data = comsafrica_data_count_data,
                                  datatype = "Poisson",
                                  nboot = 100, npermut = 100)
-summary(comsafrica_right_scars_boot)
 print(comsafrica_right_scars_boot)
+right_scars_irr<-comsafrica_right_scars_boot$R
+right_scars_ci<-comsafrica_right_scars_boot$CI_emp$CI_org
 
 # dorsal scar count
 hist(comsafrica_data_count_data$dorsal_scar_count)
 set.seed(50)
-comsafrica_dorsal_scar_count_boot<-rpt(dorsal_scar_count ~ new_flake_id*analysis_order + (1 | new_flake_id),
-                                       grname = c("new_flake_id","Fixed"),
+comsafrica_dorsal_scar_count_boot<-rpt(dorsal_scar_count ~ (1 | assemblage_code)  + (1 | new_flake_id),
+                                       grname = c("assemblage_code","new_flake_id"),
                                        data = comsafrica_data_count_data,
                                        datatype = "Poisson",
                                        nboot = 100, npermut = 100)
-summary(comsafrica_dorsal_scar_count_boot)
 print(comsafrica_dorsal_scar_count_boot)
+dorsal_scar_count_irr<-comsafrica_dorsal_scar_count_boot$R
+dorsal_scar_count_ci<-comsafrica_dorsal_scar_count_boot$CI_emp$CI_org
+
+## compile IRR count values into table
+irr_count_data<-rbind(proximal_scars_irr,left_scars_irr,distal_scars_irr,right_scars_irr,dorsal_scar_count_irr) %>%
+   rownames_to_column() %>%
+   filter(rowname %in% c("R_org","R_org1","R_org2","R_org3", "R_org4"))
+
+var_countnames<-c("proximal scars","left scars","distal scars","right scars","dorsal scars total")
+
+irr_count_data_merged<-cbind(irr_count_data,var_countnames) %>%
+   select(-rowname) %>%
+   select(c(var_countnames,assemblage_code,new_flake_id)) %>%
+   pivot_longer(cols=c("assemblage_code","new_flake_id"),
+                names_to = "variable", values_to = "irr")
+
+## compile IRR count value CI data into table
+irr_count_cidata<-rbind(proximal_scars_ci,left_scars_ci,distal_scars_ci,right_scars_ci,dorsal_scar_count_ci) %>%
+   rownames_to_column()
+
+var_cicountnames<-c("proximal scars","proximal scars","left scars","left scars",
+                    "distal scars","distal scars","right scars","right scars",
+                    "dorsal scars total","dorsal scars total")
+
+irr_count_cidata_merged<-cbind(irr_count_cidata,var_cicountnames) %>%
+   rename(variable=rowname,
+          var_countnames=var_cicountnames,
+          lower='2.5%',
+          upper='97.5%') %>%
+   mutate(variable = gsub("[[:digit:]]", "", variable))
+
+## merge IRR and CI  Assemblage data
+irr_count_data_merged_assemblage<-irr_count_data_merged %>%
+   filter(variable=="assemblage_code")
+irr_count_cidata_merged_assemblage<-irr_count_cidata_merged %>%
+   filter(variable=="assemblage_code")
+
+irr_count_data_complete_assemblage<-merge(irr_count_data_merged_assemblage,
+                                          irr_count_cidata_merged_assemblage,
+                               by="var_countnames") %>%
+   select(-c(variable.x,variable.y)) %>%
+   select(c(var_countnames,irr,upper,lower)) %>%
+   mutate(across(where(is.numeric), ~ round(., 4))) %>%
+   arrange(-upper)
+
+## merge IRR and CI  flake ID data
+irr_count_data_merged_flakeid<-irr_count_data_merged %>%
+   filter(variable=="new_flake_id")
+irr_count_cidata_merged_flakeid<-irr_count_cidata_merged %>%
+   filter(variable=="new_flake_id")
+
+irr_count_data_complete_flakeid<-merge(irr_count_data_merged_flakeid,
+                                       irr_count_cidata_merged_flakeid,
+                                          by="var_countnames") %>%
+   select(-c(variable.x,variable.y)) %>%
+   select(c(var_countnames,irr,upper,lower)) %>%
+   mutate(across(where(is.numeric), ~ round(., 2))) %>%
+   arrange(-upper)
 
 ### repeatability coefficients for categorical data ####
 
