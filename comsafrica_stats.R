@@ -607,9 +607,10 @@ irr_cont_cidata_merged_assemblage<-irr_cont_cidata_merged %>%
 irr_cont_data_complete_assemblage<-merge(irr_cont_data_merged_assemblage,
                                          irr_cont_cidata_merged_assemblage,
                                           by="var_contnames") %>%
-   select(-c(variable.x,variable.y)) %>%
-   select(c(var_contnames,irr,upper,lower)) %>%
-   mutate(across(where(is.numeric), ~ round(., 4)))
+   select(-c(variable.y)) %>%
+   select(c(var_contnames,variable.x,irr,upper,lower)) %>%
+   mutate(across(where(is.numeric), ~ round(., 4))) %>%
+   rename(comparison=variable.x)
 
 ## merge IRR and CI  flake ID data
 irr_cont_data_merged_flakeid<-irr_cont_data_merged %>%
@@ -620,9 +621,10 @@ irr_cont_cidata_merged_flakeid<-irr_cont_cidata_merged %>%
 irr_cont_data_complete_flakeid<-merge(irr_cont_data_merged_flakeid,
                                       irr_cont_cidata_merged_flakeid,
                                        by="var_contnames") %>%
-   select(-c(variable.x,variable.y)) %>%
-   select(c(var_contnames,irr,lower,upper)) %>%
-   mutate(across(where(is.numeric), ~ round(., 2)))
+   select(-c(variable.y)) %>%
+   select(c(var_contnames,variable.x,irr,lower,upper)) %>%
+   mutate(across(where(is.numeric), ~ round(., 2))) %>%
+   rename(comparison=variable.x)
 
 ### repeatability coefficients for Count data ####
 
@@ -728,10 +730,10 @@ irr_count_cidata_merged_assemblage<-irr_count_cidata_merged %>%
 irr_count_data_complete_assemblage<-merge(irr_count_data_merged_assemblage,
                                           irr_count_cidata_merged_assemblage,
                                by="var_countnames") %>%
-   select(-c(variable.x,variable.y)) %>%
-   select(c(var_countnames,irr,upper,lower)) %>%
+   select(-c(variable.y)) %>%
+   select(c(var_countnames,variable.x,irr,upper,lower)) %>%
    mutate(across(where(is.numeric), ~ round(., 4))) %>%
-   arrange(-upper)
+   rename(comparison=variable.x)
 
 ## merge IRR and CI  flake ID data
 irr_count_data_merged_flakeid<-irr_count_data_merged %>%
@@ -742,10 +744,10 @@ irr_count_cidata_merged_flakeid<-irr_count_cidata_merged %>%
 irr_count_data_complete_flakeid<-merge(irr_count_data_merged_flakeid,
                                        irr_count_cidata_merged_flakeid,
                                           by="var_countnames") %>%
-   select(-c(variable.x,variable.y)) %>%
-   select(c(var_countnames,irr,upper,lower)) %>%
+   select(-c(variable.y)) %>%
+   select(c(var_countnames,variable.x,irr,upper,lower)) %>%
    mutate(across(where(is.numeric), ~ round(., 2))) %>%
-   arrange(-upper)
+   rename(comparison=variable.x)
 
 ### repeatability coefficients for categorical data ####
 
@@ -1129,12 +1131,20 @@ summary(glm(factor_levels~pa,data=test_2,family = "poisson"))
 
 ### IRR visualizations ####
 
-irr_summary<-read.csv("irr_summary_data.csv")
+data_1<-irr_count_data_complete_flakeid %>% rename(variable=var_countnames) %>%
+   mutate(data_class=as.factor(rep("Count",times=length(variable))))
+data_2<-irr_count_data_complete_assemblage %>% rename(variable=var_countnames)%>%
+   mutate(data_class=as.factor(rep("Count",times=length(variable))))
+data_3<-irr_cont_data_complete_flakeid %>% rename(variable=var_contnames)%>%
+   mutate(data_class=as.factor(rep("Continuous",times=length(variable))))
+data_4<-irr_cont_data_complete_assemblage %>% rename(variable=var_contnames)%>%
+   mutate(data_class=as.factor(rep("Continuous",times=length(variable))))
+
+irr_summary<-rbind(data_1,data_2,data_3,data_4)
 
 ## Continuous data, analyst ID
-
-ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_analyst"),
-       aes(y=irr_value, x=reorder(variable,irr_value))) +
+ggplot(data=filter(irr_summary, data_class=="Continuous" & comparison =="new_flake_id"),
+       aes(y=irr, x=reorder(variable,irr))) +
    geom_bar(position=position_dodge(), stat="identity") +
    geom_errorbar(aes(ymin=lower, ymax=upper),
                  width=.2,                    # Width of the error bars
@@ -1143,16 +1153,15 @@ ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_analys
          axis.text = element_text(size = 10))+
    geom_hline(yintercept = 0.6, linetype = 2, colour = "red") +
    labs(x = "",
-        y = "IRR value")
+        y = "IRR value") +
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
 
-## Continuous data, order
+## Continuous data, assemblage type
 
-ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_order"),
-       aes(y=irr_value, x=reorder(variable,irr_value))) +
+ggplot(data=filter(irr_summary, data_class=="Continuous" & comparison =="assemblage_code"),
+       aes(y=irr, x=reorder(variable,irr))) +
    geom_bar(position=position_dodge(), stat="identity") +
-   geom_errorbar(aes(ymin=lower, ymax=upper),
-                 width=.2,                    # Width of the error bars
-                 position=position_dodge(.9))+
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
          axis.text = element_text(size = 10)) +
    labs(x = "",
@@ -1160,8 +1169,8 @@ ggplot(data=filter(irr_summary, data_class=="Continuous" & measure =="irr_order"
 
 ## Count data, analyst ID
 
-ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_analyst"),
-       aes(y=irr_value, x=reorder(variable,irr_value))) +
+ggplot(data=filter(irr_summary, data_class=="Count" & comparison =="new_flake_id"),
+       aes(y=irr, x=reorder(variable,irr))) +
    geom_bar(position=position_dodge(), stat="identity") +
    geom_errorbar(aes(ymin=lower, ymax=upper),
                  width=.2,                    # Width of the error bars
@@ -1170,16 +1179,15 @@ ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_analyst"),
          axis.text = element_text(size = 10))+
    labs(x = "",
         y = "IRR value")+
-   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")+
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
 
-## Count data, order
+## Count data, assemblage type
 
-ggplot(data=filter(irr_summary, data_class=="Count" & measure =="irr_order"),
-       aes(y=irr_value, x=reorder(variable,irr_value))) +
+ggplot(data=filter(irr_summary, data_class=="Count" & comparison =="assemblage_code"),
+       aes(y=irr, x=reorder(variable,irr))) +
    geom_bar(position=position_dodge(), stat="identity") +
-   geom_errorbar(aes(ymin=lower, ymax=upper),
-                 width=.2,                    # Width of the error bars
-                 position=position_dodge(.9))+
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
          axis.text = element_text(size = 10))+
    labs(x = "",
@@ -1196,7 +1204,9 @@ ggplot(gwet_data_merged,aes(y=coeff.val, x=reorder(var_names,coeff.val))) +
          axis.text = element_text(size = 10))+
    labs(x = "",
         y = "IRR value")+
-   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")
+   geom_hline(yintercept = 0.6, linetype = 2, colour = "red")+
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
 
 ############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
