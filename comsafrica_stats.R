@@ -51,7 +51,7 @@ detachAllPackages <- function() {
 detachAllPackages()
 
 # Create package list to check for installed packages
-
+library(car)
 library(dplyr)
 library(rptR)
 library(krippendorffsalpha)
@@ -65,6 +65,8 @@ library(ggrepel)
 library(stringr)
 library(formattable)
 library(broom)
+library(ggforce)
+library(gmodels)
 
 ##############################
 # Set working directory and load datafile
@@ -72,13 +74,15 @@ library(broom)
 
 # Set to source directory with relevant .csv datafile provided
 # through the Open Science repository
-getwd()
+
 setwd("/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis//CoMSA_stats/comsafrica")
 
 ## Add datasets
 
 comsafrica_data<-read.csv("comsafrica_complete_adjusted.csv",stringsAsFactors=TRUE) %>%
    subset(!flake_id == "NONR3495") #filter out this non numbered flake
+individuals<-read.csv("individual_experience.csv",stringsAsFactors=TRUE) %>%
+   rename(analyst_id=Analyst)
 
 ####################################
 # Data cleaning
@@ -1090,45 +1094,6 @@ gwet_data_merged<-cbind(gwet_data,var_names) %>%
    
 write.csv(gwet_data_merged,"categorical_summary.csv")
 
-## check if factor levels determine rater reliability
-
-aa<-nlevels(comsafrica_data_cat_data$red_syst)
-ab<-nlevels(comsafrica_data_cat_data$flk_form)
-ac<-nlevels(comsafrica_data_cat_data$completeness)
-ad<-nlevels(comsafrica_data_cat_data$platform_cortex)
-ae<-nlevels(comsafrica_data_cat_data$directionality)
-af<-nlevels(comsafrica_data_cat_data$platfmorph)
-ag<-nlevels(comsafrica_data_cat_data$platflipp)
-ah<-nlevels(comsafrica_data_cat_data$bulb)
-ai<-nlevels(comsafrica_data_cat_data$shattbulb)
-aj<-nlevels(comsafrica_data_cat_data$initiation)
-ak<-nlevels(comsafrica_data_cat_data$ventr_plane_form)
-al<-nlevels(comsafrica_data_cat_data$section)
-am<-nlevels(comsafrica_data_cat_data$latedgetype)
-an<-nlevels(comsafrica_data_cat_data$flaketerm)
-ao<-nlevels(comsafrica_data_cat_data$kombewa)
-ap<-nlevels(comsafrica_data_cat_data$distplanform)
-
-test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
-            ak,al,am,an,ao,ap)) %>%
-   rename("factor_levels"=rbind.aa..ab..ac..ad..ae..af..ag..ah..ai..aj..ak..al..am..an..) 
-
-test_2<-cbind(gwet_data_merged,test[,1])%>%
-   rename("factor_levels"='test[, 1]') 
-
-ggplot(test_2, aes(x=factor_levels, y=pa,label=var_names))+
-   geom_point(size=3)+
-   labs(title="", x ="Number of categories", y = "IRR")+ 
-   guides(color=guide_legend(title="Variable names"))+ 
-   geom_label_repel(aes(label = var_names),
-                    box.padding   = 0.35, 
-                    point.padding = 0.5,
-                    segment.color = 'grey50') +
-   theme_classic()+ 
-   scale_x_continuous(breaks=seq(0,10,1))
-
-summary(glm(factor_levels~pa,data=test_2,family = "poisson"))
-
 ### IRR visualizations ####
 
 data_1<-irr_count_data_complete_flakeid %>% rename(variable=var_countnames) %>%
@@ -1210,109 +1175,200 @@ ggplot(gwet_data_merged,aes(y=coeff.val, x=reorder(var_names,coeff.val))) +
 
 ############################################### ######################
 ###### SUMMARY TABLES FOR CATEGORICAL VARIABLES ####
-# CHANGE TO USING comsafrica_data_cat_data to ensure category states 
-# are the same
 
 data1 <- comsafrica_data_cat_data
 
-# another option using tbl_summary
-library(gtsummary)
-data1 %>% 
-   select(c(new_flake_id,completeness)) %>% 
-   tbl_summary(by = new_flake_id,
-               statistic = list(all_categorical() ~ "{p}%")
-   ) %>%
-   add_overall() %>% # add an overall column
-   add_n() %>% # add column with total number of non-missing observations
-   bold_labels() 
-
 #completeness
 tableCOMPLETENESS <-  table(data1$new_flake_id, data1$completeness)
-tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS)))
-write.csv(tabCOMP, file="Tables/tablecompleteness.csv")
-
-#damage
-table2 <- table(data1$cond_flake_id, data1$damage)
-tabDAM=cbind(addmargins(round(prop.table(addmargins(table2,1),1),2)*100,2), c(margin.table(table2,1),sum(table2)))
-write.csv(tabDAM, file="Tables/tabledamage.csv")
+tabCOMP=cbind(addmargins(round(prop.table(addmargins(tableCOMPLETENESS,1),1),2)*100,2), 
+              c(margin.table(tableCOMPLETENESS,1),sum(tableCOMPLETENESS))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename("New Flake ID"=rowname,
+          "N Analysts"=V9) %>%
+   mutate(variable=as.factor(rep("completeness",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/tablecompleteness.csv", row.names=FALSE)
 
 #platform_cortex
-table3 <- table(data1$cond_flake_id, data1$platform_cortex)
-tabCORTEXPLATF=cbind(addmargins(round(prop.table(addmargins(table3,1),1),2)*100,2), c(margin.table(table3,1),sum(table3)))
-write.csv(tabCORTEXPLATF, file="Tables/tablecortexplatf.csv")
+table3 <- table(data1$new_flake_id, data1$platform_cortex)
+tabCORTEXPLATF=cbind(addmargins(round(prop.table(addmargins(table3,1),1),2)*100,2), 
+                     c(margin.table(table3,1),sum(table3))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("platform cortex",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/platformcortex.csv", row.names=FALSE)
 
 #directionality
-table4 <- table(data1$cond_flake_id, data1$directionality)
-tabDIRECTIONALITY=cbind(addmargins(round(prop.table(addmargins(table4,1),1),2)*100,2), c(margin.table(table4,1),sum(table4)))
-write.csv(tabDIRECTIONALITY, file="Tables/tabledirectionality.csv")
+table4 <- table(data1$new_flake_id, data1$directionality)
+tabDIRECTIONALITY=cbind(addmargins(round(prop.table(addmargins(table4,1),1),2)*100,2), 
+                        c(margin.table(table4,1),sum(table4))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("directionality",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/directionality.csv", row.names=FALSE)
 
 #platf morph
-table5 <- table(data1$cond_flake_id, data1$platfmorph)
-tabPLATFMORPH=cbind(addmargins(round(prop.table(addmargins(table5,1),1),2)*100,2), c(margin.table(table5,1),sum(table5)))
-write.csv(tabPLATFMORPH, file="Tables/tableplatfmorph.csv")
+table5 <- table(data1$new_flake_id, data1$platfmorph)
+tabPLATFMORPH=cbind(addmargins(round(prop.table(addmargins(table5,1),1),2)*100,2), 
+                    c(margin.table(table5,1),sum(table5))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("platform morphology",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/platformorph.csv", row.names=FALSE)
 
 #platf lip
-table6 <- table(data1$cond_flake_id, data1$platflipp)
-tabPLATFLIPP=cbind(addmargins(round(prop.table(addmargins(table6,1),1),2)*100,2), c(margin.table(table6,1),sum(table6)))
-write.csv(tabPLATFLIPP, file="Tables/tableplatflipp.csv")
+table6 <- table(data1$new_flake_id, data1$platflipp)
+tabPLATFLIPP=cbind(addmargins(round(prop.table(addmargins(table6,1),1),2)*100,2), 
+                   c(margin.table(table6,1),sum(table6))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("platform lipping",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/platformlip.csv", row.names=FALSE)
 
 #bulb
-table7 <- table(data1$cond_flake_id, data1$bulb)
-tabBULB=cbind(addmargins(round(prop.table(addmargins(table7,1),1),2)*100,2), c(margin.table(table7,1),sum(table7)))
-write.csv(tabBULB, file="Tables/tablebulb.csv")
+table7 <- table(data1$new_flake_id, data1$bulb)
+tabBULB=cbind(addmargins(round(prop.table(addmargins(table7,1),1),2)*100,2), 
+              c(margin.table(table7,1),sum(table7))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("bulb",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/bulb.csv", row.names=FALSE)
 
 #shattbulb
-table8 <- table(data1$cond_flake_id, data1$shattbulb)
-tabSHATTBULB=cbind(addmargins(round(prop.table(addmargins(table8,1),1),2)*100,2), c(margin.table(table8,1),sum(table8)))
-write.csv(tabSHATTBULB, file="Tables/tableshattbulb.csv")
+table8 <- table(data1$new_flake_id, data1$shattbulb)
+tabSHATTBULB=cbind(addmargins(round(prop.table(addmargins(table8,1),1),2)*100,2), 
+                   c(margin.table(table8,1),sum(table8))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("shattbulb",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/shattbulb.csv", row.names=FALSE)
 
 #initiation
-table9 <- table(data1$cond_flake_id, data1$initiation)
-tabINITIATION=cbind(addmargins(round(prop.table(addmargins(table9,1),1),2)*100,2), c(margin.table(table9,1),sum(table9)))
-write.csv(tabINITIATION, file="Tables/tableinitiation.csv")
+table9 <- table(data1$new_flake_id, data1$initiation)
+tabINITIATION=cbind(addmargins(round(prop.table(addmargins(table9,1),1),2)*100,2), 
+                    c(margin.table(table9,1),sum(table9))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("initiation",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/initiation.csv", row.names=FALSE)
 
 #ventral plane form
-table10 <- table(data1$cond_flake_id, data1$ventr_plane_form)
-tabVENTRPLANEFORM=cbind(addmargins(round(prop.table(addmargins(table10,1),1),2)*100,2), c(margin.table(table10,1),sum(table10)))
-write.csv(tabVENTRPLANEFORM, file="Tables/tableventralplaneform.csv")
+table10 <- table(data1$new_flake_id, data1$ventr_plane_form)
+tabVENTRPLANEFORM=cbind(addmargins(round(prop.table(addmargins(table10,1),1),2)*100,2), 
+                        c(margin.table(table10,1),sum(table10))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("ventral plan form",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/ventral plan form.csv", row.names=FALSE)
 
 #section
-table11 <- table(data1$cond_flake_id, data1$section)
-tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), c(margin.table(table11,1),sum(table11)))
-write.csv(tabSECTION, file="Tables/tablesection.csv")
+table11 <- table(data1$new_flake_id, data1$section)
+tabSECTION=cbind(addmargins(round(prop.table(addmargins(table11,1),1),2)*100,2), 
+                 c(margin.table(table11,1),sum(table11))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("section",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/section.csv", row.names=FALSE)
 
 #lateral edge type
-table12 <- table(data1$cond_flake_id, data1$latedgetype)
-tabLATEDGE=cbind(addmargins(round(prop.table(addmargins(table12,1),1),2)*100,2), c(margin.table(table12,1),sum(table12)))
-write.csv(tabLATEDGE, file="Tables/tablelatedge.csv")
+table12 <- table(data1$new_flake_id, data1$latedgetype)
+tabLATEDGE=cbind(addmargins(round(prop.table(addmargins(table12,1),1),2)*100,2), 
+                 c(margin.table(table12,1),sum(table12))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("lateral edge type",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/lateral edge type.csv", row.names=FALSE)
 
 #Flake termination
-table13 <- table(data1$cond_flake_id, data1$flaketerm)
-tabFLAKETERM=cbind(addmargins(round(prop.table(addmargins(table13,1),1),2)*100,2), c(margin.table(table13,1),sum(table13)))
-write.csv(tabFLAKETERM, file="Tables/tableflaketerm.csv")
+table13 <- table(data1$new_flake_id, data1$flaketerm)
+tabFLAKETERM=cbind(addmargins(round(prop.table(addmargins(table13),1),2)*100,2), 
+                   c(margin.table(table13,1),sum(table13))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("flake termination",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/flake termination.csv", row.names=FALSE)
 
 #Kombewa
-table14 <- table(data1$cond_flake_id, data1$kombewa)
-tabKOMB=cbind(addmargins(round(prop.table(addmargins(table14,1),1),2)*100,2), c(margin.table(table14,1),sum(table14)))
-write.csv(tabKOMB, file="Tables/tablekombewa.csv")
+table14 <- table(data1$new_flake_id, data1$kombewa)
+tabKOMB=cbind(addmargins(round(prop.table(addmargins(table14),1),2)*100,2), 
+              c(margin.table(table14,1),sum(table14))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("kombewa",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/kombewa.csv", row.names=FALSE)
 
 #Distal PLan form
-table15 <- table(data1$cond_flake_id, data1$distplanform)
-tabDISTPLANFORM=cbind(addmargins(round(prop.table(addmargins(table15,1),1),2)*100,2), c(margin.table(table15,1),sum(table15)))
-write.csv(tabDISTPLANFORM, file="Tables/tabledistplanform.csv")
+table15 <- table(data1$new_flake_id, data1$distplanform)
+tabDISTPLANFORM=cbind(addmargins(round(prop.table(addmargins(table15),1),2)*100,2), 
+                      c(margin.table(table15,1),sum(table15))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("distal plan form",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/distal plan form.csv", row.names=FALSE)
 
 #Reduction System
-table16 <- table(data1$cond_flake_id, data1$red_syst)
-tabREDSYST=cbind(addmargins(round(prop.table(addmargins(table16,1),1),2)*100,2), c(margin.table(table16,1),sum(table16)))
-write.csv(tabREDSYST, file="Tables/tableredsyst.csv")
+table16 <- table(data1$new_flake_id, data1$red_syst)
+tabREDSYST=cbind(addmargins(round(prop.table(addmargins(table16),1),2)*100,2), 
+                 c(margin.table(table16,1),sum(table16))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("reduction system",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/reduction system.csv", row.names=FALSE)
 
 #flake form
-table17 <- table(data1$cond_flake_id, data1$flk_form)
-tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17,1),1),2)*100,2), c(margin.table(table17,1),sum(table17)))
-write.csv(tabFLKFORM, file="Tables/tableflakeform.csv")
-
-write.csv(data1, file="comsafrica_complete_adjusted_catcleaned.csv")
-
+table17 <- table(data1$new_flake_id, data1$flk_form)
+tabFLKFORM=cbind(addmargins(round(prop.table(addmargins(table17),1),2)*100,2), 
+                 c(margin.table(table17,1),sum(table17))) %>%
+   data.frame %>%
+   rownames_to_column() %>%
+   rename_at(ncol(.), ~"N Analysts") %>%
+   rename("New Flake ID"=rowname) %>%
+   mutate(variable=as.factor(rep("flake form",times=length("New Flake ID")))) %>%
+   slice(1:(n() - 1)) %>%
+   write.csv("Supplementary tables/flake form.csv", row.names=FALSE)
 
 ############################################### ######################
 #######SUMMARY TABLES FOR COUNT AND CONTINUOUS DATA#######
@@ -1364,8 +1420,6 @@ write.csv(tabRIGHTSCARS, file="Tables/tablerightscars.csv")
 
 ##numerical variables
 #cleaning data
-
-library(gtsummary)
 
 tbl1 <-  data1 %>%
       tbl_summary(
@@ -1435,9 +1489,9 @@ round_df <- function(x, digits) {
 flake_measurements_summary<- comsafrica_data_complete %>%
    select(c(flake_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
             techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
-            platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height)) %>%
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax)) %>%
    filter(!new_flake_id %in% c(1,89,97)) %>%
-   mutate(across(c(5:23), na_if, 0)) %>%
+   mutate(across(c(5:21), na_if, 0)) %>%
    pivot_longer(!new_flake_id &!assemblage_code &!flake_id,
       names_to = "variable",
       values_to = "value") %>%
@@ -1453,10 +1507,54 @@ flake_measurements_summary<- comsafrica_data_complete %>%
    distinct(flake_id,new_flake_id,assemblage_code,
             variable,cv,mean,sd,min,max,median,range) %>%
    mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2))) %>%
-   select(-assemblage_code) %>%
+   rename("new flake id"=new_flake_id,
+          "original flake id"=flake_id) %>%
    na.omit()
 
-library(gmodels)
+# summarize cont vars to see how far individuals ranged from average measurements
+
+individuals_summary<- comsafrica_data_complete %>%
+   select(c(analyst_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax)) %>%
+   filter(!new_flake_id %in% c(1,89,97)) %>%
+   mutate(across(c(5:21), na_if, 0)) %>%
+   pivot_longer(!new_flake_id &!assemblage_code &!analyst_id,
+                names_to = "variable",
+                values_to = "value") %>%
+   drop_na(value) %>%
+   group_by(new_flake_id,variable) %>%
+   mutate(mean=mean(value, na.rm=T),
+          analyst_to_mean=abs((mean-value)/mean)*100) %>%
+   group_by(analyst_id,variable) %>%
+   mutate(mean_analyst_to_mean=mean(analyst_to_mean, na.rm=T)) %>%
+   distinct(analyst_id,variable,mean_analyst_to_mean) %>%
+   mutate_at(vars(mean_analyst_to_mean), funs(round(., 2))) %>%
+   na.omit()
+
+#summarize individuals overall
+individuals_overall_summary<- comsafrica_data_complete %>%
+   select(c(analyst_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax)) %>%
+   filter(!new_flake_id %in% c(1,89,97)) %>%
+   mutate(across(c(5:21), na_if, 0)) %>%
+   pivot_longer(!new_flake_id &!assemblage_code &!analyst_id,
+                names_to = "variable",
+                values_to = "value") %>%
+   drop_na(value) %>%
+   group_by(new_flake_id,variable) %>%
+   mutate(mean=mean(value, na.rm=T),
+          analyst_to_mean=abs((mean-value)/mean)*100) %>%
+   group_by(analyst_id,variable) %>%
+   mutate(mean_analyst_to_mean=mean(analyst_to_mean, na.rm=T)) %>%
+   group_by(analyst_id) %>%
+   mutate(mean_analyst_to_mean_overall=mean(mean_analyst_to_mean, na.rm=T)) %>%
+   distinct(analyst_id,mean_analyst_to_mean_overall) %>%
+   mutate_at(vars(mean_analyst_to_mean_overall), funs(round(., 2))) %>%
+   na.omit()
+
+#
 range_summary<-flake_measurements_summary %>%
    select(c(variable,mean,sd,range)) %>%
    group_by(variable) %>%
@@ -1472,17 +1570,207 @@ range_summary<-flake_measurements_summary %>%
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
 ## Visualize average measurement SD values
-library(ggforce)
 ggplot(data=range_summary,
        aes(y=cv_mean, x=reorder(variable,cv_mean))) +
    geom_bar(position=position_dodge(), stat="identity") +
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
          axis.text = element_text(size = 10)) +
    ylab(bquote("Average coefficient of variation")) +
-   xlab("")+
-   facet_zoom(ylim = c(0, 25), zoom.data = ifelse(cv_mean <= 25, NA, FALSE))
+   xlab("") +
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
 
-#####Few follow up questions####
+#####Follow up questions####
+
+## Does experience impact performance?
+
+individuals_combined<-merge(individuals_summary, individuals,
+                            by="analyst_id")
+
+individuals_overall_combined<-merge(individuals_overall_summary, individuals,
+                            by="analyst_id")
+
+library("PerformanceAnalytics")
+my_data <- individuals[,c(2:8)]
+chart.Correlation(my_data, histogram=TRUE, pch=19)
+
+#overall
+library(performance)
+model_1<-lm(mean_analyst_to_mean_overall~training_quant+years_experience,
+   data=individuals_overall_combined,
+   subset = mean_analyst_to_mean_overall <10.5)
+summary(model_1)
+avPlots(model_1)
+check_model(model_1)
+
+ggplot(individuals_overall_combined,
+       aes(y=mean_analyst_to_mean_overall,x=training_quant))+
+   geom_point() +
+   geom_smooth(method="lm") +
+   xlab("Quantitative training\n(1=lowest, 5=highest)") + 
+   ylab("Average distance from mean measures")+
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
+#dorsal_cortex
+model_1<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="dorsal_cortex")
+summary(model_1)
+model_1_data<-data.frame(summary(model_1)$coefficients) %>%
+   slice(-1) %>%
+   rownames_to_column() %>%
+   rename(variable=rowname) %>%
+   mutate(model=rep("dorsal_cortex",times=length(variable)))
+
+#maximumdimension
+model_2<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="maximumdimension")
+summary(model_2)
+
+#maximumthickness
+model_3<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="maximumthickness")
+summary(model_3)
+model_3_data<-data.frame(summary(model_3)$coefficients) %>%
+   slice(-1) %>%
+   rownames_to_column() %>%
+   rename(variable=rowname) %>%
+   mutate(model=rep("maximumthickness",times=length(variable)))
+
+#maximumwidth
+model_4<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="maximumwidth")
+summary(model_4)
+
+#platfthickimpact
+model_5<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="platfthickimpact")
+summary(model_5)
+
+#platfthickmax
+model_6<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="platfthickmax")
+summary(model_6)
+
+#platfthickmid
+model_7<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="platfthickmid")
+summary(model_7)
+
+#platfwidth
+model_8<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="platfwidth")
+summary(model_8)
+
+#techlength
+model_9<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techlength")
+summary(model_9)
+
+#techmaxthickness
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techmaxthickness"))
+
+#techmaxwidth
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techmaxwidth"))
+
+#techthickdist
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techthickdist"))
+
+#techthickmes
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techthickmes"))
+
+#techthickprox
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techthickprox"))
+
+#techwidthdist
+model_4<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techwidthdist")
+model_4_data<-data.frame(summary(model_4)$coefficients) %>%
+   slice(-1) %>%
+   rownames_to_column() %>%
+   rename(variable=rowname) %>%
+   mutate(model=rep("techwidthdist",times=length(variable)))
+
+#techwidthmes
+summary(lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techwidthmes"))
+
+#techwidthprox
+model_5<-lm(mean_analyst_to_mean~years_experience+training_quant,
+           data=individuals_combined,
+           subset=variable=="techwidthprox")
+model_5_data<-data.frame(summary(model_5)$coefficients) %>%
+   slice(-1) %>%
+   rownames_to_column() %>%
+   rename(variable=rowname) %>%
+   mutate(model=rep("techwidthprox",times=length(variable)))
+
+# merge regression tables together for significant experience results
+
+sig_experience_results<-rbind(model_1_data,model_3_data,
+                              model_4_data, model_5_data) %>%
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+   rename(est=Estimate,
+          "std error"=Std..Error,
+          t_value=t.value,
+          p_value=Pr...t..) %>%
+   select(c("model","variable","est","std error","t value","p-value"))
+   
+## check if factor levels determine rater reliability
+
+aa<-nlevels(comsafrica_data_cat_data$red_syst)
+ab<-nlevels(comsafrica_data_cat_data$flk_form)
+ac<-nlevels(comsafrica_data_cat_data$completeness)
+ad<-nlevels(comsafrica_data_cat_data$platform_cortex)
+ae<-nlevels(comsafrica_data_cat_data$directionality)
+af<-nlevels(comsafrica_data_cat_data$platfmorph)
+ag<-nlevels(comsafrica_data_cat_data$platflipp)
+ah<-nlevels(comsafrica_data_cat_data$bulb)
+ai<-nlevels(comsafrica_data_cat_data$shattbulb)
+aj<-nlevels(comsafrica_data_cat_data$initiation)
+ak<-nlevels(comsafrica_data_cat_data$ventr_plane_form)
+al<-nlevels(comsafrica_data_cat_data$section)
+am<-nlevels(comsafrica_data_cat_data$latedgetype)
+an<-nlevels(comsafrica_data_cat_data$flaketerm)
+ao<-nlevels(comsafrica_data_cat_data$kombewa)
+ap<-nlevels(comsafrica_data_cat_data$distplanform)
+
+test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
+                       ak,al,am,an,ao,ap)) %>%
+   rename("factor_levels"=rbind.aa..ab..ac..ad..ae..af..ag..ah..ai..aj..ak..al..am..an..) 
+
+test_2<-cbind(gwet_data_merged,test[,1])%>%
+   rename("factor_levels"='test[, 1]') 
+
+ggplot(test_2, aes(x=factor_levels, y=coeff.val,label=var_names))+
+   geom_point(size=3)+
+   labs(title="", x ="Number of categories", y = "IRR")+ 
+   guides(color=guide_legend(title="Variable names")) +
+   theme_classic()+ 
+   scale_x_continuous(breaks=seq(0,10,1))
+
+summary(glm(factor_levels~coeff.val,data=test_2,family = "poisson"))
 
 # Dorsal scars by section vs. total
 
@@ -1672,1068 +1960,6 @@ combined_variance_attribute_data<-data.frame(rbind(a,b,c,d,e,f,g,h,i,j,k)) %>%
 
 write.csv(combined_variance_attribute_data,"combined_variance_attribute_data.csv")
 
-#### Range histograms-arranged by IRR performance (worst to best) ####
 
-# edgeplatf
-ggplot(data=filter(flake_measurements_summary,variable=="edgeplatf"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="EPA [raw measurement]",
-       x ="Range of measurements", y = "Density")
-
-# platfthickmid
-ggplot(data=filter(flake_measurements_summary,variable=="platfthickmid"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Platform thickness mid-point",
-       x ="Range of measurements", y = "Density")
-
-# techwidthdist
-ggplot(data=filter(flake_measurements_summary,variable=="techwidthdist"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological width distal",
-       x ="Range of measurements", y = "Density")
-
-# techthickprox
-ggplot(data=filter(flake_measurements_summary,variable=="techthickprox"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological thickness proximal",
-       x ="Range of measurements", y = "Density")
-
-# techlength
-ggplot(data=filter(flake_measurements_summary,variable=="techlength"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological length",
-       x ="Range of measurements", y = "Density")
-
-# platfthickmax
-ggplot(data=filter(flake_measurements_summary,variable=="platfthickmax"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Platform thickness maximum",
-       x ="Range of measurements", y = "Density")
-
-# platfwidth
-ggplot(data=filter(flake_measurements_summary,variable=="platfwidth"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Platform width",
-       x ="Range of measurements", y = "Density")
-
-# platfthickimpact
-ggplot(data=filter(flake_measurements_summary,variable=="platfthickimpact"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Platform thickness impact",
-       x ="Range of measurements", y = "Density")
-
-# techwidthprox
-ggplot(data=filter(flake_measurements_summary,variable=="techwidthprox"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological width proximal",
-       x ="Range of measurements", y = "Density")
-
-# techmaxthickness
-ggplot(data=filter(flake_measurements_summary,variable=="techmaxthickness"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological max thickness",
-       x ="Range of measurements", y = "Density")
-
-# techmaxwidth
-ggplot(data=filter(flake_measurements_summary,variable=="techmaxwidth"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological max width",
-       x ="Range of measurements", y = "Density")
-
-# techthickdist
-ggplot(data=filter(flake_measurements_summary,variable=="techthickdist"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological thickness distal",
-       x ="Range of measurements", y = "Density")
-
-# techwidthmes
-ggplot(data=filter(flake_measurements_summary,variable=="techwidthmes"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological width mesial",
-       x ="Range of measurements", y = "Density")
-
-# techthickmes
-ggplot(data=filter(flake_measurements_summary,variable=="techthickmes"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Technological thickness mesial",
-       x ="Range of measurements", y = "Density")
-
-# maximumthickness
-ggplot(data=filter(flake_measurements_summary,variable=="maximumthickness"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Maximum thickness",
-       x ="Range of measurements", y = "Density")
-
-# dorsal_cortex COME BACK TO THIS AFTER CHECKING DATA FOR WEIRD RANGE
-# VALUES
-ggplot(data=filter(flake_measurements_summary,variable=="dorsal_cortex"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Dorsal cortex",
-       x ="Range of measurements", y = "Density")
-
-# maximumwidth
-ggplot(data=filter(flake_measurements_summary,variable=="maximumwidth"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Maximum width",
-       x ="Range of measurements", y = "Density")
-
-# Max dimension
-ggplot(data=filter(flake_measurements_summary,variable=="maximumdimension"), aes(x=range)) +
-  geom_histogram(aes(y=..density..), colour="black", fill="white")+
-  labs(title="Maximum dimension",
-       x ="Range of measurements", y = "Density")
-
-# mass
-ggplot(data=filter(flake_measurements_summary,variable=="mass"), aes(x=range)) +
-   geom_histogram(aes(y=..density..), colour="black", fill="white")+
-   labs(title="Mass",
-        x ="Range of measurements", y = "Density")
-
-###### outlier detection ######
-
-## MASS
-mass <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "mass",
-             mean = mean(mass, na.rm = TRUE),
-             sd = sd(mass, na.rm = TRUE),
-             min = min(mass, na.rm=T),
-             max = max(mass, na.rm=T),
-             median = median(mass, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(mass)))
-
-mass$maxmin <- (mass$max - mass$min)
-
-boxplot(mass$maxmin)$out
-Q <- quantile(mass$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(mass$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-massoutliers <- mass %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-massoutliers
-
-#Flk new ID 58 --> fragmentation during transport
-#Flk new ID 83 --> one abnormal entry (human error?)
-#others are probably in the range of errors of a scale?
-
-## DORSAL CORTEX
-cortex <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "cortex",
-             mean = mean(dorsal_cortex, na.rm = TRUE),
-             sd = sd(dorsal_cortex, na.rm = TRUE),
-             min = min(dorsal_cortex, na.rm=T),
-             max = max(dorsal_cortex, na.rm=T),
-             median = median(dorsal_cortex, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(dorsal_cortex)))
-
-cortex$maxmin <- (cortex$max - cortex$min)
-
-boxplot(cortex$maxmin)$out
-Q <- quantile(cortex$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(cortex$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-cortexoutliers <- cortex %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-cortexoutliers
-
-#New flk IDs 3, 73 and 81 have discrepancies on dorsal cortex because of what is considered 'cortex'
-
-## MAX DIM
-maxdim <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "Max Dim",
-             mean = mean(maximumdimension, na.rm = TRUE),
-             sd = sd(maximumdimension, na.rm = TRUE),
-             min = min(maximumdimension, na.rm=T),
-             max = max(maximumdimension, na.rm=T),
-             median = median(maximumdimension, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(maximumdimension)))
-
-maxdim$maxmin <- (maxdim$max - maxdim$min)
-
-boxplot(maxdim$maxmin)$out
-Q <- quantile(maxdim$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(maxdim$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-maxdimoutliers <- maxdim %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-maxdimoutliers
-
-#interesting to see that most outliers are due to one analyst having a strong difference with the others
-#looking at the flakes, they are of a quadrangular / squarish shape: difficulty to eyeball the location of the max dim?
-#flk id 58, like for mass, the discrepancy is due to fragmentation during transport
-#flk id 52 (B80), analyst 0202a human error? no mistake in flk number
-
-## MAX WIDTH
-maxwidth <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "Max Width",
-             mean = mean(maximumwidth, na.rm = TRUE),
-             sd = sd(maximumwidth, na.rm = TRUE),
-             min = min(maximumwidth, na.rm=T),
-             max = max(maximumwidth, na.rm=T),
-             median = median(maximumwidth, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(maximumwidth)))
-
-maxwidth$maxmin <- (maxwidth$max - maxwidth$min)
-
-boxplot(maxwidth$maxmin)$out
-Q <- quantile(maxwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(maxwidth$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-maxwidthoutliers <- maxwidth %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-maxwidthoutliers
-
-#flk id 6, wide platform --> definition problem?
-#flk id 58, one value distinct from the others --> definition problem for width?
-#flk id 59, wide range, probably related to quadrangular flake morphology 
-
-## MAX THICKNESS
-maxT <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "Max Thick",
-             mean = mean(maximumthickness, na.rm = TRUE),
-             sd = sd(maximumthickness, na.rm = TRUE),
-             min = min(maximumthickness, na.rm=T),
-             max = max(maximumthickness, na.rm=T),
-             median = median(maximumthickness, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(maximumthickness)))
-
-maxT$maxmin <- (maxT$max - maxT$min)
-
-boxplot(maxT$maxmin)$out
-Q <- quantile(maxT$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(maxT$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-maxToutliers <- maxT %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-maxToutliers
-
-#flks 14, 51, 62, 67 are all relatively large flakes with prominent bulbs and thick platforms
-
-## TECHL
-
-summary(new_comsafrica_data$techlength)
-techL <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "Tech Length",
-             mean = mean(techlength, na.rm = TRUE),
-             sd = sd(techlength, na.rm = TRUE),
-             min = min(techlength, na.rm=T),
-             max = max(techlength, na.rm=T),
-             median = median(techlength, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techlength)))
-
-
-techL$maxmin <- (techL$max - techL$min)
-
-boxplot(techL$maxmin)$out
-Q <- quantile(techL$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techL$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techLoutliers <- techL %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techLoutliers
-
-#flk id 40  - one abherrant value
-#flk id 58 - discrepancy due to transport
-#flk id 68 - discrepancy due to clarity of definition for length / shape of flake (one side of the flake much longer than the other)
-#flk id 84 - clarity of technological axis?
-#flk id 91 - shape of the flake
-
-## TECHMAXWIDTH
-techmaxwidth <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techmaxwidth",
-             mean = mean(techmaxwidth, na.rm = TRUE),
-             sd = sd(techmaxwidth, na.rm = TRUE),
-             min = min(techmaxwidth, na.rm=T),
-             max = max(techmaxwidth, na.rm=T),
-             median = median(techmaxwidth, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techmaxwidth)))
-
-techmaxwidth$maxmin <- (techmaxwidth$max - techmaxwidth$min)
-
-boxplot(techmaxwidth$maxmin)$out
-Q <- quantile(techmaxwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techmaxwidth$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techmaxwidthoutliers <- techmaxwidth %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techmaxwidthoutliers
-
-
-#flk id 6, shape flake?
-#flk id 58, combination of analysis order and shape flake?
-
-##TECHMAXTHICKNESS
-techmaxthickness <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techmaxthickness",
-             mean = mean(techmaxthickness, na.rm = TRUE),
-             sd = sd(techmaxthickness, na.rm = TRUE),
-             min = min(techmaxthickness, na.rm=T),
-             max = max(techmaxthickness, na.rm=T),
-             median = median(techmaxthickness, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techmaxthickness)))
-
-techmaxthickness$maxmin <- (techmaxthickness$max - techmaxthickness$min)
-
-boxplot(techmaxthickness$maxmin)$out
-Q <- quantile(techmaxthickness$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techmaxthickness$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techmaxthicknessoutliers <- techmaxthickness %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techmaxthicknessoutliers
-
-#flk ids 12, 51, 67 no straightforward explanation. Flakes with thick platforms - drift from definition of techW
-
-##TECHWIDTHPROX
-
-techwidthprox <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techwidthprox",
-             mean = mean(techwidthprox, na.rm = TRUE),
-             sd = sd(techwidthprox, na.rm = TRUE),
-             min = min(techwidthprox, na.rm=T),
-             max = max(techwidthprox, na.rm=T),
-             median = median(techwidthprox, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techwidthprox)))
-
-techwidthprox$maxmin <- (techwidthprox$max - techwidthprox$min)
-techwidthprox
-boxplot(techwidthprox$maxmin)$out
-Q <- quantile(techwidthprox$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techwidthprox$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techwidthproxoutliers <- techwidthprox %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techwidthproxoutliers
-
-
-#newflkid 79 - one abherrant value
-# all other flakes (15, 20, 56, 59, 62, 84) --> relatively large flakes - weird shape or expanding and then converging edges
-
-
-##TECHWIDTHMES
-techwidthmes <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techwidthmes",
-             mean = mean(techwidthmes, na.rm = TRUE),
-             sd = sd(techwidthmes, na.rm = TRUE),
-             min = min(techwidthmes, na.rm=T),
-             max = max(techwidthmes, na.rm=T),
-             median = median(techwidthmes, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techwidthmes)))
-
-techwidthmes$maxmin <- (techwidthmes$max - techwidthmes$min)
-techwidthmes
-boxplot(techwidthmes$maxmin)$out
-Q <- quantile(techwidthmes$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techwidthmes$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techwidthmesoutliers <- techwidthmes %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techwidthmesoutliers
-
-#id 9,59,71,84 --> flake shapes for 59 and 84?
-
-##TECHWIDTHDIST
-techwidthdist <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techwidthdist",
-             mean = mean(techwidthdist, na.rm = TRUE),
-             sd = sd(techwidthdist, na.rm = TRUE),
-             min = min(techwidthdist, na.rm=T),
-             max = max(techwidthdist, na.rm=T),
-             median = median(techwidthdist, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techwidthdist)))
-
-techwidthdist$maxmin <- (techwidthdist$max - techwidthdist$min)
-techwidthdist
-boxplot(techwidthdist$maxmin)$out
-Q <- quantile(techwidthdist$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techwidthdist$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techwidthdistoutliers <- techwidthdist %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techwidthdistoutliers
-
-#id 71, 84, 91 < weird shape
-
-###TECHTHICKPROX
-techthickprox <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techthickprox",
-             mean = mean(techthickprox, na.rm = TRUE),
-             sd = sd(techthickprox, na.rm = TRUE),
-             min = min(techthickprox, na.rm=T),
-             max = max(techthickprox, na.rm=T),
-             median = median(techthickprox, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techthickprox)))
-
-
-techthickprox$maxmin <- (techthickprox$max - techthickprox$min)
-techthickprox
-boxplot(techthickprox$maxmin)$out
-Q <- quantile(techthickprox$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techthickprox$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techthickproxoutliers <- techthickprox %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techthickproxoutliers
-
-
-#43 - human error (a8acd - 63.48 instead of 6.48?), #79 one abherrant value
-#3, 7, 11, 12, 49, 62 --> flake shape?
-
-
-###TECHTHICKMES
-techthickmes <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techthickmes",
-             mean = mean(techthickmes, na.rm = TRUE),
-             sd = sd(techthickmes, na.rm = TRUE),
-             min = min(techthickmes, na.rm=T),
-             max = max(techthickmes, na.rm=T),
-             median = median(techthickmes, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techthickmes)))
-
-
-techthickmes$maxmin <- (techthickmes$max - techthickmes$min)
-techthickmes
-boxplot(techthickmes$maxmin)$out
-Q <- quantile(techthickmes$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techthickmes$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techthickmesoutliers <- techthickmes %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techthickmesoutliers
-
-
-#flk id 1 < one abherrant value: human error?
-#flk id 3 < flk shape?
-
-###TECHTHICKDIST
-techthickdist <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "techthickdist",
-             mean = mean(techthickdist, na.rm = TRUE),
-             sd = sd(techthickdist, na.rm = TRUE),
-             min = min(techthickdist, na.rm=T),
-             max = max(techthickdist, na.rm=T),
-             median = median(techthickdist, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(techthickdist)))
-
-techthickdist$maxmin <- (techthickdist$max - techthickdist$min)
-techthickdist
-boxplot(techthickdist$maxmin)$out
-Q <- quantile(techthickdist$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(techthickdist$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-techthickdistoutliers <- techthickdist %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-techthickdistoutliers
-
-#flk 58 < no immediate explanation, flk shape?
-
-###PLATFWIDTH
-platfwidth <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "platfwidth",
-             mean = mean(platfwidth, na.rm = TRUE),
-             sd = sd(platfwidth, na.rm = TRUE),
-             min = min(platfwidth, na.rm=T),
-             max = max(platfwidth, na.rm=T),
-             median = median(platfwidth, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(platfwidth)))
-
-platfwidth$maxmin <- (platfwidth$max - platfwidth$min)
-platfwidth
-boxplot(platfwidth$maxmin)$out
-Q <- quantile(platfwidth$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(platfwidth$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-platfwidthoutliers <- platfwidth %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-platfwidthoutliers
-
-#flk id 2 one abherrant value
-#flk id 9, 56, 63, 67 : cortical platform, platform not well defined
-#flk id 14-15, 74 : debordant flakes
-#flk 33 - human error, duplicates?
-
-###PLATFTHICKIMPACT
-platfthickimpact <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "platfthickimpact",
-             mean = mean(platfthickimpact, na.rm = TRUE),
-             sd = sd(platfthickimpact, na.rm = TRUE),
-             min = min(platfthickimpact, na.rm=T),
-             max = max(platfthickimpact, na.rm=T),
-             median = median(platfthickimpact, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(platfthickimpact)))
-
-platfthickimpact$maxmin <- (platfthickimpact$max - platfthickimpact$min)
-platfthickimpact
-boxplot(platfthickimpact$maxmin)$out
-Q <- quantile(platfthickimpact$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(platfthickimpact$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-platfthickimpactoutliers <- platfthickimpact %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-platfthickimpactoutliers
-
-## PLATFTHICKMAX
-platfthickmax <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "platfthickmax",
-             mean = mean(platfthickmax, na.rm = TRUE),
-             sd = sd(platfthickmax, na.rm = TRUE),
-             min = min(platfthickmax, na.rm=T),
-             max = max(platfthickmax, na.rm=T),
-             median = median(platfthickmax, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(platfthickmax)))
-
-
-platfthickmax$maxmin <- (platfthickmax$max - platfthickmax$min)
-platfthickmax
-boxplot(platfthickmax$maxmin)$out
-Q <- quantile(platfthickmax$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(platfthickmax$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-platfthickmaxoutliers <- platfthickmax %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-platfthickmaxoutliers
-
-## PLATFTHICKMID
-platfthickmid <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "platfthickmid",
-             mean = mean(platfthickmid, na.rm = TRUE),
-             sd = sd(platfthickmid, na.rm = TRUE),
-             min = min(platfthickmid, na.rm=T),
-             max = max(platfthickmid, na.rm=T),
-             median = median(platfthickmid, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(platfthickmid)))
-
-
-platfthickmid$maxmin <- (platfthickmid$max - platfthickmid$min)
-platfthickmid
-boxplot(platfthickmid$maxmin)$out
-Q <- quantile(platfthickmid$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(platfthickmid$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-platfthickmidoutliers <- platfthickmid %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-platfthickmidoutliers
-
-## EDGEPLATF
-edgeplatf <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "edgeplatf",
-             mean = mean(edgeplatf, na.rm = TRUE),
-             sd = sd(edgeplatf, na.rm = TRUE),
-             min = min(edgeplatf, na.rm=T),
-             max = max(edgeplatf, na.rm=T),
-             median = median(edgeplatf, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(edgeplatf)))
-
-
-edgeplatf$maxmin <- (edgeplatf$max - edgeplatf$min)
-edgeplatf
-boxplot(edgeplatf$maxmin)$out
-Q <- quantile(edgeplatf$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(edgeplatf$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-edgeplatfoutliers <- edgeplatf %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-edgeplatfoutliers
-
-#check this variable for consistency (mm or degrees), remove all  that are degrees (NA)
-
-angle_height <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "angle_height",
-             mean = mean(angle_height, na.rm = TRUE),
-             sd = sd(angle_height, na.rm = TRUE),
-             min = min(angle_height, na.rm=T),
-             max = max(angle_height, na.rm=T),
-             median = median(angle_height, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(angle_height)))
-
-angle_height
-angle_height$maxmin <- (angle_height$max - angle_height$min)
-angle_height
-boxplot(angle_height$maxmin)$out
-Q <- quantile(angle_height$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(angle_height$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-angle_heightoutliers <- angle_height %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-angle_heightoutliers
-
-##problems with angle height: is 0 a real value or automatic fill when not recorded?  (as seen for other measures?) seems to depend...
-
-#DORSAL SCAR COUNT
-
-dorsal_scar_count <- new_comsafrica_data %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "dorsal_scar_count",
-             mean = mean(dorsal_scar_count, na.rm = TRUE),
-             sd = sd(dorsal_scar_count, na.rm = TRUE),
-             min = min(dorsal_scar_count, na.rm=T),
-             max = max(dorsal_scar_count, na.rm=T),
-             median = median(dorsal_scar_count, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(dorsal_scar_count)))
-
-dorsal_scar_count
-dorsal_scar_count$maxmin <- (dorsal_scar_count$max - dorsal_scar_count$min)
-dorsal_scar_count
-boxplot(dorsal_scar_count$maxmin)$out
-Q <- quantile(dorsal_scar_count$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(dorsal_scar_count$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-dorsal_scar_countoutliers <- dorsal_scar_count %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-dorsal_scar_countoutliers
-
-#flk id 3 < depends on cortex definitions too
-#if flk id 3 removed, no outliers, but looking at those with a min-max range >10, it seems that problems linked to cortex definitions and what is a scar
-
-#PROX SCAR COUNT
-proximal_scars <- new_comsafrica_data_scar %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "proximal_scars",
-             mean = mean(proximal_scars, na.rm = TRUE),
-             sd = sd(proximal_scars, na.rm = TRUE),
-             min = min(proximal_scars, na.rm=T),
-             max = max(proximal_scars, na.rm=T),
-             median = median(proximal_scars, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(proximal_scars)))
-
-proximal_scars
-proximal_scars$maxmin <- (proximal_scars$max - proximal_scars$min)
-proximal_scars
-boxplot(proximal_scars$maxmin)$out
-Q <- quantile(proximal_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(proximal_scars$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-proximal_scarsoutliers <- proximal_scars %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-proximal_scarsoutliers
-
-##LEFT SCARS
-left_scars <- new_comsafrica_data_scar %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "left_scars",
-             mean = mean(left_scars, na.rm = TRUE),
-             sd = sd(left_scars, na.rm = TRUE),
-             min = min(left_scars, na.rm=T),
-             max = max(left_scars, na.rm=T),
-             median = median(left_scars, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(left_scars)))
-
-left_scars
-left_scars$maxmin <- (left_scars$max - left_scars$min)
-left_scars
-boxplot(left_scars$maxmin)$out
-Q <- quantile(left_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(left_scars$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-left_scarsoutliers <- left_scars %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-left_scarsoutliers
-
-#no outliers
-
-##RIGHT SCARS
-right_scars <- new_comsafrica_data_scar %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "right_scars",
-             mean = mean(right_scars, na.rm = TRUE),
-             sd = sd(right_scars, na.rm = TRUE),
-             min = min(right_scars, na.rm=T),
-             max = max(right_scars, na.rm=T),
-             median = median(right_scars, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(right_scars)))
-
-right_scars
-right_scars$maxmin <- (right_scars$max - right_scars$min)
-right_scars
-boxplot(right_scars$maxmin)$out
-Q <- quantile(right_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(right_scars$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-right_scarsoutliers <- right_scars %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-right_scarsoutliers
-
-#id8 - human error? count does not add up between total number scars and number scars per sector
-#id46 - same + difference in interpretation? often same analyst (46b96) has much larger count scars
-#id60 - same, often does not add up to total count scars
-#id62 - same
-
-##DISTAL SCARS
-distal_scars <- new_comsafrica_data_scar %>%
-   group_by(new_flake_id) %>%
-   summarize(variable = "distal_scars",
-             mean = mean(distal_scars, na.rm = TRUE),
-             sd = sd(distal_scars, na.rm = TRUE),
-             min = min(distal_scars, na.rm=T),
-             max = max(distal_scars, na.rm=T),
-             median = median(distal_scars, na.rm=T),
-             count=n(),
-             count2 = sum(!is.na(distal_scars)))
-
-distal_scars
-distal_scars$maxmin <- (distal_scars$max - distal_scars$min)
-distal_scars
-boxplot(distal_scars$maxmin)$out
-Q <- quantile(distal_scars$maxmin, probs=c(.25, .75), na.rm = FALSE)
-iqr <- IQR(distal_scars$maxmin)
-up <-  Q[2]+1.5*iqr # Upper Range  
-up
-
-distal_scarsoutliers <- distal_scars %>%
-   select(new_flake_id, maxmin, min, max) %>%
-   filter(maxmin > up)
-distal_scarsoutliers
-
-#no outliers
-
-###Alternative summary table for quantitative variables using dplyr ####
-
-###tables per quantitative variables
-
-mass <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "mass",
-            mean = mean(mass, na.rm = TRUE),
-            sd = sd(mass, na.rm = TRUE),
-            min = min(mass, na.rm=T),
-            max = max(mass, na.rm=T),
-            median = median(mass, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(mass)))
-
-cortex <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "cortex",
-            mean = mean(dorsal_cortex, na.rm = TRUE),
-            sd = sd(dorsal_cortex, na.rm = TRUE),
-            min = min(dorsal_cortex, na.rm=T),
-            max = max(dorsal_cortex, na.rm=T),
-            median = median(dorsal_cortex, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(dorsal_cortex)))
-
-
-
-maxdim <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "Max Dim",
-            mean = mean(maximumdimension, na.rm = TRUE),
-            sd = sd(maximumdimension, na.rm = TRUE),
-            min = min(maximumdimension, na.rm=T),
-            max = max(maximumdimension, na.rm=T),
-            median = median(maximumdimension, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(maximumdimension)))
-
-maxwidth <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "Max Width",
-            mean = mean(maximumwidth, na.rm = TRUE),
-            sd = sd(maximumwidth, na.rm = TRUE),
-            min = min(maximumwidth, na.rm=T),
-            max = max(maximumwidth, na.rm=T),
-            median = median(maximumwidth, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(maximumwidth)))
-
-maxT <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "Max Thick",
-            mean = mean(maximumthickness, na.rm = TRUE),
-            sd = sd(maximumthickness, na.rm = TRUE),
-            min = min(maximumthickness, na.rm=T),
-            max = max(maximumthickness, na.rm=T),
-            median = median(maximumthickness, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(maximumthickness)))
-
-
-techL <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "Tech Length",
-            mean = mean(techlength, na.rm = TRUE),
-            sd = sd(techlength, na.rm = TRUE),
-            min = min(techlength, na.rm=T),
-            max = max(techlength, na.rm=T),
-            median = median(techlength, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techlength)))
-
-techmaxwidth <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techmaxwidth",
-            mean = mean(techmaxwidth, na.rm = TRUE),
-            sd = sd(techmaxwidth, na.rm = TRUE),
-            min = min(techmaxwidth, na.rm=T),
-            max = max(techmaxwidth, na.rm=T),
-            median = median(techmaxwidth, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techmaxwidth)))
-
-techmaxthickness <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techmaxthickness",
-            mean = mean(techmaxthickness, na.rm = TRUE),
-            sd = sd(techmaxthickness, na.rm = TRUE),
-            min = min(techmaxthickness, na.rm=T),
-            max = max(techmaxthickness, na.rm=T),
-            median = median(techmaxthickness, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techmaxthickness)))
-
-techwidthprox <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techwidthprox",
-            mean = mean(techwidthprox, na.rm = TRUE),
-            sd = sd(techwidthprox, na.rm = TRUE),
-            min = min(techwidthprox, na.rm=T),
-            max = max(techwidthprox, na.rm=T),
-            median = median(techwidthprox, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techwidthprox)))
-
-techwidthmes <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techwidthmes",
-            mean = mean(techwidthmes, na.rm = TRUE),
-            sd = sd(techwidthmes, na.rm = TRUE),
-            min = min(techwidthmes, na.rm=T),
-            max = max(techwidthmes, na.rm=T),
-            median = median(techwidthmes, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techwidthmes)))
-
-techwidthdist <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techwidthdist",
-            mean = mean(techwidthdist, na.rm = TRUE),
-            sd = sd(techwidthdist, na.rm = TRUE),
-            min = min(techwidthdist, na.rm=T),
-            max = max(techwidthdist, na.rm=T),
-            median = median(techwidthdist, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techwidthdist)))
-
-techthickprox <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techthickprox",
-            mean = mean(techthickprox, na.rm = TRUE),
-            sd = sd(techthickprox, na.rm = TRUE),
-            min = min(techthickprox, na.rm=T),
-            max = max(techthickprox, na.rm=T),
-            median = median(techthickprox, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techthickprox)))
-
-techthickmes <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techthickmes",
-            mean = mean(techthickmes, na.rm = TRUE),
-            sd = sd(techthickmes, na.rm = TRUE),
-            min = min(techthickmes, na.rm=T),
-            max = max(techthickmes, na.rm=T),
-            median = median(techthickmes, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techthickmes)))
-
-techthickdist <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "techthickdist",
-            mean = mean(techthickdist, na.rm = TRUE),
-            sd = sd(techthickdist, na.rm = TRUE),
-            min = min(techthickdist, na.rm=T),
-            max = max(techthickdist, na.rm=T),
-            median = median(techthickdist, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(techthickdist)))
-
-platfwidth <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "platfwidth",
-            mean = mean(platfwidth, na.rm = TRUE),
-            sd = sd(platfwidth, na.rm = TRUE),
-            min = min(platfwidth, na.rm=T),
-            max = max(platfwidth, na.rm=T),
-            median = median(platfwidth, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(platfwidth)))
-
-platfthickimpact <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "platfthickimpact",
-            mean = mean(platfthickimpact, na.rm = TRUE),
-            sd = sd(platfthickimpact, na.rm = TRUE),
-            min = min(platfthickimpact, na.rm=T),
-            max = max(platfthickimpact, na.rm=T),
-            median = median(platfthickimpact, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(platfthickimpact)))
-
-platfthickmax <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "platfthickmax",
-            mean = mean(platfthickmax, na.rm = TRUE),
-            sd = sd(platfthickmax, na.rm = TRUE),
-            min = min(platfthickmax, na.rm=T),
-            max = max(platfthickmax, na.rm=T),
-            median = median(platfthickmax, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(platfthickmax)))
-
-platfthickmid <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "platfthickmid",
-            mean = mean(platfthickmid, na.rm = TRUE),
-            sd = sd(platfthickmid, na.rm = TRUE),
-            min = min(platfthickmid, na.rm=T),
-            max = max(platfthickmid, na.rm=T),
-            median = median(platfthickmid, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(platfthickmid)))
-
-edgeplatf <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "edgeplatf",
-            mean = mean(edgeplatf, na.rm = TRUE),
-            sd = sd(edgeplatf, na.rm = TRUE),
-            min = min(edgeplatf, na.rm=T),
-            max = max(edgeplatf, na.rm=T),
-            median = median(edgeplatf, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(edgeplatf)))
-
-angle_height <- data1 %>%
-  group_by(new_flake_id) %>%
-  summarize(variable = "angle_height",
-            mean = mean(angle_height, na.rm = TRUE),
-            sd = sd(angle_height, na.rm = TRUE),
-            min = min(angle_height, na.rm=T),
-            max = max(angle_height, na.rm=T),
-            median = median(angle_height, na.rm=T),
-            count=n(),
-            count2 = sum(!is.na(angle_height)))
-
-sumquant <- rbind(mass, cortex,maxdim, maxwidth, maxT, techL, techmaxwidth,
-                  techmaxthickness, techwidthprox, techwidthmes,
-                  techwidthdist, techthickprox, techthickmes,
-                  techthickdist, platfwidth, platfthickimpact,
-                  platfthickmax, platfthickmid, edgeplatf, angle_height)
-
-write.csv(sumquant, file="Tables/sumquant.csv")
 
 
