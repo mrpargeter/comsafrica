@@ -83,6 +83,8 @@ comsafrica_data<-read.csv("comsafrica_complete_adjusted.csv",stringsAsFactors=TR
    subset(!flake_id == "NONR3495") #filter out this non numbered flake
 individuals<-read.csv("individual_experience.csv",stringsAsFactors=TRUE) %>%
    rename(analyst_id=Analyst)
+categorical_images<-read.csv("images_irr_categorical.csv",stringsAsFactors=TRUE)
+continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors=TRUE)
 
 ####################################
 # Data cleaning
@@ -355,11 +357,16 @@ comsafrica_data_complete<-new_comsafrica_data %>%
 ### repeatability coefficients for continuous (Gaussian) data ####
 
 # cortex
-hist(log(comsafrica_data_complete$dorsal_cortex))
+cortex_data<-comsafrica_data_complete %>% 
+   mutate(dorsal_cortex=replace(dorsal_cortex,dorsal_cortex==0,1),
+          log_cortex=log(dorsal_cortex),) %>%
+   select(c(assemblage_code,new_flake_id,dorsal_cortex,log_cortex))
+hist((cortex_data$dorsal_cortex))
+
 set.seed(50)
-comsafrica_cortex_boot<-rpt(dorsal_cortex ~ (1 | assemblage_code) + (1 | new_flake_id),
+comsafrica_cortex_boot<-rpt(log_cortex ~ (1 | assemblage_code) + (1 | new_flake_id),
                             grname = c("assemblage_code","new_flake_id"),
-                            data = comsafrica_data_complete,
+                            data = cortex_data,
                             datatype = "Gaussian",
                             nboot = 1000, npermut = 100)
 print(comsafrica_cortex_boot)
@@ -566,8 +573,8 @@ irr_continuous_data<-rbind(cortex_irr,maxdim_irr,mass_irr,
                            platfthickmax_irr,platfthickimpact_irr,platfthickmid_irr) %>%
    rownames_to_column()
 
-var_contnames<-c("cortex","maxdim","mass",
-                  "maxwidth","maxthick","techlength",
+var_contnames<-c("dorsal_cortex","maximumdimension","mass",
+                  "maximumwidth","maximumthickness","techlength",
                   "techmaxwidth","techmaxthick","techwidthprox",
                   "techwidthmes","techwidthdist","techthickprox",
                   "techthickmes","techthickdist","platfwidth",
@@ -588,8 +595,9 @@ irr_cont_cidata<-rbind(cortex_ci,maxdim_ci,mass_ci,
                        platfthickmax_ci,platfthickimpact_ci,platfthickmid_ci) %>%
    rownames_to_column()
 
-var_cicontnames<-c("cortex","cortex","maxdim","maxdim","mass","mass",
-                   "maxwidth","maxwidth","maxthick","maxthick","techlength","techlength",
+var_cicontnames<-c("dorsal_cortex","dorsal_cortex","maximumdimension","maximumdimension",
+                   "mass","mass","maximumwidth","maximumwidth",
+                   "maximumthickness","maximumthickness","techlength","techlength",
                    "techmaxwidth","techmaxwidth","techmaxthick","techmaxthick","techwidthprox","techwidthprox",
                    "techwidthmes","techwidthmes","techwidthdist","techwidthdist","techthickprox","techthickprox",
                    "techthickmes","techthickmes","techthickdist","techthickdist","platfwidth","platfwidth",
@@ -1078,10 +1086,10 @@ p<-gwet.ac1.raw(distplanform_data_a_krip)$est
 
 ## collate gwet results
 gwet_data<-rbind(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
-var_names<-c("reduction system","flake form","completeness","platform cortex",
-             "scar directionality", "platform morphology", "platform lipping",
-             "bulb","shattered bulb", "initiation","ventral plan form","cross section shape",
-             "lateral edge shape","flake termination","Kombewa","distal plan form")
+var_names<-c("reduction_system","flake_form","completeness","platform_cortex",
+             "scar_directionality", "platform_morphology", "platform_lipping",
+             "bulb","shattered_bulb", "initiation","ventral_plan_form","cross_section_shape",
+             "lateral_edge_shape","flake_termination","Kombewa","distal_plan_form")
 
 gwet_data_merged<-cbind(gwet_data,var_names) %>%
    select(c(var_names,coeff.val,conf.int)) %>%
@@ -1168,7 +1176,7 @@ ggplot(gwet_data_merged,aes(y=coeff.val, x=reorder(var_names,coeff.val))) +
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
          axis.text = element_text(size = 10))+
    labs(x = "",
-        y = "IRR value")+
+        y = "AC1 value")+
    geom_hline(yintercept = 0.6, linetype = 2, colour = "red")+
    theme(axis.title = element_text(face="bold"),
          axis.text.x = element_text(face = "bold"))
@@ -1566,11 +1574,15 @@ range_summary<-flake_measurements_summary %>%
    mutate_at(vars(cv_mean,sd_mean,range_mean), funs(round(., 2))) %>%
    select(variable,range_mean,sd_mean,cv_mean) %>%
    arrange(cv_mean)
+
+#how to IRR and CV values compare
+range_irr_comparisons<-cbind(range_summary,
+                             irr_cont_data_complete_flakeid,by="variable")
  
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
 ## Visualize average measurement SD values
-ggplot(data=range_summary,
+ggplot(data=filter(range_summary,!variable=="dorsal_cortex"),
        aes(y=cv_mean, x=reorder(variable,cv_mean))) +
    geom_bar(position=position_dodge(), stat="identity") +
    theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
@@ -1578,7 +1590,12 @@ ggplot(data=range_summary,
    ylab(bquote("Average coefficient of variation")) +
    xlab("") +
    theme(axis.title = element_text(face="bold"),
-         axis.text.x = element_text(face = "bold"))
+         axis.text.x = element_text(face = "bold"))+
+   geom_hline(yintercept = mean(range_summary$cv_mean), color="red")+
+   geom_hline(yintercept = mean(range_summary$cv_mean)-sd(range_summary$cv_mean), 
+              color="blue",linetype='dotted')+
+   geom_hline(yintercept = mean(range_summary$cv_mean)+sd(range_summary$cv_mean), 
+              color="blue",linetype='dotted')
 
 #####Follow up questions####
 
@@ -1596,14 +1613,21 @@ chart.Correlation(my_data, histogram=TRUE, pch=19)
 
 #overall
 library(performance)
-model_1<-lm(mean_analyst_to_mean_overall~training_quant+years_experience,
+model_1<-lm(mean_analyst_to_mean_overall~training_quant,
    data=individuals_overall_combined,
-   subset = mean_analyst_to_mean_overall <10.5)
+   subset = mean_analyst_to_mean_overall <11)
 summary(model_1)
 avPlots(model_1)
 check_model(model_1)
 
-ggplot(individuals_overall_combined,
+model_2<-lm(mean_analyst_to_mean_overall~training_chaine_op,
+            data=individuals_overall_combined,
+            subset = mean_analyst_to_mean_overall <11)
+summary(model_2)
+avPlots(model_2)
+check_model(model_2)
+
+plot_1<-ggplot(subset(individuals_overall_combined,mean_analyst_to_mean_overall<11),
        aes(y=mean_analyst_to_mean_overall,x=training_quant))+
    geom_point() +
    geom_smooth(method="lm") +
@@ -1611,6 +1635,20 @@ ggplot(individuals_overall_combined,
    ylab("Average distance from mean measures")+
    theme(axis.title = element_text(face="bold"),
          axis.text.x = element_text(face = "bold"))
+
+plot_2<-ggplot(subset(individuals_overall_combined,mean_analyst_to_mean_overall<11),
+       aes(y=mean_analyst_to_mean_overall,x=training_chaine_op))+
+   geom_point() +
+   geom_smooth(method="lm") +
+   xlab("Chaine operatoire training\n(1=lowest, 5=highest)") + 
+   ylab("Average distance from mean measures")+
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
+library(ggpubr)
+ggarrange(plot_1, plot_2,
+          labels = c("A", "B", "C"),
+          ncol = 2, nrow = 1)
 
 #dorsal_cortex
 model_1<-lm(mean_analyst_to_mean~years_experience+training_quant,
@@ -1735,42 +1773,55 @@ sig_experience_results<-rbind(model_1_data,model_3_data,
           "std error"=Std..Error,
           t_value=t.value,
           p_value=Pr...t..) %>%
-   select(c("model","variable","est","std error","t value","p-value"))
+   select(c("model","variable","est","std error","t_value","p_value")) %>%
+   filter(!p_value>0.05)
    
 ## check if factor levels determine rater reliability
 
-aa<-nlevels(comsafrica_data_cat_data$red_syst)
-ab<-nlevels(comsafrica_data_cat_data$flk_form)
-ac<-nlevels(comsafrica_data_cat_data$completeness)
-ad<-nlevels(comsafrica_data_cat_data$platform_cortex)
-ae<-nlevels(comsafrica_data_cat_data$directionality)
-af<-nlevels(comsafrica_data_cat_data$platfmorph)
-ag<-nlevels(comsafrica_data_cat_data$platflipp)
-ah<-nlevels(comsafrica_data_cat_data$bulb)
-ai<-nlevels(comsafrica_data_cat_data$shattbulb)
-aj<-nlevels(comsafrica_data_cat_data$initiation)
-ak<-nlevels(comsafrica_data_cat_data$ventr_plane_form)
-al<-nlevels(comsafrica_data_cat_data$section)
-am<-nlevels(comsafrica_data_cat_data$latedgetype)
-an<-nlevels(comsafrica_data_cat_data$flaketerm)
-ao<-nlevels(comsafrica_data_cat_data$kombewa)
-ap<-nlevels(comsafrica_data_cat_data$distplanform)
+var_names<-c("reduction_system","flake_form","completeness","platform_cortex",
+             "scar_directionality", "platform_morphology", "platform_lipping",
+             "bulb","shattered_bulb", "initiation","ventral_plan_form","cross_section_shape",
+             "lateral_edge_shape","flake_termination","Kombewa","distal_plan_form")
 
-test<-data.frame(rbind(aa,ab,ac,ad,ae,af,ag,ah,ai,aj,
-                       ak,al,am,an,ao,ap)) %>%
-   rename("factor_levels"=rbind.aa..ab..ac..ad..ae..af..ag..ah..ai..aj..ak..al..am..an..) 
+reduction_system<-7
+flake_form<-2
+completeness<-8
+platform_cortex<-4
+scar_directionality<-10
+platform_morphology<-10
+platform_lipping<-3
+bulb<-2
+shattered_bulb<-2
+initiation<-3
+ventral_plan_form<-5
+cross_section_shape<-6
+lateral_edge_shape<-8
+flake_termination<-6
+Kombewa<-3
+distal_plan_form<-4
 
-test_2<-cbind(gwet_data_merged,test[,1])%>%
-   rename("factor_levels"='test[, 1]') 
+level_counts<-data.frame(rbind(reduction_system,flake_form,completeness,platform_cortex,
+                       scar_directionality,platform_morphology,platform_lipping,bulb,
+                       shattered_bulb,initiation,ventral_plan_form,cross_section_shape,
+                       lateral_edge_shape,flake_termination,Kombewa,distal_plan_form)) %>%
+   rownames_to_column() %>%
+   rename("factor_levels"=rbind.reduction_system..flake_form..completeness..platform_cortex..,
+          var_names=rowname)
+   
+test_2<-merge(gwet_data_merged,level_counts, by="var_names")
 
-ggplot(test_2, aes(x=factor_levels, y=coeff.val,label=var_names))+
+ggplot(subset(test_2, !var_names=="reduction_system"), aes(x=factor_levels, y=coeff.val,label=var_names))+
    geom_point(size=3)+
-   labs(title="", x ="Number of categories", y = "IRR")+ 
+   labs(title="", x ="Number of variable states", y = "AC1")+ 
    guides(color=guide_legend(title="Variable names")) +
    theme_classic()+ 
-   scale_x_continuous(breaks=seq(0,10,1))
+   scale_x_continuous(breaks=seq(0,10,1)) +
+   geom_smooth(method="lm")+
+   geom_text(aes(label=var_names),hjust=0,vjust=1.5)
 
-summary(glm(factor_levels~coeff.val,data=test_2,family = "poisson"))
+#test_2_subset<-subset(test_2, !factor_levels>6.9 | !coeff.val>0.8)
+test_2_subset_2<-subset(test_2, !var_names=="reduction_system")
+summary(glm(factor_levels~coeff.val,data=test_2_subset_2,family="poisson"))
 
 # Dorsal scars by section vs. total
 
@@ -1783,6 +1834,32 @@ summary(lm(sum_scars~dorsal_scar_count, data=dorsal_scars))
 
 ggplot(dorsal_scars, aes(x=sum_scars, y=dorsal_scar_count))+
    geom_point()
+
+## do images impact measurement repeatability?
+
+categorical_images<-read.csv("images_irr_categorical.csv",stringsAsFactors=TRUE)
+continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors=TRUE)
+
+# plot categorical
+ggplot(categorical_images,aes(x=as.factor(image), y=irr))+
+   geom_boxplot() +
+   geom_jitter(size=2) +
+   scale_x_discrete(name="Image absent/present") +
+   scale_y_continuous(name="Inter-rater reliability score")
+
+summary(glm(image~irr, data=categorical_images))
+
+# plot continuous
+ggplot(continuous_images,aes(x=as.factor(image), y=irr))+
+   geom_boxplot(outlier.size = 0, outlier.colour = "white") +
+   geom_jitter(size=3, aes(shape=data.class)) +
+   scale_x_discrete(name="Image absent/present") +
+   scale_y_continuous(name="Inter-rater reliability score")+
+   theme(legend.title=element_blank())
+
+summary(glm(image~irr, data=categorical_images))
+# continuous
+summary(glm(image~irr, data=subset(continuous_images,data.class=="continuous")))
 
 ## how do technological features impact measurement variance? ##
 
@@ -1959,6 +2036,7 @@ combined_variance_attribute_data<-data.frame(rbind(a,b,c,d,e,f,g,h,i,j,k)) %>%
    mutate_at(vars(adj.p.value), funs(round(., 3)))
 
 write.csv(combined_variance_attribute_data,"combined_variance_attribute_data.csv")
+
 
 
 
