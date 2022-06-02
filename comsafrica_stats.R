@@ -355,23 +355,9 @@ comsafrica_data_complete<-new_comsafrica_data %>%
             platfwidth,platfthickimpact,platfthickmid,platfthickmax,edgeplatf,angle_height))
 
 ### repeatability coefficients for continuous (Gaussian) data ####
-
-# cortex
-cortex_data<-comsafrica_data_complete %>% 
-   mutate(dorsal_cortex=replace(dorsal_cortex,dorsal_cortex==0,1),
-          log_cortex=log(dorsal_cortex),) %>%
-   select(c(assemblage_code,new_flake_id,dorsal_cortex,log_cortex))
-hist((cortex_data$dorsal_cortex))
-
-set.seed(50)
-comsafrica_cortex_boot<-rpt(log_cortex ~ (1 | assemblage_code) + (1 | new_flake_id),
-                            grname = c("assemblage_code","new_flake_id"),
-                            data = cortex_data,
-                            datatype = "Gaussian",
-                            nboot = 1000, npermut = 100)
-print(comsafrica_cortex_boot)
-cortex_irr<-comsafrica_cortex_boot$R
-cortex_ci<-comsafrica_cortex_boot$CI_emp
+# first as a whole, then divide into assemblage variants to compare inter-rater variance
+# technological strategies
+   #### Both assemblages ####
 
 # maxdim
 hist(comsafrica_data_complete$maximumdimension)
@@ -384,6 +370,9 @@ comsafrica_maxdim_boot<-rpt(maximumdimension ~  (1 | assemblage_code)  + (1 | ne
 print(comsafrica_maxdim_boot)
 maxdim_irr<-comsafrica_maxdim_boot$R
 maxdim_ci<-comsafrica_maxdim_boot$CI_emp
+
+ggplot(comsafrica_data_complete, aes(x=assemblage_code, y=maximumdimension))+
+   geom_boxplot()
 
 #mass
 set.seed(50)
@@ -421,13 +410,13 @@ maxthick_ci<-comsafrica_maxthick$CI_emp
 #flake tech length
 set.seed(50)
 comsafrica_techlength<-rpt(techlength ~  (1 | assemblage_code)  + (1 | new_flake_id),
-                         grname = c("assemblage_code","new_flake_id"),
-                         data = comsafrica_data_complete,
-                         datatype = "Gaussian",
-                         nboot = 1000, npermut = 100)
+                           grname = c("assemblage_code","new_flake_id"),
+                           data = comsafrica_data_complete,
+                           datatype = "Gaussian",
+                           nboot = 1000, npermut = 100)
 print(comsafrica_techlength)
-techlength_irr<-comsafrica_techlength$R
-techlength_ci<-comsafrica_techlength$CI_emp
+maxthick_irr<-comsafrica_maxthick$R
+maxthick_ci<-comsafrica_maxthick$CI_emp
 
 #flake tech max width
 set.seed(50)
@@ -638,12 +627,536 @@ irr_cont_data_complete_flakeid<-merge(irr_cont_data_merged_flakeid,
    mutate(across(where(is.numeric), ~ round(., 2))) %>%
    rename(comparison=variable.x)
 
+   #### Assemblage A ####
+
+a_data<-filter(comsafrica_data_complete, assemblage_code=="chert_condition_A") 
+
+# maxdim
+set.seed(50)
+a_comsafrica_maxdim_boot<-rpt(maximumdimension ~  (1 | new_flake_id),
+                            grname = ("new_flake_id"),
+                            data = a_data,
+                            datatype = "Gaussian",
+                            nboot = 1000, npermut = 100)
+print(a_comsafrica_maxdim_boot)
+maxdim_irr_a<-a_comsafrica_maxdim_boot$R
+maxdim_ci_a<-a_comsafrica_maxdim_boot$CI_emp
+
+#mass
+set.seed(50)
+a_comsafrica_mass<-rpt(log(mass) ~  (1 | new_flake_id),
+                     grname = ("new_flake_id"),
+                     data = filter(a_data,mass>0),
+                     datatype = "Gaussian",
+                     nboot = 1000, npermut = 100)
+print(a_comsafrica_mass)
+mass_irr_a<-a_comsafrica_mass$R
+mass_ci_a<-a_comsafrica_mass$CI_emp
+
+#flake width
+set.seed(50)
+a_comsafrica_maxwidth<-rpt(maximumwidth ~  (1 | new_flake_id),
+                         grname = ("new_flake_id"),
+                         data = a_data,
+                         datatype = "Gaussian",
+                         nboot = 1000, npermut = 100)
+print(a_comsafrica_maxwidth)
+maxwidth_irr_a<-a_comsafrica_maxwidth$R
+maxwidth_ci_a<-a_comsafrica_maxwidth$CI_emp
+
+#flake max thickness
+set.seed(50)
+a_comsafrica_maxthick<-rpt(maximumthickness ~  (1 | new_flake_id),
+                         grname = ("new_flake_id"),
+                         data = a_data,
+                         datatype = "Gaussian",
+                         nboot = 1000, npermut = 100)
+print(a_comsafrica_maxthick)
+maxthick_irr_a<-a_comsafrica_maxthick$R
+maxthick_ci_a<-a_comsafrica_maxthick$CI_emp
+
+#flake tech length
+set.seed(50)
+a_comsafrica_techlength<-rpt(techlength ~  (1 | new_flake_id),
+                           grname = ("new_flake_id"),
+                           data = a_data,
+                           datatype = "Gaussian",
+                           nboot = 1000, npermut = 100)
+print(a_comsafrica_techlength)
+techlength_irr_a<-a_comsafrica_techlength$R
+techlength_ci_a<-a_comsafrica_techlength$CI_emp
+
+#flake tech max width
+set.seed(50)
+a_comsafrica_techmaxwidth<-rpt(techmaxwidth ~  (1 | new_flake_id),
+                             grname = ("new_flake_id"),
+                             data = a_data,
+                             datatype = "Gaussian",
+                             nboot = 1000, npermut = 100)
+print(a_comsafrica_techmaxwidth)
+techmaxwidth_irr_a<-a_comsafrica_techmaxwidth$R
+techmaxwidth_ci_a<-a_comsafrica_techmaxwidth$CI_emp
+
+#flake tech max thickness
+set.seed(50)
+a_comsafrica_techmaxthick<-rpt(techmaxthickness ~  (1 | new_flake_id),
+                             grname = ("new_flake_id"),
+                             data = a_data,
+                             datatype = "Gaussian",
+                             nboot = 1000, npermut = 100)
+print(a_comsafrica_techmaxthick)
+techmaxthick_irr_a<-a_comsafrica_techmaxthick$R
+techmaxthick_ci_a<-a_comsafrica_techmaxthick$CI_emp
+
+#flake tech width prox
+set.seed(50)
+a_comsafrica_techwidthprox<-rpt(techwidthprox ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = a_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(a_comsafrica_techwidthprox)
+techwidthprox_irr_a<-a_comsafrica_techwidthprox$R
+techwidthprox_ci_a<-a_comsafrica_techwidthprox$CI_emp
+
+#flake tech width mes
+set.seed(50)
+a_comsafrica_techwidthmes<-rpt(techwidthmes ~  (1 | new_flake_id),
+                             grname = ("new_flake_id"),
+                             data = a_data,
+                             datatype = "Gaussian",
+                             nboot = 1000, npermut = 100)
+print(a_comsafrica_techwidthmes)
+techwidthmes_irr_a<-a_comsafrica_techwidthmes$R
+techwidthmes_ci_a<-a_comsafrica_techwidthmes$CI_emp
+
+#flake tech width dist
+set.seed(50)
+a_comsafrica_techwidthdist<-rpt(techwidthdist ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = a_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(a_comsafrica_techwidthdist)
+techwidthdist_irr_a<-a_comsafrica_techwidthdist$R
+techwidthdist_ci_a<-a_comsafrica_techwidthdist$CI_emp
+
+#flake tech thick prox
+#tech_thick_prox_data<-a_data %>%
+#  filter(!new_flake_id %in% c(27,68,10))
+
+set.seed(50)
+a_comsafrica_techtechthickprox<-rpt(techthickprox ~  (1 | new_flake_id),
+                                  grname = ("new_flake_id"),
+                                  data = a_data,
+                                  datatype = "Gaussian",
+                                  nboot = 1000, npermut = 100)
+print(a_comsafrica_techtechthickprox)
+techthickprox_irr_a<-a_comsafrica_techtechthickprox$R
+techthickprox_ci_a<-a_comsafrica_techtechthickprox$CI_emp
+
+#flake tech thick med
+set.seed(50)
+a_comsafrica_techtechthickmes<-rpt(techthickmes ~  (1 | new_flake_id),
+                                 grname = ("new_flake_id"),
+                                 data = a_data,
+                                 datatype = "Gaussian",
+                                 nboot = 1000, npermut = 100)
+print(a_comsafrica_techtechthickmes)
+techthickmes_irr_a<-a_comsafrica_techtechthickmes$R
+techthickmes_ci_a<-a_comsafrica_techtechthickmes$CI_emp
+
+#flake tech thick dist
+set.seed(50)
+a_comsafrica_techthickdist<-rpt(techthickdist ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = a_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(a_comsafrica_techthickdist)
+techthickdist_irr_a<-a_comsafrica_techthickdist$R
+techthickdist_ci_a<-a_comsafrica_techthickdist$CI_emp
+
+#flake platform width
+set.seed(50)
+a_comsafrica_platfwidth<-rpt(platfwidth ~  (1 | new_flake_id),
+                           grname = ("new_flake_id"),
+                           data = a_data,
+                           datatype = "Gaussian",
+                           nboot = 1000, npermut = 100)
+print(a_comsafrica_platfwidth)
+platfwidth_irr_a<-a_comsafrica_platfwidth$R
+platfwidth_ci_a<-a_comsafrica_platfwidth$CI_emp
+
+#flake platform thickness
+set.seed(50)
+a_comsafrica_platfthickmax<-rpt(platfthickmax ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = a_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(a_comsafrica_platfthickmax)
+platfthickmax_irr_a<-a_comsafrica_platfthickmax$R
+platfthickmax_ci_a<-a_comsafrica_platfthickmax$CI_emp
+
+#flake platform thickness impact
+set.seed(50)
+a_comsafrica_platfthicimpact<-rpt(platfthickimpact ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = a_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(a_comsafrica_platfthicimpact)
+platfthickimpact_irr_a<-a_comsafrica_platfthicimpact$R
+platfthickimpact_ci_a<-a_comsafrica_platfthicimpact$CI_emp
+
+#flake platform thickness mid point
+set.seed(50)
+a_comsafrica_platfthickmid<-rpt(platfthickmid ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = a_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(a_comsafrica_platfthickmid)
+platfthickmid_irr_a<-a_comsafrica_platfthickmid$R
+platfthickmid_ci_a<-a_comsafrica_platfthickmid$CI_emp
+
+## compile IRR continuous values into table
+irr_continuous_data_a<-rbind(maxdim_irr_a,mass_irr_a,
+                           maxwidth_irr_a,maxthick_irr_a,techlength_irr_a,
+                           techmaxwidth_irr_a,techmaxthick_irr_a,techwidthprox_irr_a,
+                           techwidthmes_irr_a,techwidthdist_irr_a,techthickprox_irr_a,
+                           techthickmes_irr_a,techthickdist_irr_a,platfwidth_irr_a,
+                           platfthickmax_irr_a,platfthickimpact_irr_a,platfthickmid_irr_a) %>%
+   rownames_to_column()
+
+var_contnames<-c("maximumdimension","mass",
+                 "maximumwidth","maximumthickness","techlength",
+                 "techmaxwidth","techmaxthick","techwidthprox",
+                 "techwidthmes","techwidthdist","techthickprox",
+                 "techthickmes","techthickdist","platfwidth",
+                 "platfthickmax","platfthickimpact","platfthickmid")
+
+irr_cont_data_merged_a<-cbind(irr_continuous_data_a,var_contnames) %>%
+   select(-rowname) %>%
+   select(c(var_contnames,new_flake_id)) %>%
+   pivot_longer(cols=c("new_flake_id"),
+                names_to = "variable", values_to = "irr")
+
+## compile IRR continuous value CI data into table
+irr_cont_cidata_a<-rbind(maxdim_ci_a,mass_ci_a,
+                       maxwidth_ci_a,maxthick_ci_a,techlength_ci_a,
+                       techmaxwidth_ci_a,techmaxthick_ci_a,techwidthprox_ci_a,
+                       techwidthmes_ci_a,techwidthdist_ci_a,techthickprox_ci_a,
+                       techthickmes_ci_a,techthickdist_ci_a,platfwidth_ci_a,
+                       platfthickmax_ci_a,platfthickimpact_ci_a,platfthickmid_ci_a) %>%
+   rownames_to_column()
+
+var_cicontnames<-c("maximumdimension","mass","maximumwidth","maximumthickness",
+                   "techlength","techmaxwidth","techmaxthick","techwidthprox","techwidthmes",
+                   "techwidthdist","techthickprox","techthickmes","techthickdist","platfwidth",
+                   "platfthickmax","platfthickimpact","platfthickmid")
+
+irr_cont_cidata_merged_a<-cbind(irr_cont_cidata_a,var_cicontnames) %>%
+   rename(variable=rowname,
+          var_contnames=var_cicontnames,
+          lower='2.5%',
+          upper='97.5%') %>%
+   mutate(variable = gsub("[[:digit:]]", "", variable))
+
+## merge IRR and CI  flake ID data
+irr_cont_data_merged_flakeid_a<-irr_cont_data_merged_a %>%
+   filter(variable=="new_flake_id")
+irr_cont_cidata_merged_flakeid_a<-irr_cont_cidata_merged_a %>%
+   filter(variable=="new_flake_id")
+
+irr_cont_data_complete_flakeid_a<-merge(irr_cont_data_merged_flakeid_a,
+                                        irr_cont_cidata_merged_flakeid_a,
+                                      by="var_contnames") %>%
+   select(-c(variable.y)) %>%
+   select(c(var_contnames,variable.x,irr,lower,upper)) %>%
+   mutate(across(where(is.numeric), ~ round(., 2)),
+          assemblage_code=rep("a", times=length(lower))) %>%
+   rename(comparison=variable.x)
+
+   #### Assemblage B ####
+
+b_data<-filter(comsafrica_data_complete, assemblage_code=="chert_condition_B") 
+
+# maxdim
+set.seed(50)
+b_comsafrica_maxdim_boot<-rpt(maximumdimension ~  (1 | new_flake_id),
+                              grname = ("new_flake_id"),
+                              data = b_data,
+                              datatype = "Gaussian",
+                              nboot = 1000, npermut = 100)
+print(b_comsafrica_maxdim_boot)
+maxdim_irr_b<-b_comsafrica_maxdim_boot$R
+maxdim_ci_b<-b_comsafrica_maxdim_boot$CI_emp
+
+#mass
+set.seed(50)
+b_comsafrica_mass<-rpt(log(mass) ~  (1 | new_flake_id),
+                       grname = ("new_flake_id"),
+                       data = filter(b_data,mass>0),
+                       datatype = "Gaussian",
+                       nboot = 1000, npermut = 100)
+print(b_comsafrica_mass)
+mass_irr_b<-b_comsafrica_mass$R
+mass_ci_b<-b_comsafrica_mass$CI_emp
+
+#flake width
+set.seed(50)
+b_comsafrica_maxwidth<-rpt(maximumwidth ~  (1 | new_flake_id),
+                           grname = ("new_flake_id"),
+                           data = b_data,
+                           datatype = "Gaussian",
+                           nboot = 1000, npermut = 100)
+print(b_comsafrica_maxwidth)
+maxwidth_irr_b<-b_comsafrica_maxwidth$R
+maxwidth_ci_b<-b_comsafrica_maxwidth$CI_emp
+
+#flake max thickness
+set.seed(50)
+b_comsafrica_maxthick<-rpt(maximumthickness ~  (1 | new_flake_id),
+                           grname = ("new_flake_id"),
+                           data = b_data,
+                           datatype = "Gaussian",
+                           nboot = 1000, npermut = 100)
+print(b_comsafrica_maxthick)
+maxthick_irr_b<-b_comsafrica_maxthick$R
+maxthick_ci_b<-b_comsafrica_maxthick$CI_emp
+
+#flake tech length
+set.seed(50)
+b_comsafrica_techlength<-rpt(techlength ~  (1 | new_flake_id),
+                             grname = ("new_flake_id"),
+                             data = b_data,
+                             datatype = "Gaussian",
+                             nboot = 1000, npermut = 100)
+print(b_comsafrica_techlength)
+techlength_irr_b<-b_comsafrica_techlength$R
+techlength_ci_b<-b_comsafrica_techlength$CI_emp
+
+#flake tech max width
+set.seed(50)
+b_comsafrica_techmaxwidth<-rpt(techmaxwidth ~  (1 | new_flake_id),
+                               grname = ("new_flake_id"),
+                               data = b_data,
+                               datatype = "Gaussian",
+                               nboot = 1000, npermut = 100)
+print(b_comsafrica_techmaxwidth)
+techmaxwidth_irr_b<-b_comsafrica_techmaxwidth$R
+techmaxwidth_ci_b<-b_comsafrica_techmaxwidth$CI_emp
+
+#flake tech max thickness
+set.seed(50)
+b_comsafrica_techmaxthick<-rpt(techmaxthickness ~  (1 | new_flake_id),
+                               grname = ("new_flake_id"),
+                               data = b_data,
+                               datatype = "Gaussian",
+                               nboot = 1000, npermut = 100)
+print(b_comsafrica_techmaxthick)
+techmaxthick_irr_b<-b_comsafrica_techmaxthick$R
+techmaxthick_ci_b<-b_comsafrica_techmaxthick$CI_emp
+
+#flake tech width prox
+set.seed(50)
+b_comsafrica_techwidthprox<-rpt(techwidthprox ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = b_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(b_comsafrica_techwidthprox)
+techwidthprox_irr_b<-b_comsafrica_techwidthprox$R
+techwidthprox_ci_b<-b_comsafrica_techwidthprox$CI_emp
+
+#flake tech width mes
+set.seed(50)
+b_comsafrica_techwidthmes<-rpt(techwidthmes ~  (1 | new_flake_id),
+                               grname = ("new_flake_id"),
+                               data = b_data,
+                               datatype = "Gaussian",
+                               nboot = 1000, npermut = 100)
+print(b_comsafrica_techwidthmes)
+techwidthmes_irr_b<-b_comsafrica_techwidthmes$R
+techwidthmes_ci_b<-b_comsafrica_techwidthmes$CI_emp
+
+#flake tech width dist
+set.seed(50)
+b_comsafrica_techwidthdist<-rpt(techwidthdist ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = b_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(b_comsafrica_techwidthdist)
+techwidthdist_irr_b<-b_comsafrica_techwidthdist$R
+techwidthdist_ci_b<-b_comsafrica_techwidthdist$CI_emp
+
+#flake tech thick prox
+#tech_thick_prox_data<-b_data %>%
+#  filter(!new_flake_id %in% c(27,68,10))
+
+set.seed(50)
+b_comsafrica_techtechthickprox<-rpt(techthickprox ~  (1 | new_flake_id),
+                                    grname = ("new_flake_id"),
+                                    data = b_data,
+                                    datatype = "Gaussian",
+                                    nboot = 1000, npermut = 100)
+print(b_comsafrica_techtechthickprox)
+techthickprox_irr_b<-b_comsafrica_techtechthickprox$R
+techthickprox_ci_b<-b_comsafrica_techtechthickprox$CI_emp
+
+#flake tech thick med
+set.seed(50)
+b_comsafrica_techtechthickmes<-rpt(techthickmes ~  (1 | new_flake_id),
+                                   grname = ("new_flake_id"),
+                                   data = b_data,
+                                   datatype = "Gaussian",
+                                   nboot = 1000, npermut = 100)
+print(b_comsafrica_techtechthickmes)
+techthickmes_irr_b<-b_comsafrica_techtechthickmes$R
+techthickmes_ci_b<-b_comsafrica_techtechthickmes$CI_emp
+
+#flake tech thick dist
+set.seed(50)
+b_comsafrica_techthickdist<-rpt(techthickdist ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = b_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(b_comsafrica_techthickdist)
+techthickdist_irr_b<-b_comsafrica_techthickdist$R
+techthickdist_ci_b<-b_comsafrica_techthickdist$CI_emp
+
+#flake platform width
+set.seed(50)
+b_comsafrica_platfwidth<-rpt(platfwidth ~  (1 | new_flake_id),
+                             grname = ("new_flake_id"),
+                             data = b_data,
+                             datatype = "Gaussian",
+                             nboot = 1000, npermut = 100)
+print(b_comsafrica_platfwidth)
+platfwidth_irr_b<-b_comsafrica_platfwidth$R
+platfwidth_ci_b<-b_comsafrica_platfwidth$CI_emp
+
+#flake platform thickness
+set.seed(50)
+b_comsafrica_platfthickmax<-rpt(platfthickmax ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = b_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(b_comsafrica_platfthickmax)
+platfthickmax_irr_b<-b_comsafrica_platfthickmax$R
+platfthickmax_ci_b<-b_comsafrica_platfthickmax$CI_emp
+
+#flake platform thickness impact
+set.seed(50)
+b_comsafrica_platfthicimpact<-rpt(platfthickimpact ~  (1 | new_flake_id),
+                                  grname = ("new_flake_id"),
+                                  data = b_data,
+                                  datatype = "Gaussian",
+                                  nboot = 1000, npermut = 100)
+print(b_comsafrica_platfthicimpact)
+platfthickimpact_irr_b<-b_comsafrica_platfthicimpact$R
+platfthickimpact_ci_b<-b_comsafrica_platfthicimpact$CI_emp
+
+#flake platform thickness mid point
+set.seed(50)
+b_comsafrica_platfthickmid<-rpt(platfthickmid ~  (1 | new_flake_id),
+                                grname = ("new_flake_id"),
+                                data = b_data,
+                                datatype = "Gaussian",
+                                nboot = 1000, npermut = 100)
+print(b_comsafrica_platfthickmid)
+platfthickmid_irr_b<-b_comsafrica_platfthickmid$R
+platfthickmid_ci_b<-b_comsafrica_platfthickmid$CI_emp
+
+## compile IRR continuous values into table
+irr_continuous_data_b<-rbind(maxdim_irr_b,mass_irr_b,
+                             maxwidth_irr_b,maxthick_irr_b,techlength_irr_b,
+                             techmaxwidth_irr_b,techmaxthick_irr_b,techwidthprox_irr_b,
+                             techwidthmes_irr_b,techwidthdist_irr_b,techthickprox_irr_b,
+                             techthickmes_irr_b,techthickdist_irr_b,platfwidth_irr_b,
+                             platfthickmax_irr_b,platfthickimpact_irr_b,platfthickmid_irr_b) %>%
+   rownames_to_column()
+
+var_contnames<-c("maximumdimension","mass",
+                 "maximumwidth","maximumthickness","techlength",
+                 "techmaxwidth","techmaxthick","techwidthprox",
+                 "techwidthmes","techwidthdist","techthickprox",
+                 "techthickmes","techthickdist","platfwidth",
+                 "platfthickmax","platfthickimpact","platfthickmid")
+
+irr_cont_data_merged_b<-cbind(irr_continuous_data_b,var_contnames) %>%
+   select(-rowname) %>%
+   select(c(var_contnames,new_flake_id)) %>%
+   pivot_longer(cols=c("new_flake_id"),
+                names_to = "variable", values_to = "irr")
+
+## compile IRR continuous value CI data into table
+irr_cont_cidata_b<-rbind(maxdim_ci_b,mass_ci_b,
+                         maxwidth_ci_b,maxthick_ci_b,techlength_ci_b,
+                         techmaxwidth_ci_b,techmaxthick_ci_b,techwidthprox_ci_b,
+                         techwidthmes_ci_b,techwidthdist_ci_b,techthickprox_ci_b,
+                         techthickmes_ci_b,techthickdist_ci_b,platfwidth_ci_b,
+                         platfthickmax_ci_b,platfthickimpact_ci_b,platfthickmid_ci_b) %>%
+   rownames_to_column()
+
+var_cicontnames<-c("maximumdimension","mass","maximumwidth","maximumthickness",
+                   "techlength","techmaxwidth","techmaxthick","techwidthprox","techwidthmes",
+                   "techwidthdist","techthickprox","techthickmes","techthickdist","platfwidth",
+                   "platfthickmax","platfthickimpact","platfthickmid")
+
+irr_cont_cidata_merged_b<-cbind(irr_cont_cidata_b,var_cicontnames) %>%
+   rename(variable=rowname,
+          var_contnames=var_cicontnames,
+          lower='2.5%',
+          upper='97.5%') %>%
+   mutate(variable = gsub("[[:digit:]]", "", variable))
+
+## merge IRR and CI  flake ID data
+irr_cont_data_merged_flakeid_b<-irr_cont_data_merged_b %>%
+   filter(variable=="new_flake_id")
+irr_cont_cidata_merged_flakeid_b<-irr_cont_cidata_merged_b %>%
+   filter(variable=="new_flake_id")
+
+irr_cont_data_complete_flakeid_b<-merge(irr_cont_data_merged_flakeid_b,
+                                        irr_cont_cidata_merged_flakeid_b,
+                                        by="var_contnames") %>%
+   select(-c(variable.y)) %>%
+   select(c(var_contnames,variable.x,irr,lower,upper)) %>%
+   mutate(across(where(is.numeric), ~ round(., 2)),
+          assemblage_code=rep("b", times=length(lower))) %>%
+   rename(comparison=variable.x)
+
+   #### merge and compare two assemblage IRR data ####
+merged_assemblage_irr_cont_data<-rbind(irr_cont_data_complete_flakeid_a,
+                                       irr_cont_data_complete_flakeid_b) %>%
+   select(c(var_contnames,assemblage_code,irr)) %>%
+   spread(assemblage_code, irr) %>%
+   mutate(irr_difference=(a-b))
+
+library(ggtext)
+ggplot(merged_assemblage_irr_cont_data,
+       aes(y=irr_difference, x=reorder(var_contnames,irr_difference))) +
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   ylab(expression(paste("IRR difference")))+
+   xlab(label="")+
+   theme(axis.title.y = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
 ### repeatability coefficients for Count data ####
 
 comsafrica_data_count_data<-new_comsafrica_data %>%
    select(c(assemblage_code,analyst_id,analysis_order,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
             dorsal_scar_count)) %>%
    filter(!analyst_id == "r42o8")
+
+   #### Both assemblages ####
 
 # proximal_scars
 hist(comsafrica_data_count_data$proximal_scars)
@@ -761,6 +1274,174 @@ irr_count_data_complete_flakeid<-merge(irr_count_data_merged_flakeid,
    mutate(across(where(is.numeric), ~ round(., 2))) %>%
    rename(comparison=variable.x)
 
+   #### Assemblage A ####
+count_data_a<-comsafrica_data_count_data %>% filter(assemblage_code=="chert_condition_A")
+
+# proximal_scars
+hist(count_data_a$proximal_scars)
+set.seed(50)
+comsafrica_proximal_scars_boot_a<-rpt(proximal_scars ~    + (1 | new_flake_id),
+                                    grname = "new_flake_id",
+                                    data = count_data_a,
+                                    datatype = "Poisson",
+                                    nboot = 100, npermut = 100)
+print(comsafrica_proximal_scars_boot_a)
+proximal_scars_irr_a<-comsafrica_proximal_scars_boot_a$R
+
+# left_scars
+hist(count_data_a$left_scars)
+set.seed(50)
+comsafrica_left_scars_boot_a<-rpt(left_scars ~    + (1 | new_flake_id),
+                                grname = "new_flake_id",
+                                data = count_data_a,
+                                datatype = "Poisson",
+                                nboot = 100, npermut = 100)
+print(comsafrica_left_scars_boot_a)
+left_scars_irr_a<-comsafrica_left_scars_boot_a$R
+
+# distal_scars
+hist(count_data_a$distal_scars)
+set.seed(50)
+comsafrica_distal_scars_boot_a<-rpt(distal_scars ~    + (1 | new_flake_id),
+                                  grname = "new_flake_id",
+                                  data = count_data_a,
+                                  datatype = "Poisson",
+                                  nboot = 100, npermut = 100)
+print(comsafrica_distal_scars_boot_a)
+distal_scars_irr_a<-comsafrica_distal_scars_boot_a$R
+
+# right_scars
+hist(count_data_a$right_scars)
+set.seed(50)
+comsafrica_right_scars_boot_a<-rpt(right_scars ~    + (1 | new_flake_id),
+                                 grname = "new_flake_id",
+                                 data = count_data_a,
+                                 datatype = "Poisson",
+                                 nboot = 100, npermut = 100)
+print(comsafrica_right_scars_boot_a)
+right_scars_irr_a<-comsafrica_right_scars_boot_a$R
+
+# dorsal scar count
+hist(count_data_a$dorsal_scar_count)
+set.seed(50)
+comsafrica_dorsal_scar_count_boot_a<-rpt(dorsal_scar_count ~    + (1 | new_flake_id),
+                                       grname = "new_flake_id",
+                                       data = count_data_a,
+                                       datatype = "Poisson",
+                                       nboot = 100, npermut = 100)
+print(comsafrica_dorsal_scar_count_boot_a)
+dorsal_scar_count_irr_a<-comsafrica_dorsal_scar_count_boot_a$R
+
+## compile IRR count values into table
+irr_count_data_a<-rbind(proximal_scars_irr_a,left_scars_irr_a,
+                      distal_scars_irr_a,right_scars_irr_a,dorsal_scar_count_irr_a) %>%
+   rownames_to_column() %>%
+   filter(rowname %in% c("R_org","R_org1","R_org2","R_org3", "R_org4"))
+
+var_countnames<-c("proximal scars","left scars",
+                  "distal scars","right scars",
+                  "dorsal scars total")
+
+irr_count_data_merged_a<-cbind(irr_count_data_a,var_countnames) %>%
+   select(-rowname) %>%
+   select(c(var_countnames,new_flake_id)) %>%
+   pivot_longer(cols=c("new_flake_id"),
+                names_to = "variable", values_to = "irr") %>%
+   mutate(assemblage_code=rep("a", times=length(var_countnames)))
+
+   #### Assemblage B ####
+
+count_data_b<-comsafrica_data_count_data %>% filter(assemblage_code=="chert_condition_B")
+
+# proximal_scars
+hist(count_data_b$proximal_scars)
+set.seed(50)
+comsafrica_proximal_scars_boot_b<-rpt(proximal_scars ~    + (1 | new_flake_id),
+                                      grname = "new_flake_id",
+                                      data = count_data_b,
+                                      datatype = "Poisson",
+                                      nboot = 100, npermut = 100)
+print(comsafrica_proximal_scars_boot_b)
+proximal_scars_irr_b<-comsafrica_proximal_scars_boot_b$R
+
+# left_scars
+hist(count_data_b$left_scars)
+set.seed(50)
+comsafrica_left_scars_boot_b<-rpt(left_scars ~    + (1 | new_flake_id),
+                                  grname = "new_flake_id",
+                                  data = count_data_b,
+                                  datatype = "Poisson",
+                                  nboot = 100, npermut = 100)
+print(comsafrica_left_scars_boot_b)
+left_scars_irr_b<-comsafrica_left_scars_boot_b$R
+
+# distal_scars
+hist(count_data_b$distal_scars)
+set.seed(50)
+comsafrica_distal_scars_boot_b<-rpt(distal_scars ~    + (1 | new_flake_id),
+                                    grname = "new_flake_id",
+                                    data = count_data_b,
+                                    datatype = "Poisson",
+                                    nboot = 100, npermut = 100)
+print(comsafrica_distal_scars_boot_b)
+distal_scars_irr_b<-comsafrica_distal_scars_boot_b$R
+
+# right_scars
+hist(count_data_b$right_scars)
+set.seed(50)
+comsafrica_right_scars_boot_b<-rpt(right_scars ~    + (1 | new_flake_id),
+                                   grname = "new_flake_id",
+                                   data = count_data_b,
+                                   datatype = "Poisson",
+                                   nboot = 100, npermut = 100)
+print(comsafrica_right_scars_boot_b)
+right_scars_irr_b<-comsafrica_right_scars_boot_b$R
+
+# dorsal scar count
+hist(count_data_b$dorsal_scar_count)
+set.seed(50)
+comsafrica_dorsal_scar_count_boot_b<-rpt(dorsal_scar_count ~    + (1 | new_flake_id),
+                                         grname = "new_flake_id",
+                                         data = count_data_b,
+                                         datatype = "Poisson",
+                                         nboot = 100, npermut = 100)
+print(comsafrica_dorsal_scar_count_boot_b)
+dorsal_scar_count_irr_b<-comsafrica_dorsal_scar_count_boot_b$R
+
+## compile IRR count values into table
+irr_count_data_b<-rbind(proximal_scars_irr_b,left_scars_irr_b,
+                        distal_scars_irr_b,right_scars_irr_b,dorsal_scar_count_irr_b) %>%
+   rownames_to_column() %>%
+   filter(rowname %in% c("R_org","R_org1","R_org2","R_org3", "R_org4"))
+
+var_countnames<-c("proximal scars","left scars",
+                  "distal scars","right scars",
+                  "dorsal scars total")
+
+irr_count_data_merged_b<-cbind(irr_count_data_b,var_countnames) %>%
+   select(-rowname) %>%
+   select(c(var_countnames,new_flake_id)) %>%
+   pivot_longer(cols=c("new_flake_id"),
+                names_to = "variable", values_to = "irr") %>%
+   mutate(assemblage_code=rep("b", times=length(var_countnames)))
+
+## merge assemblages a and b
+
+combined_assemblage_count_data<-rbind(irr_count_data_merged_b,
+                                      irr_count_data_merged_a) %>%
+   spread(assemblage_code, irr) %>%
+   mutate(irr_difference=(a-b))
+
+ggplot(combined_assemblage_count_data,
+       aes(y=irr_difference, x=reorder(var_countnames,irr_difference))) +
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   ylab(expression(paste("IRR difference")))+
+   xlab(label="")+
+   theme(axis.title.y = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
 ### repeatability coefficients for categorical data ####
 
 comsafrica_data_cat_data<-new_comsafrica_data %>%
@@ -769,6 +1450,8 @@ comsafrica_data_cat_data<-new_comsafrica_data %>%
             distplanform,kombewa,red_syst,flk_form))
 
 comsafrica_data_cat_data<-as.data.frame(unclass(comsafrica_data_cat_data), stringsAsFactors = TRUE)
+
+   #### Both assemblages ####
 
 ## Reduction system ##
 
@@ -1102,6 +1785,685 @@ gwet_data_merged<-cbind(gwet_data,var_names) %>%
    
 write.csv(gwet_data_merged,"categorical_summary.csv")
 
+   #### Assemblage A ####
+
+categ_data_a<-comsafrica_data_cat_data %>% filter(assemblage_code=="chert_condition_A")
+
+## Reduction system ##
+
+red_syst_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,red_syst) %>%
+   na.omit
+
+# delete flake #'s with < 4 observations
+red_syst_data_a<-red_syst_data_a[as.numeric(ave(red_syst_data_a$new_flake_id,
+                                                red_syst_data_a$new_flake_id,
+                                                FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+red_syst_data_a_krip_a<- red_syst_data_a %>%
+   mutate(red_sys_dummy=unclass(red_syst)) %>%
+   select(-red_syst) %>%
+   spread(analyst_id,red_sys_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+q<-gwet.ac1.raw(red_syst_data_a_krip_a)$est
+
+## flake form ##
+
+flake_form_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,flk_form) %>%
+   na.omit
+
+# delete flake #'s with < 4 observations
+flake_form_data_a<-flake_form_data_a[as.numeric(ave(flake_form_data_a$new_flake_id,
+                                                    flake_form_data_a$new_flake_id,
+                                                    FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+flake_form_data_a_krip_a<- flake_form_data_a %>%
+   mutate(flk_form=as.factor(flk_form),
+          flk_form_dummy=unclass(flk_form)) %>%
+   select(-flk_form) %>%
+   spread(analyst_id, flk_form_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+r<-gwet.ac1.raw(flake_form_data_a_krip_a)$est
+
+## completeness ##
+
+completeness_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,completeness) %>% 
+   na.omit #delete coding episodes with no data
+
+# delete flake #'s with < 4 observations
+completeness_data_a<-completeness_data_a[as.numeric(ave(completeness_data_a$new_flake_id,
+                                                        completeness_data_a$new_flake_id,
+                                                        FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+completeness_data_a_krip_a<- completeness_data_a %>%
+   mutate(completeness=as.factor(completeness),
+          completeness_dummy=unclass(completeness)) %>%
+   select(-completeness) %>%
+   spread(analyst_id, completeness_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+s<-gwet.ac1.raw(completeness_data_a_krip_a)$est
+
+## platform cortex ##
+
+platform_cortex_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,platform_cortex) %>%
+   na.omit
+
+platform_cortex_data_a<-platform_cortex_data_a[as.numeric(ave(platform_cortex_data_a$new_flake_id,
+                                                              platform_cortex_data_a$new_flake_id,
+                                                              FUN=length)) >= 6, ]
+
+platform_cortex_data_a_krip_a<- platform_cortex_data_a %>%
+   mutate(platform_cortex=as.factor(platform_cortex),
+          platform_cortex_dummy=unclass(platform_cortex)) %>%
+   select(-platform_cortex) %>%
+   spread(analyst_id, platform_cortex_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+t<-gwet.ac1.raw(platform_cortex_data_a_krip_a)$est
+
+## scar directions ##
+
+directionality_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,directionality) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+directionality_data_a<-directionality_data_a[as.numeric(ave(directionality_data_a$new_flake_id,
+                                                            directionality_data_a$new_flake_id,
+                                                            FUN=length)) >= 6, ]
+
+directionality_data_a_krip_a<- directionality_data_a %>%
+   mutate(directionality_dummy=unclass(directionality)) %>%
+   select(-directionality) %>%
+   spread(analyst_id, directionality_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+u<-gwet.ac1.raw(directionality_data_a_krip_a)$est
+
+## platf morph ##
+
+plat_morph_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,platfmorph) %>%
+   na.omit
+
+plat_morph_data_a<-plat_morph_data_a[as.numeric(ave(plat_morph_data_a$new_flake_id,
+                                                    plat_morph_data_a$new_flake_id,
+                                                    FUN=length)) >= 6, ]
+
+plat_morph_data_a_krip_a<- plat_morph_data_a %>%
+   mutate(plat_morph_dummy=unclass(platfmorph)) %>%
+   select(-platfmorph) %>%
+   spread(analyst_id, plat_morph_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+v<-gwet.ac1.raw(plat_morph_data_a_krip_a)$est
+
+## platf lip ##
+
+plat_lip_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,platflipp) %>%
+   na.omit
+
+plat_lip_data_a<-plat_lip_data_a[as.numeric(ave(plat_lip_data_a$new_flake_id,
+                                                plat_lip_data_a$new_flake_id,
+                                                FUN=length)) >=6, ]
+
+plat_lip_data_a_krip_a<- plat_lip_data_a %>%
+   mutate(plat_lip_dummy=unclass(platflipp)) %>%
+   select(-platflipp) %>%
+   spread(analyst_id, plat_lip_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+w<-gwet.ac1.raw(plat_lip_data_a_krip_a)$est
+
+## bulb ##
+
+plat_bulb_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,bulb) %>%
+   na.omit 
+
+plat_bulb_data_a<-plat_bulb_data_a[as.numeric(ave(plat_bulb_data_a$new_flake_id,
+                                                  plat_bulb_data_a$new_flake_id,
+                                                  FUN=length)) >=6, ]
+
+plat_bulb_data_a_krip_a<- plat_bulb_data_a %>%
+   mutate(plat_bulb_dummy=unclass(bulb)) %>%
+   select(-bulb) %>%
+   spread(analyst_id, plat_bulb_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+x<-gwet.ac1.raw(plat_bulb_data_a_krip_a)$est
+
+## Shattbulb ##
+
+plat_shattbulb_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,shattbulb) %>%
+   na.omit
+
+plat_shattbulb_data_a<-plat_shattbulb_data_a[as.numeric(ave(plat_shattbulb_data_a$new_flake_id,
+                                                            plat_shattbulb_data_a$new_flake_id,
+                                                            FUN=length)) >=6, ]
+
+plat_shattbulb_data_a_krip_a<- plat_shattbulb_data_a %>%
+   mutate(plat_shattbulb_dummy=unclass(shattbulb)) %>%
+   select(-shattbulb) %>%
+   spread(analyst_id, plat_shattbulb_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+y<-gwet.ac1.raw(plat_shattbulb_data_a_krip_a)$est
+
+## initiation ##
+
+plat_initiation_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,initiation) %>%
+   na.omit
+
+plat_initiation_data_a<-plat_initiation_data_a[as.numeric(ave(plat_initiation_data_a$new_flake_id,
+                                                              plat_initiation_data_a$new_flake_id,
+                                                              FUN=length)) >=6, ]
+
+plat_initiation_data_a_krip_a<- plat_initiation_data_a %>%
+   mutate(initiation_dummy=unclass(initiation)) %>%
+   select(-initiation) %>%
+   spread(analyst_id, initiation_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+z<-gwet.ac1.raw(plat_initiation_data_a_krip_a)$est
+
+## ventr_plane_form ##
+
+ventr_plane_form_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,ventr_plane_form) %>%
+   na.omit
+
+ventr_plane_form_data_a<-ventr_plane_form_data_a[as.numeric(ave(ventr_plane_form_data_a$new_flake_id,
+                                                                ventr_plane_form_data_a$new_flake_id,
+                                                                FUN=length)) >=6, ]
+
+ventr_plane_form_data_a_krip_a<- ventr_plane_form_data_a %>%
+   mutate(ventr_plane_form_dummy=unclass(ventr_plane_form)) %>%
+   select(-ventr_plane_form) %>%
+   spread(analyst_id, ventr_plane_form_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+aa<-gwet.ac1.raw(ventr_plane_form_data_a_krip_a)$est
+
+## Section ##
+
+section_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,section) %>%
+   na.omit
+
+section_data_a<-section_data_a[as.numeric(ave(section_data_a$new_flake_id,
+                                              section_data_a$new_flake_id,
+                                              FUN=length)) >=6, ]
+
+section_data_a_krip_a<- section_data_a %>%
+   mutate(section_dummy=unclass(section)) %>%
+   select(-section) %>%
+   spread(analyst_id, section_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+bb<-gwet.ac1.raw(section_data_a_krip_a)$est
+
+## Lateral edge type ##
+
+latedge_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,latedgetype) %>%
+   na.omit
+
+latedge_data_a<-latedge_data_a[as.numeric(ave(latedge_data_a$new_flake_id,
+                                              latedge_data_a$new_flake_id,
+                                              FUN=length)) >=6, ]
+
+latedge_data_a_krip_a<- latedge_data_a %>%
+   mutate(latedge_dummy=unclass(latedgetype)) %>%
+   select(-latedgetype) %>%
+   spread(analyst_id, latedge_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+cc<-gwet.ac1.raw(latedge_data_a_krip_a)$est
+
+## Flake termination ##
+
+flaketerm_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,flaketerm) %>%
+   na.omit
+
+flaketerm_data_a<-flaketerm_data_a[as.numeric(ave(flaketerm_data_a$new_flake_id,
+                                                  flaketerm_data_a$new_flake_id,
+                                                  FUN=length)) >=6, ]
+
+flaketerm_data_a_krip_a<- flaketerm_data_a %>%
+   mutate(flaketerm_dummy=unclass(flaketerm)) %>%
+   select(-flaketerm) %>%
+   spread(analyst_id, flaketerm_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+dd<-gwet.ac1.raw(flaketerm_data_a_krip_a)$est
+
+## Kombewa
+
+kombewa_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,kombewa) %>%
+   na.omit
+
+kombewa_data_a<-kombewa_data_a[as.numeric(ave(kombewa_data_a$new_flake_id,
+                                              kombewa_data_a$new_flake_id,
+                                              FUN=length)) > 4, ]
+
+kombewa_data_a_krip_a<- kombewa_data_a %>%
+   mutate(kombewa_dummy=unclass(kombewa)) %>%
+   select(-kombewa) %>%
+   spread(analyst_id, kombewa_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+ee<-gwet.ac1.raw(kombewa_data_a_krip_a)$est
+
+## Distal plan form
+
+distplanform_data_a<-categ_data_a %>%
+   select(new_flake_id,analyst_id,distplanform) %>%
+   na.omit
+
+distplanform_data_a<-distplanform_data_a[as.numeric(ave(distplanform_data_a$new_flake_id,
+                                                        distplanform_data_a$new_flake_id,
+                                                        FUN=length)) > 4, ]
+
+distplanform_data_a_krip_a<- distplanform_data_a %>%
+   mutate(distplanform_dummy=unclass(distplanform)) %>%
+   select(-distplanform) %>%
+   spread(analyst_id, distplanform_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+ff<-gwet.ac1.raw(distplanform_data_a_krip_a)$est
+
+## collate gwet results
+gwet_data_a<-rbind(q,r,s,t,u,v,w,x,y,z,aa,bb,cc,dd,ee,ff)
+var_names<-c("reduction_system","flake_form","completeness","platform_cortex",
+             "scar_directionality", "platform_morphology", "platform_lipping",
+             "bulb","shattered_bulb", "initiation","ventral_plan_form","cross_section_shape",
+             "lateral_edge_shape","flake_termination","Kombewa","distal_plan_form")
+
+gwet_data_merged_a<-cbind(gwet_data_a,var_names) %>%
+   select(c(var_names,coeff.val)) %>%
+   mutate(assemblage_code=rep("a",times=length(var_names)),
+          across(where(is.numeric), ~ round(., 2))) %>%
+   arrange(-coeff.val)
+
+   #### Assemblage B ####
+
+categ_data_b<-comsafrica_data_cat_data %>% filter(assemblage_code=="chert_condition_B")
+
+## Reduction system ##
+
+red_syst_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,red_syst) %>%
+   na.omit
+
+# delete flake #'s with < 4 observations
+red_syst_data_b<-red_syst_data_b[as.numeric(ave(red_syst_data_b$new_flake_id,
+                                                red_syst_data_b$new_flake_id,
+                                                FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+red_syst_data_b_krip_b<- red_syst_data_b %>%
+   mutate(red_sys_dummy=unclass(red_syst)) %>%
+   select(-red_syst) %>%
+   spread(analyst_id,red_sys_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+gg<-gwet.ac1.raw(red_syst_data_b_krip_b)$est
+
+## flake form ##
+
+flake_form_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,flk_form) %>%
+   na.omit
+
+# delete flake #'s with < 4 observations
+flake_form_data_b<-flake_form_data_b[as.numeric(ave(flake_form_data_b$new_flake_id,
+                                                    flake_form_data_b$new_flake_id,
+                                                    FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+flake_form_data_b_krip_b<- flake_form_data_b %>%
+   mutate(flk_form=as.factor(flk_form),
+          flk_form_dummy=unclass(flk_form)) %>%
+   select(-flk_form) %>%
+   spread(analyst_id, flk_form_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+hh<-gwet.ac1.raw(flake_form_data_b_krip_b)$est
+
+## completeness ##
+
+completeness_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,completeness) %>% 
+   na.omit #delete coding episodes with no data
+
+# delete flake #'s with < 4 observations
+completeness_data_b<-completeness_data_b[as.numeric(ave(completeness_data_b$new_flake_id,
+                                                        completeness_data_b$new_flake_id,
+                                                        FUN=length)) >= 6, ]
+
+# reclass cat variables into numeric values for the krip stat
+completeness_data_b_krip_b<- completeness_data_b %>%
+   mutate(completeness=as.factor(completeness),
+          completeness_dummy=unclass(completeness)) %>%
+   select(-completeness) %>%
+   spread(analyst_id, completeness_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+ii<-gwet.ac1.raw(completeness_data_b_krip_b)$est
+
+## platform cortex ##
+
+platform_cortex_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,platform_cortex) %>%
+   na.omit
+
+platform_cortex_data_b<-platform_cortex_data_b[as.numeric(ave(platform_cortex_data_b$new_flake_id,
+                                                              platform_cortex_data_b$new_flake_id,
+                                                              FUN=length)) >= 6, ]
+
+platform_cortex_data_b_krip_b<- platform_cortex_data_b %>%
+   mutate(platform_cortex=as.factor(platform_cortex),
+          platform_cortex_dummy=unclass(platform_cortex)) %>%
+   select(-platform_cortex) %>%
+   spread(analyst_id, platform_cortex_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+jj<-gwet.ac1.raw(platform_cortex_data_b_krip_b)$est
+
+## scar directions ##
+
+directionality_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,directionality) %>%
+   na_if("") %>% #delete coding episodes with no data
+   na.omit
+
+directionality_data_b<-directionality_data_b[as.numeric(ave(directionality_data_b$new_flake_id,
+                                                            directionality_data_b$new_flake_id,
+                                                            FUN=length)) >= 6, ]
+
+directionality_data_b_krip_b<- directionality_data_b %>%
+   mutate(directionality_dummy=unclass(directionality)) %>%
+   select(-directionality) %>%
+   spread(analyst_id, directionality_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+kk<-gwet.ac1.raw(directionality_data_b_krip_b)$est
+
+## platf morph ##
+
+plat_morph_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,platfmorph) %>%
+   na.omit
+
+plat_morph_data_b<-plat_morph_data_b[as.numeric(ave(plat_morph_data_b$new_flake_id,
+                                                    plat_morph_data_b$new_flake_id,
+                                                    FUN=length)) >= 6, ]
+
+plat_morph_data_b_krip_b<- plat_morph_data_b %>%
+   mutate(plat_morph_dummy=unclass(platfmorph)) %>%
+   select(-platfmorph) %>%
+   spread(analyst_id, plat_morph_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+ll<-gwet.ac1.raw(plat_morph_data_b_krip_b)$est
+
+## platf lip ##
+
+plat_lip_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,platflipp) %>%
+   na.omit
+
+plat_lip_data_b<-plat_lip_data_b[as.numeric(ave(plat_lip_data_b$new_flake_id,
+                                                plat_lip_data_b$new_flake_id,
+                                                FUN=length)) >=6, ]
+
+plat_lip_data_b_krip_b<- plat_lip_data_b %>%
+   mutate(plat_lip_dummy=unclass(platflipp)) %>%
+   select(-platflipp) %>%
+   spread(analyst_id, plat_lip_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+mm<-gwet.ac1.raw(plat_lip_data_b_krip_b)$est
+
+## bulb ##
+
+plat_bulb_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,bulb) %>%
+   na.omit 
+
+plat_bulb_data_b<-plat_bulb_data_b[as.numeric(ave(plat_bulb_data_b$new_flake_id,
+                                                  plat_bulb_data_b$new_flake_id,
+                                                  FUN=length)) >=6, ]
+
+plat_bulb_data_b_krip_b<- plat_bulb_data_b %>%
+   mutate(plat_bulb_dummy=unclass(bulb)) %>%
+   select(-bulb) %>%
+   spread(analyst_id, plat_bulb_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+nn<-gwet.ac1.raw(plat_bulb_data_b_krip_b)$est
+
+## Shattbulb ##
+
+plat_shattbulb_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,shattbulb) %>%
+   na.omit
+
+plat_shattbulb_data_b<-plat_shattbulb_data_b[as.numeric(ave(plat_shattbulb_data_b$new_flake_id,
+                                                            plat_shattbulb_data_b$new_flake_id,
+                                                            FUN=length)) >=6, ]
+
+plat_shattbulb_data_b_krip_b<- plat_shattbulb_data_b %>%
+   mutate(plat_shattbulb_dummy=unclass(shattbulb)) %>%
+   select(-shattbulb) %>%
+   spread(analyst_id, plat_shattbulb_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+oo<-gwet.ac1.raw(plat_shattbulb_data_b_krip_b)$est
+
+## initiation ##
+
+plat_initiation_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,initiation) %>%
+   na.omit
+
+plat_initiation_data_b<-plat_initiation_data_b[as.numeric(ave(plat_initiation_data_b$new_flake_id,
+                                                              plat_initiation_data_b$new_flake_id,
+                                                              FUN=length)) >=6, ]
+
+plat_initiation_data_b_krip_b<- plat_initiation_data_b %>%
+   mutate(initiation_dummy=unclass(initiation)) %>%
+   select(-initiation) %>%
+   spread(analyst_id, initiation_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+pp<-gwet.ac1.raw(plat_initiation_data_b_krip_b)$est
+
+## ventr_plane_form ##
+
+ventr_plane_form_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,ventr_plane_form) %>%
+   na.omit
+
+ventr_plane_form_data_b<-ventr_plane_form_data_b[as.numeric(ave(ventr_plane_form_data_b$new_flake_id,
+                                                                ventr_plane_form_data_b$new_flake_id,
+                                                                FUN=length)) >=6, ]
+
+ventr_plane_form_data_b_krip_b<- ventr_plane_form_data_b %>%
+   mutate(ventr_plane_form_dummy=unclass(ventr_plane_form)) %>%
+   select(-ventr_plane_form) %>%
+   spread(analyst_id, ventr_plane_form_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+qq<-gwet.ac1.raw(ventr_plane_form_data_b_krip_b)$est
+
+## Section ##
+
+section_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,section) %>%
+   na.omit
+
+section_data_b<-section_data_b[as.numeric(ave(section_data_b$new_flake_id,
+                                              section_data_b$new_flake_id,
+                                              FUN=length)) >=6, ]
+
+section_data_b_krip_b<- section_data_b %>%
+   mutate(section_dummy=unclass(section)) %>%
+   select(-section) %>%
+   spread(analyst_id, section_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+rr<-gwet.ac1.raw(section_data_b_krip_b)$est
+
+## Lateral edge type ##
+
+latedge_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,latedgetype) %>%
+   na.omit
+
+latedge_data_b<-latedge_data_b[as.numeric(ave(latedge_data_b$new_flake_id,
+                                              latedge_data_b$new_flake_id,
+                                              FUN=length)) >=6, ]
+
+latedge_data_b_krip_b<- latedge_data_b %>%
+   mutate(latedge_dummy=unclass(latedgetype)) %>%
+   select(-latedgetype) %>%
+   spread(analyst_id, latedge_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+ss<-gwet.ac1.raw(latedge_data_b_krip_b)$est
+
+## Flake termination ##
+
+flaketerm_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,flaketerm) %>%
+   na.omit
+
+flaketerm_data_b<-flaketerm_data_b[as.numeric(ave(flaketerm_data_b$new_flake_id,
+                                                  flaketerm_data_b$new_flake_id,
+                                                  FUN=length)) >=6, ]
+
+flaketerm_data_b_krip_b<- flaketerm_data_b %>%
+   mutate(flaketerm_dummy=unclass(flaketerm)) %>%
+   select(-flaketerm) %>%
+   spread(analyst_id, flaketerm_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+tt<-gwet.ac1.raw(flaketerm_data_b_krip_b)$est
+
+## Kombewa
+
+kombewa_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,kombewa) %>%
+   na.omit
+
+kombewa_data_b<-kombewa_data_b[as.numeric(ave(kombewa_data_b$new_flake_id,
+                                              kombewa_data_b$new_flake_id,
+                                              FUN=length)) > 4, ]
+
+kombewa_data_b_krip_b<- kombewa_data_b %>%
+   mutate(kombewa_dummy=unclass(kombewa)) %>%
+   select(-kombewa) %>%
+   spread(analyst_id, kombewa_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+uu<-gwet.ac1.raw(kombewa_data_b_krip_b)$est
+
+## Distal plan form
+
+distplanform_data_b<-categ_data_b %>%
+   select(new_flake_id,analyst_id,distplanform) %>%
+   na.omit
+
+distplanform_data_b<-distplanform_data_b[as.numeric(ave(distplanform_data_b$new_flake_id,
+                                                        distplanform_data_b$new_flake_id,
+                                                        FUN=length)) > 4, ]
+
+distplanform_data_b_krip_b<- distplanform_data_b %>%
+   mutate(distplanform_dummy=unclass(distplanform)) %>%
+   select(-distplanform) %>%
+   spread(analyst_id, distplanform_dummy) %>%
+   select(-new_flake_id) %>%
+   as.matrix()
+
+vv<-gwet.ac1.raw(distplanform_data_b_krip_b)$est
+
+## collate gwet results
+gwet_data_b<-rbind(gg,hh,ii,jj,kk,ll,mm,nn,oo,pp,qq,rr,ss,tt,uu,vv)
+var_names<-c("reduction_system","flake_form","completeness","platform_cortex",
+             "scar_directionality", "platform_morphology", "platform_lipping",
+             "bulb","shattered_bulb", "initiation","ventral_plan_form","cross_section_shape",
+             "lateral_edge_shape","flake_termination","Kombewa","distal_plan_form")
+
+gwet_data_merged_b<-cbind(gwet_data_a,var_names) %>%
+   select(c(var_names,coeff.val)) %>%
+   mutate(assemblage_code=rep("b",times=length(var_names)),
+          across(where(is.numeric), ~ round(., 2))) %>%
+   arrange(-coeff.val)
+
+##merge two assemblage datasets
+combined_categorical_irr<-rbind(gwet_data_merged_b,
+                                gwet_data_merged_a) %>%
+   #filter(!var_names=="reduction_system") %>%
+   spread(assemblage_code, coeff.val) %>%
+   mutate(irr_difference=(a-b))
+
+ggplot(combined_categorical_irr,
+       aes(y=irr_difference, x=reorder(var_names,irr_difference))) +
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   ylab(expression(paste("IRR difference")))+
+   xlab(label="")+
+   theme(axis.title.y = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
 ### IRR visualizations ####
 
 data_1<-irr_count_data_complete_flakeid %>% rename(variable=var_countnames) %>%
@@ -1116,7 +2478,7 @@ data_4<-irr_cont_data_complete_assemblage %>% rename(variable=var_contnames)%>%
 irr_summary<-rbind(data_1,data_2,data_3,data_4)
 
 ## Continuous data, analyst ID
-ggplot(data=filter(irr_summary, data_class=="Continuous" & comparison =="new_flake_id"),
+ggplot(data=filter(irr_summary, data_class=="Continuous" & comparison =="new_flake_id" & !variable =="dorsal_cortex"),
        aes(y=irr, x=reorder(variable,irr))) +
    geom_bar(position=position_dodge(), stat="identity") +
    geom_errorbar(aes(ymin=lower, ymax=upper),
@@ -1605,7 +2967,8 @@ individuals_combined<-merge(individuals_summary, individuals,
                             by="analyst_id")
 
 individuals_overall_combined<-merge(individuals_overall_summary, individuals,
-                            by="analyst_id")
+                            by="analyst_id") %>%
+   mutate(combined_training_years=(training_quant/training_chaine_op))
 
 library("PerformanceAnalytics")
 my_data <- individuals[,c(2:8)]
@@ -1627,6 +2990,20 @@ summary(model_2)
 avPlots(model_2)
 check_model(model_2)
 
+
+model_3<-lm(mean_analyst_to_mean_overall~years_experience,
+            data=individuals_overall_combined,
+            subset = mean_analyst_to_mean_overall <11)
+summary(model_3)
+avPlots(model_2)
+check_model(model_2)
+
+model_4<-lm(mean_analyst_to_mean_overall~years_experience,
+            data=individuals_overall_combined,
+            subset = mean_analyst_to_mean_overall <11 & training_quant<5)
+summary(model_4)
+check_model(model_4)
+
 plot_1<-ggplot(subset(individuals_overall_combined,mean_analyst_to_mean_overall<11),
        aes(y=mean_analyst_to_mean_overall,x=training_quant))+
    geom_point() +
@@ -1640,7 +3017,7 @@ plot_2<-ggplot(subset(individuals_overall_combined,mean_analyst_to_mean_overall<
        aes(y=mean_analyst_to_mean_overall,x=training_chaine_op))+
    geom_point() +
    geom_smooth(method="lm") +
-   xlab("Chaine operatoire training\n(1=lowest, 5=highest)") + 
+   xlab("Chaîne opératoire training\n(1=lowest, 5=highest)") + 
    ylab("Average distance from mean measures")+
    theme(axis.title = element_text(face="bold"),
          axis.text.x = element_text(face = "bold"))
@@ -1844,22 +3221,20 @@ continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors
 ggplot(categorical_images,aes(x=as.factor(image), y=irr))+
    geom_boxplot() +
    geom_jitter(size=2) +
-   scale_x_discrete(name="Image absent/present") +
+   scale_x_discrete(name="",labels = c('Image absent','Image present')) +
    scale_y_continuous(name="Inter-rater reliability score")
 
-summary(glm(image~irr, data=categorical_images))
+summary(aov(image~irr, data=categorical_images))
 
 # plot continuous
 ggplot(continuous_images,aes(x=as.factor(image), y=irr))+
    geom_boxplot(outlier.size = 0, outlier.colour = "white") +
    geom_jitter(size=3, aes(shape=data.class)) +
-   scale_x_discrete(name="Image absent/present") +
+   scale_x_discrete(name="",labels = c('Image absent','Image present')) +
    scale_y_continuous(name="Inter-rater reliability score")+
    theme(legend.title=element_blank())
 
-summary(glm(image~irr, data=categorical_images))
-# continuous
-summary(glm(image~irr, data=subset(continuous_images,data.class=="continuous")))
+summary(aov(image~irr, data=continuous_images))
 
 ## how do technological features impact measurement variance? ##
 
