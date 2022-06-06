@@ -79,274 +79,14 @@ setwd("/Volumes/GoogleDrive/My Drive/Projects/CoMSAfrica/Geneva/Data analysis//C
 
 ## Add datasets
 
-comsafrica_data<-read.csv("comsafrica_complete_adjusted.csv",stringsAsFactors=TRUE) %>%
+comsafrica_data<-read.csv("comsafrica_data.csv",stringsAsFactors=TRUE) %>%
    subset(!flake_id == "NONR3495") #filter out this non numbered flake
 individuals<-read.csv("individual_experience.csv",stringsAsFactors=TRUE) %>%
    rename(analyst_id=Analyst)
 categorical_images<-read.csv("images_irr_categorical.csv",stringsAsFactors=TRUE)
 continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors=TRUE)
 
-####################################
-# Data cleaning
-##################################
-
-# change column names to lower case
-colnames(comsafrica_data) <- tolower(colnames(comsafrica_data))
-
-## clean categorical variables
-comsafrica_data<-comsafrica_data %>%
-   mutate(completeness=recode(completeness, 
-                              fragment="Indeterminate",
-                              shatter="Indeterminate",
-                              lateral="Indeterminate",
-                              indeterminate="Indeterminate",
-                              Indet="Indeterminate",
-                              other="Indeterminate"),
-          red_syst=recode(red_syst,Discoidal = "Discoid",idnet = "Indet",inde = "Indet",
-                          Indeterminate = "Indet",other = "Indet",Ind = "Indet",
-                          indet = "Indet",Indet = "Indet",INDET = "Indet",'indeterminate (broken)' = "Indet",
-                          'Indeterminate (broken)' = "Indet",indeterminate = "Indet",laminar = "Laminar",
-                          'Levallois (pref)' = "Levallois",'Lev or Disc' = "Indet",'Levallois indet' = "Levallois",
-                          'Levallois non-Nubian' = "Levallois",'levallois non nubian' = "Levallois",
-                          'LEVALLOIS OR DISCOID' = "Levallois",'LEVALLOIS/LEVALLOIS-RELATED' = "Levallois",
-                          na = "Indet",'NON-LEVALLOIS; ORTHOGONAL VOLUME EXPLOITATION' = "Indet",
-                          none = "Indet",Nubian = "Levallois",'ON ANVIL' = "Bipolar",
-                          'Platform (laminar?)' = "Platform",'Platform / Laminar' = "Platform",
-                          'possible Levallois non-Nubian' = "Levallois",'Other (informal)' = "Indet",
-                          'potential levallois' = "Levallois",levallois = "Levallois",
-                          LEVALLOIS = "Levallois",'Levallois non Nubian' = "Levallois",'Levallois?' = "Levallois",
-                          'potential Lev' = "Levallois",'potential Levallois' = "Levallois",
-                          CENTRIPETAL = "Discoid",discoid = "Discoid",DISCOID = "Discoid",
-                          'Discoid?' = "Discoid",'Core Edge Flake' = "Indet",FLAKE = "Flake",bipolar = "Bipolar"),
-          red_syst=na_if(red_syst, "Indet"),                                                                    #replace indet by NAs
-          platform_cortex=recode(platform_cortex, INDET = "Indeterminate",
-                                 complete = "Complete", absent = "Absent"),
-          platform_cortex=na_if(platform_cortex, "Indeterminate"),
-          flk_form=recode(flk_form,BLADE = "Blade",CONVFLAKE = "Convflake",ELONG = "Blade",
-                          Elong = "Blade",flake = "Flake",FLAKE = "Flake",INDET="Indeterminate"),
-          flk_form=na_if(flk_form, "Indeterminate"), 
-          directionality=recode(directionality,centripetal = "Centripetal",other = "Other"),
-          platfmorph=recode(platfmorph,'Chapeau de Gendarme' = "ChapeauDeGendarme",linear = "Linear",
-                            Diherdral = "Dihedral",facetted = "Facetted"),
-          platflipp=recode_factor(platflipp, YES = "yes", Yes='yes',NO = "no", No="no", 'NOT APPLICABLE' = "Indeterminate"),
-          platflipp=na_if(platflipp, "Indeterminate"),
-          bulb=recode(bulb, YES = "yes", Yes="yes",NO = "no",No="no",Indet="Indeterminate"),
-          bulb=na_if(bulb, "Indeterminate"),
-          shattbulb=recode(shattbulb,Indet = "Indeterminate",Indeterminateerminate = "Indeterminate",
-                           NO = "No",no="No",YES = "Yes"),
-          initiation=recode(initiation,BENDING = "Bending",HERTZIAN = "Hertzian",hertzian = "Hertzian",
-                            WEDGING = "Wedging"),
-          initiation=na_if(initiation, "INDET"),
-          ventr_plane_form=recode(ventr_plane_form,very_concave = "Very concave",Very_concave = "Very concave",
-                                  BULBAR = "Bulbar",CONCAVE = "Concave",FLAT = "Flat",
-                                  TWISTED = "Twisted",'VERY CONCAVE' = "Very concave",VERY_CONCAVE = "Very concave"),
-          section=recode(section,DOMED = "Domed",INDET = "Indeterminate",LENTIC = "Lenticular",
-                         LENTICULAR = "Lenticular",RIGHTTRI = "Righttriangle",RIGHTTRIANGLE = "Righttriangle",FLAT="Lenticular",
-                         TRAP = "Trapezoidal",TRAPEZOIDAL = "Trapezoidal",TRI = "Triangular",TRIANGULAR = "Triangular"),
-          section=na_if(section, "Indeterminate"),
-          latedgetype=recode(latedgetype,AMORPH = "Amorphous",CONV = "Convergent",CONVERGENT = "Convergent",SQUARE = "Square",
-                             'SUB-PARALLEL' = "Parallel",DIAMOND = "Diamond",DIV = "Divergent",DIVERGENT = "Divergent",
-                             OVAL = "Ovoid",OVOID = "Ovoid",PARALLEL = "Parallel", INDET = "Indeterminate"),
-          latedgetype=na_if(latedgetype, "na"),
-          latedgetype=na_if(latedgetype, "Indeterminate"),
-          flaketerm=recode(flaketerm,FEATHER = "Feather",HINGE = "Hinge",INDET = "Indeterminate",
-                           OVERSHOT = "Overshot",AXIAL= "Axial",CRUSHED = "Crushed"),
-          flaketerm=na_if(flaketerm, "Indeterminate"),
-          kombewa=recode(kombewa,NO = "No",YES = "Yes",no="No", Indet="Indeterminate"),
-          distplanform=recode(distplanform,FLAT = "Flat",INDET = "Indeterminate",INDETERMINATE = "Indeterminate",CONCAVE="Indeterminate",
-                              IRR = "Irregular",Irreg = "Irregular",POINTED = "Pointed",rounded = "Rounded",ROUNDED = "Rounded"),
-          distplanform=na_if(distplanform, "Indeterminate"))%>% 
-   map_df(~ na_if(.x, "")) %>% 
-   droplevels
-
-#replacement of NA values by 'Indeterminate' for specific variables where NAs = indet
-comsafrica_data$completeness <- fct_explicit_na(comsafrica_data$completeness, na_level = "Indeterminate") 
-comsafrica_data$kombewa <- fct_explicit_na(comsafrica_data$kombewa, na_level = "Indeterminate") 
-
-#summary of qualitative variables + explanations of changes above
-
-summary(comsafrica_data$completeness)# I grouped together other and indeterminate too as it seems that analysts
-#used one or the other, but rarely both
-summary(comsafrica_data$red_syst) 
-summary(comsafrica_data$platform_cortex) #indet used for distal fragments as well (as na), so grouped with NAs
-summary(comsafrica_data$flk_form) #indet removed, not an option in the E4 file
-summary(comsafrica_data$directionality) #indet and other kept as used by same analysts. NAs correspond to when it was not possible to record data (100% cortex) and some human errors
-summary(comsafrica_data$platfmorph) #other and indet used by same analysts. Nas correspond to mostly fragments and a few human errors
-summary(comsafrica_data$platflipp) #indet exclusively produced by E4 users while NAs correspond to fragments as well as likely indet from non-E4 users (as they are associated with 
-#a determined platf) --> indet to be removed from the analysis.  
-summary(comsafrica_data$bulb) #indet are also present when medial fragment so indet is also used as NAs. removed from analysis
-summary(comsafrica_data$initiation) #only one INDET, removed from the analysis --> NA
-summary(comsafrica_data$ventr_plane_form)
-summary(comsafrica_data$section) #flat doesn't exist in E4, grouped with Lenticular; indeterminate can be NA or indet, so replaced by NA
-summary(comsafrica_data$latedgetype) #indet is mostly na with a few true indet, so replaced by NA
-summary(comsafrica_data$flaketerm) #indet can be both na and indet, so replaced by NA
-summary(comsafrica_data$kombewa) #indet are indet and nas are indet with maybe few NAs, I think we can replace NAs by indet.
-summary(comsafrica_data$distplanform) #concave does not exist --> indeterminate; indet seems to correspond to NAs (prox or medial fragments?) so grouped with NAs
-
-## cleaning quantitative data##
-summary(comsafrica_data$maximumdimension)
-comsafrica_data$maximumdimension[comsafrica_data$maximumdimension==0] <- NA
-
-summary(comsafrica_data$mass)
-comsafrica_data$mass[comsafrica_data$mass==0] <- NA
-
-summary(comsafrica_data$maximumwidth)
-comsafrica_data$maximumwidth[comsafrica_data$maximumwidth==0] <- NA
-
-summary(comsafrica_data$maximumthickness)
-comsafrica_data$maximumthickness[comsafrica_data$maximumthickness==0] <- NA
-
-summary(comsafrica_data$techlength)
-comsafrica_data$techlength[comsafrica_data$techlength==0] <- NA
-
-summary(comsafrica_data$techmaxwidth)
-comsafrica_data$techmaxwidth[comsafrica_data$techmaxwidth==0] <- NA
-
-summary(comsafrica_data$techmaxthickness)
-comsafrica_data$techmaxthickness[comsafrica_data$techmaxthickness==0] <- NA
-
-summary(comsafrica_data$techwidthprox)
-comsafrica_data$techwidthprox[comsafrica_data$techwidthprox==0] <- NA
-
-summary(comsafrica_data$techwidthmes)
-comsafrica_data$techwidthmes[comsafrica_data$techwidthmes==0] <- NA
-
-summary(comsafrica_data$techwidthdist)
-comsafrica_data$techwidthdist[comsafrica_data$techwidthdist==0] <- NA
-
-summary(comsafrica_data$techthickprox)
-comsafrica_data$techthickprox[comsafrica_data$techthickprox==0] <- NA
-
-summary(comsafrica_data$techthickmes)
-comsafrica_data$techthickmes[comsafrica_data$techthickmes==0] <- NA
-
-summary(comsafrica_data$techthickdist)
-comsafrica_data$techthickdist[comsafrica_data$techthickdist==0] <- NA
-
-summary(comsafrica_data$platfwidth)
-comsafrica_data$platfwidth[comsafrica_data$platfwidth==0] <- NA
-
-summary(comsafrica_data$platfthickmax)
-comsafrica_data$platfthickmax[comsafrica_data$platfthickmax==0] <- NA
-
-summary(comsafrica_data$platfthickimpact)
-comsafrica_data$platfthickimpact[comsafrica_data$platfthickimpact==0] <- NA
-
-summary(comsafrica_data$platfthickmid)
-comsafrica_data$platfthickmid[comsafrica_data$platfthickmid==0] <- NA
-
-summary(comsafrica_data$edgeplatf)
-comsafrica_data$edgeplatf[comsafrica_data$edgeplatf==0] <- NA
-
-##Recode flake ID ##
-
-## subset
-
-# renumber flakes to avoid duplicate numbers across technological conditions when running combined IRR analysis
-# on all 100 flakes
-
-data.A <- comsafrica_data[which(comsafrica_data$assemblage_code=="chert_condition_A"),]
-
-data.A$new_flake_id <- 0
-for(i in 1:length(unique(data.A$flake_id))){
-   data.A[which(data.A$flake_id==unique(data.A$flake_id)[i]),"new_flake_id"] <- i
-}
-
-
-data.B <- comsafrica_data[which(comsafrica_data$assemblage_code=="chert_condition_B"),]
-
-count = 51
-data.B$new_flake_id <- 0
-for(i in 1:length(unique(data.B$flake_id))){
-   data.B[which(data.B$flake_id==unique(data.B$flake_id)[i]),"new_flake_id"] <- count
-   count = count+1
-}
-
-new_comsafrica_data <- rbind(data.A, data.B) %>%
-  filter(!new_flake_id %in% c(89,97)) #remove two flakes with fragmentation issues
-
-#adjust cortex values to fix data entry errors
-#A10 and B25 have strange values because of misinterpretations
-#around cortex
-
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 46
-                                       & new_comsafrica_data$analyst_id == "46b96"] <- 100
-
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 31
-                                       & new_comsafrica_data$analyst_id == "46b96"] <- NA
-
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 23
-                                  & new_comsafrica_data$analyst_id == "46b96"] <- 100
-
-new_comsafrica_data$dorsal_cortex[new_comsafrica_data$new_flake_id == 27
-                                  & new_comsafrica_data$analyst_id == "46b96"] <- NA
-
-###Corrections duplicates for analyst r42o8
-
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 17.59
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 11
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- 83.46
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 11
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 48
-new_comsafrica_data$techmaxthickness[new_comsafrica_data$new_flake_id == 11
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.77
-new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 11
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 11
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 11
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 40
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 27.05
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 40
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 7.69
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 40
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- 50.42
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 40
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 55.01
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 83
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- 12.59
-new_comsafrica_data$techlength[new_comsafrica_data$new_flake_id == 83
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- 51.39
-new_comsafrica_data$techmaxwidth[new_comsafrica_data$new_flake_id == 83
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$maximumwidth[new_comsafrica_data$new_flake_id == 85
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 19.93
-new_comsafrica_data$maximumthickness[new_comsafrica_data$new_flake_id == 85
-                                     & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$techwidthprox[new_comsafrica_data$new_flake_id == 41
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 70
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 38.53
-new_comsafrica_data$techthickprox[new_comsafrica_data$new_flake_id == 70
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 16.75
-new_comsafrica_data$techthickmes[new_comsafrica_data$new_flake_id == 70
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 12.55
-new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 70
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-new_comsafrica_data$techwidthmes[new_comsafrica_data$new_flake_id == 33
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 41.17
-new_comsafrica_data$techwidthdist[new_comsafrica_data$new_flake_id == 33
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 26.43
-new_comsafrica_data$techthickprox[new_comsafrica_data$new_flake_id == 33
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 9.09
-new_comsafrica_data$techthickmes[new_comsafrica_data$new_flake_id == 33
-                                 & new_comsafrica_data$analyst_id == "r42o8"] <- 7.77
-new_comsafrica_data$techthickdist[new_comsafrica_data$new_flake_id == 33
-                                  & new_comsafrica_data$analyst_id == "r42o8"] <- 5.34
-new_comsafrica_data$platfwidth[new_comsafrica_data$new_flake_id == 33
-                               & new_comsafrica_data$analyst_id == "r42o8"] <- NA
-
-##### Inter rater data analyses
+##### Repeatability data
 
 comsafrica_data_complete<-new_comsafrica_data %>%
    select(c(assemblage_code,analyst_id,analysis_order,flake_id,new_flake_id,proximal_scars,left_scars,distal_scars,right_scars,
@@ -2881,6 +2621,66 @@ flake_measurements_summary<- comsafrica_data_complete %>%
           "original flake id"=flake_id) %>%
    na.omit()
 
+#with one decimal point 
+flake_measurements_summary_onedecimal<- comsafrica_data_complete %>%
+   select(c(flake_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax)) %>%
+   filter(!new_flake_id %in% c(1,89,97)) %>%
+   mutate(across(c(5:21), na_if, 0)) %>%
+   mutate_at(vars(dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+                  techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+                  platfwidth,platfthickimpact,platfthickmid,platfthickmax), 
+             funs(round(., 1))) %>%
+   pivot_longer(!new_flake_id &!assemblage_code &!flake_id,
+                names_to = "variable",
+                values_to = "value") %>%
+   drop_na(value) %>%
+   group_by(new_flake_id,variable) %>%
+   mutate(cv=cv(value, na.rm=T),
+          mean=mean(value, na.rm=T),
+          sd=sd(value, na.rm=T),
+          min=min(value, na.rm=T),
+          max=max(value, na.rm=T),
+          median=median(value, na.rm=T),
+          range=max-min)  %>%
+   distinct(flake_id,new_flake_id,assemblage_code,
+            variable,cv,mean,sd,min,max,median,range) %>%
+   mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2))) %>%
+   rename("new flake id"=new_flake_id,
+          "original flake id"=flake_id) %>%
+   na.omit()
+
+#with no decimal points
+flake_measurements_summary_nodecimal<- comsafrica_data_complete %>%
+   select(c(flake_id,new_flake_id,assemblage_code,dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+            techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+            platfwidth,platfthickimpact,platfthickmid,platfthickmax)) %>%
+   filter(!new_flake_id %in% c(1,89,97)) %>%
+   mutate(across(c(5:21), na_if, 0)) %>%
+   mutate_at(vars(dorsal_cortex,mass,maximumdimension,maximumwidth,maximumthickness,techlength,techmaxwidth,techmaxthickness,
+                  techwidthprox,techwidthmes,techwidthdist,techthickprox,techthickmes,techthickdist,
+                  platfwidth,platfthickimpact,platfthickmid,platfthickmax), 
+             funs(round(., 0))) %>%
+   pivot_longer(!new_flake_id &!assemblage_code &!flake_id,
+                names_to = "variable",
+                values_to = "value") %>%
+   drop_na(value) %>%
+   group_by(new_flake_id,variable) %>%
+   mutate(cv=cv(value, na.rm=T),
+          mean=mean(value, na.rm=T),
+          sd=sd(value, na.rm=T),
+          min=min(value, na.rm=T),
+          max=max(value, na.rm=T),
+          median=median(value, na.rm=T),
+          range=max-min)  %>%
+   distinct(flake_id,new_flake_id,assemblage_code,
+            variable,cv,mean,sd,min,max,median,range) %>%
+   mutate_at(vars(cv, mean,sd,min,max,median,range), funs(round(., 2))) %>%
+   rename("new flake id"=new_flake_id,
+          "original flake id"=flake_id) %>%
+   na.omit()
+
 # summarize cont vars to see how far individuals ranged from average measurements
 
 individuals_summary<- comsafrica_data_complete %>%
@@ -2924,26 +2724,62 @@ individuals_overall_summary<- comsafrica_data_complete %>%
    mutate_at(vars(mean_analyst_to_mean_overall), funs(round(., 2))) %>%
    na.omit()
 
-#
+# with two decimals
 range_summary<-flake_measurements_summary %>%
    select(c(variable,mean,sd,range)) %>%
    group_by(variable) %>%
    mutate(sd_mean=mean(sd, na.rm=T),
           mean_mean=mean(mean, na.rm=T),
-          cv_mean=(sd_mean/mean_mean*100),
+          cv_mean_twodecimal=(sd_mean/mean_mean*100),
           range_mean=mean(range, na.rm=T)) %>%
    distinct(sd_mean, .keep_all=T) %>%
-   mutate_at(vars(cv_mean,sd_mean,range_mean), funs(round(., 2))) %>%
-   select(variable,range_mean,sd_mean,cv_mean) %>%
-   arrange(cv_mean)
+   mutate_at(vars(cv_mean_twodecimal,sd_mean,range_mean), funs(round(., 2))) %>%
+   select(variable,range_mean,sd_mean,cv_mean_twodecimal) %>%
+   arrange(cv_mean_twodecimal)
 
-#how to IRR and CV values compare
+# with one decimal
+range_summary_onedecimal<-flake_measurements_summary_onedecimal %>%
+   select(c(variable,mean,sd,range)) %>%
+   group_by(variable) %>%
+   mutate(sd_mean=mean(sd, na.rm=T),
+          mean_mean=mean(mean, na.rm=T),
+          cv_mean_onedecimal=(sd_mean/mean_mean*100),
+          range_mean=mean(range, na.rm=T)) %>%
+   distinct(sd_mean, .keep_all=T) %>%
+   mutate_at(vars(cv_mean_onedecimal,sd_mean,range_mean), funs(round(., 2))) %>%
+   select(variable,range_mean,sd_mean,cv_mean_onedecimal) %>%
+   arrange(cv_mean_onedecimal)
+
+# with no decimals
+range_summary_nodecimal<-flake_measurements_summary_nodecimal %>%
+   select(c(variable,mean,sd,range)) %>%
+   group_by(variable) %>%
+   mutate(sd_mean=mean(sd, na.rm=T),
+          mean_mean=mean(mean, na.rm=T),
+          cv_mean_nodecimal=(sd_mean/mean_mean*100),
+          range_mean=mean(range, na.rm=T)) %>%
+   distinct(sd_mean, .keep_all=T) %>%
+   mutate_at(vars(cv_mean_nodecimal,sd_mean,range_mean), funs(round(., 2))) %>%
+   select(variable,range_mean,sd_mean,cv_mean_nodecimal) %>%
+   arrange(cv_mean_nodecimal)
+
+# merge range summaries to have cv_means compared
+cv_mean_comparison<-cbind(range_summary[c("variable","cv_mean_twodecimal")],
+                          range_summary_onedecimal[c("variable","cv_mean_onedecimal")],
+                          range_summary_nodecimal[c("variable","cv_mean_nodecimal")]) %>%
+   select(-c(variable...3,variable...5)) %>%
+   mutate(one_two=cv_mean_onedecimal-cv_mean_twodecimal,
+          none_two=cv_mean_nodecimal-cv_mean_twodecimal,
+          none_one=cv_mean_nodecimal-cv_mean_onedecimal,
+          one_two_perc=(one_two/cv_mean_twodecimal)*100)
+
+#how do IRR and CV values compare
 range_irr_comparisons<-cbind(range_summary,
                              irr_cont_data_complete_flakeid,by="variable")
  
 write_csv(flake_measurements_summary,"flake_summary_measures.csv")
 
-## Visualize average measurement SD values
+## Visualize average measurement SD values with two decimals
 ggplot(data=filter(range_summary,!variable=="dorsal_cortex"),
        aes(y=cv_mean, x=reorder(variable,cv_mean))) +
    geom_bar(position=position_dodge(), stat="identity") +
@@ -2959,9 +2795,20 @@ ggplot(data=filter(range_summary,!variable=="dorsal_cortex"),
    geom_hline(yintercept = mean(range_summary$cv_mean)+sd(range_summary$cv_mean), 
               color="blue",linetype='dotted')
 
-#####Follow up questions####
+## Visualize average measurement SD values accounting for decimal differences
 
-## Does experience impact performance?
+ggplot(data=filter(cv_mean_comparison,!variable...1=="dorsal_cortex"),
+       aes(y=none_two, x=reorder(variable...1,none_two))) +
+   geom_bar(position=position_dodge(), stat="identity") +
+   theme(axis.text.x = element_text(angle = 90, vjust = 0.8, hjust = 0.99),
+         axis.text = element_text(size = 10)) +
+   ylab(bquote("Change in coefficient of variation")) +
+   xlab("") +
+   theme(axis.title = element_text(face="bold"),
+         axis.text.x = element_text(face = "bold"))
+
+#####Follow up questions####
+   #### Does experience impact performance? ####
 
 individuals_combined<-merge(individuals_summary, individuals,
                             by="analyst_id")
@@ -3153,7 +3000,7 @@ sig_experience_results<-rbind(model_1_data,model_3_data,
    select(c("model","variable","est","std error","t_value","p_value")) %>%
    filter(!p_value>0.05)
    
-## check if factor levels determine rater reliability
+   #### Do factor levels determine rater reliability ####
 
 var_names<-c("reduction_system","flake_form","completeness","platform_cortex",
              "scar_directionality", "platform_morphology", "platform_lipping",
@@ -3200,7 +3047,7 @@ ggplot(subset(test_2, !var_names=="reduction_system"), aes(x=factor_levels, y=co
 test_2_subset_2<-subset(test_2, !var_names=="reduction_system")
 summary(glm(factor_levels~coeff.val,data=test_2_subset_2,family="poisson"))
 
-# Dorsal scars by section vs. total
+   #### Dorsal scars by section vs. total ####
 
 dorsal_scars<-comsafrica_data_count_data %>%
    mutate(sum_scars=left_scars+right_scars+distal_scars+proximal_scars,
@@ -3212,7 +3059,7 @@ summary(lm(sum_scars~dorsal_scar_count, data=dorsal_scars))
 ggplot(dorsal_scars, aes(x=sum_scars, y=dorsal_scar_count))+
    geom_point()
 
-## do images impact measurement repeatability?
+   #### do images impact measurement repeatability? ####
 
 categorical_images<-read.csv("images_irr_categorical.csv",stringsAsFactors=TRUE)
 continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors=TRUE)
@@ -3236,7 +3083,7 @@ ggplot(continuous_images,aes(x=as.factor(image), y=irr))+
 
 summary(aov(image~irr, data=continuous_images))
 
-## how do technological features impact measurement variance? ##
+   #### how do technological features impact measurement variance? ####
 
 test_data<-new_comsafrica_data %>%
    distinct(new_flake_id,.keep_all=T)
@@ -3411,6 +3258,8 @@ combined_variance_attribute_data<-data.frame(rbind(a,b,c,d,e,f,g,h,i,j,k)) %>%
    mutate_at(vars(adj.p.value), funs(round(., 3)))
 
 write.csv(combined_variance_attribute_data,"combined_variance_attribute_data.csv")
+
+
 
 
 
