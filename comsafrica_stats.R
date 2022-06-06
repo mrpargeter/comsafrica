@@ -3059,7 +3059,7 @@ summary(lm(sum_scars~dorsal_scar_count, data=dorsal_scars))
 ggplot(dorsal_scars, aes(x=sum_scars, y=dorsal_scar_count))+
    geom_point()
 
-   #### do images impact measurement repeatability? ####
+   #### Do images impact measurement repeatability? ####
 
 categorical_images<-read.csv("images_irr_categorical.csv",stringsAsFactors=TRUE)
 continuous_images<-read.csv("images_irr_measurements_count.csv",stringsAsFactors=TRUE)
@@ -3083,7 +3083,7 @@ ggplot(continuous_images,aes(x=as.factor(image), y=irr))+
 
 summary(aov(image~irr, data=continuous_images))
 
-   #### how do technological features impact measurement variance? ####
+   #### How do technological features impact measurement variance? ####
 
 test_data<-new_comsafrica_data %>%
    distinct(new_flake_id,.keep_all=T)
